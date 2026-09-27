@@ -1,0 +1,222 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>palette click harness</title>
+<body>
+<div id="mount"></div>
+<pre id="out">running…</pre>
+<script src="./react-globals.js"></script>
+<script>
+  // 收集插件注册的东西，并给它的 require 提供真 React
+  window.__REG__ = { slots: [], effects: 0 }
+  window.__ModuleLoader__ = {
+    load(mod) {
+      window.__REG__.module = mod
+    },
+  }
+</script>
+<script src="./plugin.js"></script>
+<script>
+;(function () {
+  const out = []
+  let pass = 0, fail = 0
+  const check = (label, got, want) => {
+    const ok = typeof want === 'undefined' ? !!got : JSON.stringify(got) === JSON.stringify(want)
+    if (ok) { pass++; out.push('  ✓ ' + label) }
+    else { fail++; out.push('  ✗ ' + label + '  → 实际 ' + JSON.stringify(got) + '，期望 ' + JSON.stringify(want)) }
+    return ok
+  }
+
+  const mod = window.__REG__.module
+  if (!mod) { document.getElementById('out').textContent = '插件没有调用 __ModuleLoader__.load'; throw new Error('no module') }
+
+  // ---- 假 localStorage，用来观察是否落盘 ----
+  const store = new Map()
+  // window.localStorage 是只读访问器：直接赋值会静默失败，必须 defineProperty
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem: (k) => (store.has(k) ? store.get(k) : null),
+      setItem: (k, v) => { store.set(k, String(v)) },
+      removeItem: (k) => { store.delete(k) },
+      clear: () => store.clear(),
+    },
+  })
+  window.__PALETTE_STORE__ = store
+
+  // ---- 假 model directory ----
+  const LEVELS = [
+    { id: 'off', name: 'Off' }, { id: 'low', name: 'Low' },
+    { id: 'high', name: 'High' }, { id: 'max', name: 'Max' },
+  ]
+  const state = {
+    current: { provider: 'p', model: 'm', reasoningEffort: 'high' },
+    routable: [], failures: [],
+    groups: [{ id: 'p', name: 'P', models: [{ id: 'm', name: 'Model M', reasoning: { defaultEffort: 'high', efforts: LEVELS } }] }],
+    status: 'ready', error: null,
+  }
+  const listeners = new Set()
+  const directory = {
+    store: { subscribe: (l) => { listeners.add(l); return () => listeners.delete(l) }, getSnapshot: () => state },
+    load: async () => state,
+    select: async () => {},
+  }
+  const directories = { directoryFor: () => directory }
+
+  const locale = { register: () => () => {}, getLocale: () => ({ active: 'zh' }) }
+  const captured = []
+  const ctx = {
+    get: (name) => (name === 'modelDirectories' ? directories : name === 'locale' ? locale : undefined),
+    effect: (fn) => { window.__REG__.effects++; const d = fn(); return () => { if (typeof d === 'function') d() } },
+    locale,
+    slots: {
+      inject: (_slot, fn) => { try { fn() } catch (e) { out.push('  ! inject 抛错: ' + e.message) } },
+      register: (meta, component) => { captured.push({ meta, component }); return () => {} },
+    },
+  }
+
+  let exports
+  try {
+    exports = mod.factory((name) => {
+      if (name === 'react') return window.React
+      if (name === 'react/jsx-runtime') return window.jsxRuntime
+      throw new Error('unexpected require: ' + name)
+    })
+  } catch (e) {
+    document.getElementById('out').textContent = 'factory 抛错: ' + (e && e.stack || e)
+    throw e
+  }
+  out.push('—— 模块求值 ——')
+  check('apply 是函数', typeof exports.apply, 'function')
+  check('inject 声明了 slots / modelDirectories', exports.inject.includes('slots') && exports.inject.includes('modelDirectories'), true)
+
+  exports.apply(ctx)
+  out.push('—— apply 之后 ——')
+  const paletteRow = captured.find((c) => c.meta.id === 'reasoning-effort-palette')
+  const seat = captured.find((c) => c.meta.name === 'conversation.input.model')
+  check('设置行已注册', !!paletteRow, true)
+  check('座位已注册', !!seat, true)
+  check('注入的样式表已写进 head', document.querySelectorAll('style[data-plugin^="dsh-reasoning-effort"]').length >= 1, true)
+
+  // ---- 渲染 ----
+  const zh = {}
+  const t = (k) => (zh[k] !== undefined ? zh[k] : k)
+  const errors = []
+  const origError = console.error
+  console.error = function (...args) { errors.push(args.map(String).join(' ').slice(0, 400)); origError.apply(console, args) }
+  window.addEventListener('error', (e) => errors.push('window.onerror: ' + (e.error && e.error.stack || e.message)))
+
+  const mount = document.getElementById('mount')
+  const root = window.createRoot(mount)
+
+  const seatProps = seat.meta.inject('s1')
+  const React = window.React
+  root.render(
+    React.createElement('div', null,
+      React.createElement(seat.component, Object.assign({}, seatProps, { t })),
+      React.createElement('div', { id: 'settings' }, React.createElement(paletteRow.component, { t })),
+    ),
+  )
+
+  setTimeout(() => { try {
+    out.push('—— 渲染之后 ——')
+    if (errors.length) { out.push('  ! 捕获到 ' + errors.length + ' 条错误:'); errors.slice(0,4).forEach(e => out.push('    ' + e.replace(/\n/g,' ⏎ '))) }
+
+    const swatches = [...document.querySelectorAll('.re-palette-swatch')]
+    out.push('色块数量 = ' + swatches.length)
+    check('7 个色块都渲染了', swatches.length, 7)
+    const labels = swatches.map((s) => s.getAttribute('aria-label'))
+    out.push('  色块 aria-label: ' + labels.join(', '))
+    const bgs = swatches.map((s) => s.style.background)
+    check('7 个色块背景各不相同', new Set(bgs).size, 7)
+    out.push('  色块背景: ' + bgs.map((b) => b.slice(0, 30)).join('   //   '))
+
+    const green = swatches.find((s) => s.getAttribute('aria-label') === 'palette.green')
+    const violet = swatches.find((s) => s.getAttribute('aria-label') === 'palette.violet')
+    const upstream = swatches.find((s) => s.getAttribute('aria-label') === 'palette.upstream')
+    check('找到翠绿色块', !!green, true)
+    check('找到紫色块（这次修的）', !!violet, true)
+    check('找到「上游原样」色块', !!upstream, true)
+
+    // 滑块在关闭的面板里 —— 点触发器打开，React 是异步提交的，必须等一帧
+    const trigger = document.querySelector('.re-model-trigger')
+    check('触发器渲染出来了', !!trigger, true)
+    if (trigger) trigger.click()
+
+    setTimeout(() => { try {
+      const effortRoot = document.querySelector('.re-effort')
+      check('打开面板后 .re-effort 出现', !!effortRoot, true)
+      check('初始 data-palette = upstream（逐字上游）',
+        effortRoot && effortRoot.getAttribute('data-palette'), 'upstream')
+      check('默认色一条覆盖规则都不生成', !/data-palette="upstream"/.test(
+        [...document.querySelectorAll('style[data-plugin^="dsh-reasoning-effort"]')].map((s) => s.textContent).join('')), true)
+
+      const trackOf = () => {
+        const el = document.querySelector('.re-effort-track')
+        const cs = el && getComputedStyle(el)
+        return cs ? (cs.backgroundColor + ' | ' + cs.backgroundImage) : ''
+      }
+      const before = trackOf()
+      out.push('  轨道(violet): ' + before.slice(0, 110))
+
+      green.click()
+      setTimeout(() => { try {
+        out.push('—— 点击翠绿之后 ——')
+        const root2 = document.querySelector('.re-effort')
+        check('data-palette 变成 green', root2 && root2.getAttribute('data-palette'), 'green')
+        check('落盘了', store.get('dsh-reasoning-effort.palette'), 'green')
+        const now = trackOf()
+        check('轨道样式跟着变了', now !== before, true)
+        out.push('  轨道(green) : ' + now.slice(0, 110))
+        check('轨道变成绿色系', /228, 251, 234|#e4fbea/.test(now), true)
+        check('翠绿色块 aria-checked=true', green.getAttribute('aria-checked'), 'true')
+
+        // 面板关掉时也能看见：触发器上的档位文字跟着配色走
+        const effortText = document.querySelector('.re-model-effort')
+        const textColor = effortText && getComputedStyle(effortText).color
+        out.push('  档位文字色: ' + textColor)
+        check('触发器档位文字变成绿色 (#1fa055 = 31,160,85)', textColor, 'rgb(31, 160, 85)')
+        const ring = getComputedStyle(green).getPropertyValue('--re-swatch-ring').trim()
+        check('选中圈的变量是这套色自己的颜色', ring, '#1fa055')
+
+        // 用户报的 bug：点紫色什么都没发生。现在紫色必须真的变紫。
+        out.push('—— 点击紫色之后（用户报的那个 bug）——')
+        violet.click()
+        setTimeout(() => { try {
+          const r3 = document.querySelector('.re-effort')
+          check('data-palette 变成 violet', r3 && r3.getAttribute('data-palette'), 'violet')
+          const purple = trackOf()
+          out.push('  轨道(violet): ' + purple.slice(0, 110))
+          check('紫色确实生效（不是蓝的 #e5f0ff）', !/229, 240, 255/.test(purple), true)
+          check('紫色轨道 = rgb(243, 232, 255)', /243, 232, 255/.test(purple), true)
+          const textColor2 = getComputedStyle(document.querySelector('.re-model-effort')).color
+          out.push('  档位文字色: ' + textColor2)
+          check('触发器文字变紫 (#7a2ec4 = 122,46,196)', textColor2, 'rgb(122, 46, 196)')
+          check('落盘 violet', store.get('dsh-reasoning-effort.palette'), 'violet')
+
+          out.push('—— 切回「上游原样」——')
+          upstream.click()
+          setTimeout(() => { try {
+            const r4 = document.querySelector('.re-effort')
+            check('data-palette 回到 upstream', r4 && r4.getAttribute('data-palette'), 'upstream')
+            const back = trackOf()
+            out.push('  轨道(upstream): ' + back.slice(0, 110))
+            check('回到逐字上游的浅蓝 rgb(229, 240, 255)', /229, 240, 255/.test(back), true)
+            check('触发器文字回到上游蓝 rgb(77, 112, 255)',
+              getComputedStyle(document.querySelector('.re-model-effort')).color, 'rgb(77, 112, 255)')
+          } catch (e) { out.push('  ! 抛错: ' + e.message) } finally { finish() } }, 150)
+        } catch (e) { out.push('  ! 抛错: ' + e.message) } finally { /* 上面的 finish 负责收尾 */ } }, 150)
+      } catch (e) { out.push('  ! 内层抛错: ' + (e && e.stack || e)) } finally { finish() } }, 150)
+    } catch (e) { out.push('  ! 外层抛错: ' + (e && e.stack || e)); finish() } }, 150)
+  } catch (e) { out.push('  ! 延时体抛错: ' + (e && e.stack || e)); finish() } }, 200)
+
+  // 兜底：无论中途出什么事，都把已经收集到的结果打出来
+  setTimeout(() => { if (!window.__RESULT__) { out.push('  ! 兜底触发：流程没走到 finish'); finish() } }, 2500)
+
+  function finish() {
+    const head = '调色板点击链路：' + pass + ' / ' + (pass + fail) + (fail ? '  —— ' + fail + ' 项不通过' : '  —— 全部通过')
+    document.getElementById('out').textContent = head + '\n\n' + out.join('\n')
+    window.__RESULT__ = { pass, fail, total: pass + fail }
+  }
+})()
+</script>
+</body>
