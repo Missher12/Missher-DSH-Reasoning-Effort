@@ -10,11 +10,11 @@
  *
  * @module dsh-reasoning-effort/client
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
-import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
@@ -31,13 +31,14 @@ import {
   type ReasoningEffortTranslate,
 } from './locales.js'
 import { CSS } from './styles.js'
-import { displayLevelName, effortStops, levelIds, levelsText, stopIndex, type EffortStop } from './levels.js'
+import { PIXEL_CSS } from './pixel-styles.js'
+import { PixelField } from './pixel-field.js'
+import { displayLevelName, effortStops, levelIds, levelsText, stopIndex, acceptedStopIndex, type EffortStop } from './levels.js'
 import { positionModelMenu } from './menu-position.js'
+import { requireAcceptedSelection, unsupportedEffort } from './selection.js'
 import {
   DEFAULT_PALETTE_ID,
   PALETTES,
-  drawPaletted,
-  paletteCss,
   paletteOrDefault,
 } from './palettes.js'
 // Agent briefs inlined as text at build time; the copied document picks one by
@@ -225,7 +226,7 @@ interface ModelSeatInjectedProps {
   readonly locked: boolean
   readonly available: boolean
   readonly controller: ModelDirectory
-  readonly directory: SnapshotStore<ModelDirectoryState>
+  readonly directory: ModelDirectory['store']
   readonly load: () => void
   readonly select: (selection: ModelSelection) => Promise<boolean>
   readonly adapt: AdaptationService | null
@@ -279,10 +280,10 @@ const enabledStore = {
 
 function readChibiThumbPreference(): boolean {
   try {
-    // Default on: only an explicit "false" disables the chibi thumb.
-    return window.localStorage.getItem(CHIBI_THUMB_STORAGE_KEY) !== 'false'
+    // The supplied design uses a plain thumb; preserve an explicit legacy choice.
+    return window.localStorage.getItem(CHIBI_THUMB_STORAGE_KEY) === 'true'
   } catch {
-    return true
+    return false
   }
 }
 
@@ -311,12 +312,20 @@ const chibiThumbStore = {
 
 /* LOCAL ADDITION: particle palette preference. Same shape as the two stores
    above so it survives reloads and syncs across tabs the same way. */
+function validPalette(id: string): boolean {
+  return /^#[0-9a-f]{6}$/i.test(id) || PALETTES.some(palette => palette.id === id)
+}
+
+function paletteColor(id: string): string {
+  return /^#[0-9a-f]{6}$/i.test(id) ? id : paletteOrDefault(id).accent
+}
+
 function readPalettePreference(): string {
   try {
     const stored = window.localStorage.getItem(PALETTE_STORAGE_KEY)
     // Anything unrecognised (a palette removed in a later version, hand-edited
     // storage) falls back to the upstream default instead of breaking the slider.
-    return stored !== null && PALETTES.some((palette) => palette.id === stored)
+    return stored !== null && validPalette(stored)
       ? stored
       : DEFAULT_PALETTE_ID
   } catch {
@@ -334,7 +343,7 @@ const paletteStore = {
     return () => paletteListeners.delete(listener)
   },
   set: (id: string, persist = true) => {
-    const next = PALETTES.some((palette) => palette.id === id) ? id : DEFAULT_PALETTE_ID
+    const next = validPalette(id) ? id : DEFAULT_PALETTE_ID
     if (palettePreference === next) return
     palettePreference = next
     if (persist) {
@@ -389,122 +398,12 @@ function effectiveEffortIndex(levels: readonly EffortStop[], state: ModelDirecto
   return Math.floor((levels.length - 1) / 2)
 }
 
-interface RadiationState {
-  progress: number
-  dragging: boolean
-}
-
-function drawRadiation(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  time: number,
-  state: RadiationState,
-): void {
-  const origin = state.progress * width
-  const isDark = document.body.hasAttribute('data-ds-dark-theme')
-  const cell = 4
-  const speed = state.dragging ? 2.8 : 1
-
-  context.clearRect(0, 0, width, height)
-  if (origin <= 0) return
-
-  context.save()
-  context.beginPath()
-  context.rect(0, 0, origin, height)
-  context.clip()
-
-  for (let x = 0; x < origin; x += cell) {
-    const delta = x + cell * 0.5 - origin
-    const distance = Math.abs(delta)
-    const phaseA = distance / 10 - time * 0.0074 * speed
-    const phaseB = distance / 23 - time * 0.0041 * speed + 1.7
-    const phaseC = distance / 40 - time * 0.0022 * speed + 3.4
-    const sinA = Math.max(0, Math.sin(phaseA))
-    const sinB = Math.max(0, Math.sin(phaseB))
-    const sinC = Math.max(0, Math.sin(phaseC))
-    const waveA = Math.pow(sinA, 2.6)
-    const waveB = Math.pow(sinB, 3.2)
-    const waveC = Math.pow(sinC, 4)
-    const crest = Math.pow(sinA, 15) + Math.pow(sinB, 18) * 0.78
-    const wave = Math.min(1, waveA * 0.76 + waveB * 0.58 + waveC * 0.32)
-    const trail = 0.38 + 0.62 * Math.exp(-distance / Math.max(55, width * 0.72))
-    const pillar = Math.pow(Math.max(0, Math.sin(x / 20 + time * 0.0016)), 3) * 0.27
-    const columnEnergy = trail * (wave * 1.04 + pillar + crest * 0.32)
-
-    if (columnEnergy > 0.012) {
-      const nearness = Math.max(0, 1 - distance / Math.max(1, width * 0.78))
-      const red = isDark
-        ? Math.round(42 + 124 * nearness + 75 * wave)
-        : Math.round(28 + 58 * nearness + 15 * wave)
-      const green = isDark
-        ? Math.round(56 + 58 * nearness + 44 * crest)
-        : Math.round(88 + 72 * nearness + 30 * crest)
-      const blue = isDark
-        ? Math.round(175 + 72 * nearness + 8 * wave)
-        : Math.round(182 + 62 * nearness)
-      const alpha = isDark
-        ? Math.min(0.88, columnEnergy * 0.72)
-        : Math.min(0.62, columnEnergy * 0.54)
-      context.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`
-      context.fillRect(x, 0, cell - 1, height)
-    }
-
-    for (let y = 0; y < height; y += cell) {
-      const deltaY = y + cell * 0.5 - height * 0.5
-      const radial = Math.hypot(delta / 38, deltaY / 11)
-      const halo = Math.exp(-radial * 0.96) * 1.08
-      const verticalShape = 0.58 + 0.42 * Math.cos((deltaY / height) * Math.PI)
-      const grain = 0.72 + 0.28 * Math.sin(x * 0.73 + y * 1.31 + time * 0.006)
-      const alpha = Math.min(0.96, (columnEnergy * 0.88 + halo + crest * 0.19) * verticalShape * grain)
-      if (alpha < 0.035) continue
-
-      const hot = Math.max(0, 1 - radial / 2.4)
-      const red = isDark
-        ? Math.round(54 + 148 * hot + 42 * wave + 35 * crest)
-        : Math.round(25 + 72 * hot + 12 * wave)
-      const green = isDark
-        ? Math.round(68 + 78 * hot + 46 * crest)
-        : Math.round(98 + 72 * hot + 24 * crest)
-      const blue = isDark
-        ? Math.round(186 + 64 * hot)
-        : Math.round(194 + 56 * hot)
-      context.fillStyle = `rgba(${red}, ${green}, ${blue}, ${isDark ? alpha : alpha * 0.72})`
-      context.fillRect(x, y, cell - 1, cell - 1)
-    }
-  }
-
-  for (let i = 0; i < 14; i += 1) {
-    const travel = (time * (state.dragging ? 0.16 : 0.065) * (0.78 + (i % 5) * 0.09) + i * 23) % Math.max(30, origin + 64)
-    const particleX = origin - travel
-    if (particleX < -24 || particleX > width + 16) continue
-    const particleY = 3 + ((i * 13 + Math.sin(time * 0.003 + i) * 5) % Math.max(7, height - 6))
-    const length = 4 + (i % 4) * 4 + (state.dragging ? 6 : 0)
-    const alpha = 0.28 + (i % 5) * 0.1
-    const streak = context.createLinearGradient(particleX, 0, particleX + length, 0)
-    streak.addColorStop(0, isDark ? 'rgba(72,118,255,0)' : 'rgba(24,94,184,0)')
-    streak.addColorStop(0.68, isDark ? `rgba(112,135,255,${alpha})` : `rgba(36,108,202,${alpha * 0.72})`)
-    streak.addColorStop(1, isDark ? `rgba(236,222,255,${Math.min(1, alpha + 0.26)})` : `rgba(103,175,248,${Math.min(0.82, alpha + 0.18)})`)
-    context.fillStyle = streak
-    context.fillRect(particleX, particleY, length, i % 3 === 0 ? 2 : 1)
-  }
-
-  const glow = context.createRadialGradient(origin, height / 2, 0, origin, height / 2, 24)
-  glow.addColorStop(0, isDark ? 'rgba(255,255,255,.82)' : 'rgba(255,255,255,.86)')
-  glow.addColorStop(0.14, isDark ? 'rgba(183,190,255,.54)' : 'rgba(162,210,255,.48)')
-  glow.addColorStop(0.44, isDark ? 'rgba(103,74,255,.28)' : 'rgba(37,112,207,.22)')
-  glow.addColorStop(1, isDark ? 'rgba(86,31,210,0)' : 'rgba(25,91,181,0)')
-  context.fillStyle = glow
-  context.fillRect(origin - 26, 0, 52, height)
-  context.restore()
-}
-
 function EffortSlider({ directory, t }: { directory: ModelDirectory; t: ReasoningEffortTranslate }) {
   const directoryState = useSyncExternalStore(
     (notify) => directory.store.subscribe(notify),
     () => directory.store.getSnapshot(),
   )
-  const levels = sliderLevels(directoryState)
+  const levels = useMemo(() => sliderLevels(directoryState), [directoryState])
   const [effort, setEffort] = useState('')
   const [preview, setPreview] = useState(0)
   const [committing, setCommitting] = useState(false)
@@ -516,6 +415,10 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const committedRef = useRef('')
+  const committedIndexRef = useRef(-1)
+  const syncedModelRef = useRef('')
+  const previewFrameRef = useRef<number | null>(null)
+  const pendingPreviewRef = useRef(0)
   const committingRef = useRef(false)
   const previewRef = useRef(0)
   const draggingRef = useRef(false)
@@ -524,16 +427,21 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
   const globalPointerMoveRef = useRef<((event: PointerEvent) => void) | null>(null)
   const globalPointerEndRef = useRef<((event: PointerEvent) => void) | null>(null)
   const globalPointerCancelRef = useRef<((event: PointerEvent) => void) | null>(null)
-  const radiationRef = useRef<RadiationState>({ progress: 0.5, dragging: false })
-  const redrawRef = useRef<(() => void) | null>(null)
+  const pixelsRef = useRef<PixelField | null>(null)
+  const invalidEffort = unsupportedEffort(directoryState.current?.reasoningEffort, currentModel(directoryState)?.reasoning?.efforts)
   const available = directoryState.current !== null && levels.length >= 2
   const busy = committing || directoryState.status === 'selecting'
   const error = localError ?? directoryState.error
 
   useEffect(() => {
     if (!available || committingRef.current || draggingRef.current) return
-    const index = effectiveEffortIndex(levels, directoryState)
+    const modelKey = JSON.stringify([directoryState.current?.provider, directoryState.current?.model])
+    const accepted = syncedModelRef.current === modelKey
+      ? acceptedStopIndex(levels, directoryState.current?.reasoningEffort, committedIndexRef.current) : -1
+    const index = accepted >= 0 ? accepted : effectiveEffortIndex(levels, directoryState)
     const next = levels[index]?.send ?? ''
+    syncedModelRef.current = modelKey
+    committedIndexRef.current = index
     committedRef.current = next
     previewRef.current = index
     setEffort(next)
@@ -546,101 +454,38 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
   }, [directory])
 
   useEffect(() => {
-    previewRef.current = preview
-    radiationRef.current.progress = levels.length >= 2 ? preview / (levels.length - 1) : 0.5
-    redrawRef.current?.()
-  }, [preview, levels.length])
-
-  useEffect(() => {
-    radiationRef.current.dragging = dragging
-    redrawRef.current?.()
-  }, [dragging])
-
-  useEffect(() => {
     const canvas = canvasRef.current
     if (canvas === null) return
-    const context = canvas.getContext('2d')
-    if (context === null) return
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    /* LOCAL ADDITION: scratch canvas for the palette recolour. Unused (and never
-       touched) while the default palette is selected. */
-    const offscreen = document.createElement('canvas')
-    const offContext = offscreen.getContext('2d')
-    let width = 1
-    let height = 1
-    let ratio = 1
-    let frame = 0
-
-    const resize = () => {
-      const bounds = canvas.getBoundingClientRect()
-      ratio = Math.min(window.devicePixelRatio || 1, 2)
-      width = Math.max(1, bounds.width)
-      height = Math.max(1, bounds.height)
-      canvas.width = Math.max(1, Math.round(width * ratio))
-      canvas.height = Math.max(1, Math.round(height * ratio))
-      context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      offscreen.width = canvas.width
-      offscreen.height = canvas.height
-    }
-
-    const draw = (time = performance.now()) => {
-      const render = (target: CanvasRenderingContext2D) => {
-        drawRadiation(target, width, height, time, radiationRef.current)
-      }
-      /* Read the palette per frame off the store, so switching it needs no
-         effect re-run and never restarts the animation. */
-      if (offContext === null) {
-        render(context)
-        return
-      }
-      drawPaletted(context, offscreen, offContext, ratio, paletteOrDefault(paletteStore.getSnapshot()), render)
-    }
-
-    const loop = (time: number) => {
-      draw(time)
-      frame = window.requestAnimationFrame(loop)
-    }
-
-    const redraw = () => {
-      if (reducedMotion.matches) draw()
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      resize()
-      draw()
-    })
-    const themeObserver = new MutationObserver(() => draw())
-    resizeObserver.observe(canvas)
-    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-ds-dark-theme'] })
-    redrawRef.current = redraw
-    resize()
-    draw()
-    if (!reducedMotion.matches) frame = window.requestAnimationFrame(loop)
-
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const pixels = new PixelField(canvas, reduced)
+    pixelsRef.current = pixels
+    pixels.setColor(paletteColor(paletteStore.getSnapshot()))
+    const resize = new ResizeObserver(() => pixels.resize())
+    if (canvas.parentElement) resize.observe(canvas.parentElement)
+    const sync = () => pixels.sync()
+    document.addEventListener('visibilitychange', sync)
+    reduced.addEventListener('change', sync)
     return () => {
-      window.cancelAnimationFrame(frame)
-      resizeObserver.disconnect()
-      themeObserver.disconnect()
-      redrawRef.current = null
+      pixels.setActive(false)
+      pixels.sync()
+      resize.disconnect()
+      document.removeEventListener('visibilitychange', sync)
+      reduced.removeEventListener('change', sync)
+      pixelsRef.current = null
     }
-  }, [])
+  }, [available])
 
-  /* LOCAL ADDITION: repaint at once when the palette changes. Under normal
-     motion the rAF loop picks the change up by itself; this exists for
-     reduced-motion users, whose canvas only redraws on demand. */
   useEffect(() => {
-    const unsubscribe = paletteStore.subscribe(() => redrawRef.current?.())
-    return () => {
-      unsubscribe()
-    }
-  }, [])
-
+    pixelsRef.current?.setColor(paletteColor(palette))
+  }, [available, palette])
+  const topPreview = invalidEffort === undefined && clampIndex(preview, levels.length) === levels.length - 1
+  useEffect(() => { pixelsRef.current?.setActive(topPreview) }, [available, topPreview])
 
   const commit = useCallback(async (raw: number) => {
     if (committingRef.current) return
     committingRef.current = true
     const previous = committedRef.current
+    const previousIndex = committedIndexRef.current
 
     setDragging(false)
     setCommitting(true)
@@ -658,7 +503,9 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
 
     try {
       const models = await directory.load()
+      if (models.current === null) throw new Error(t('effort.unavailable'))
       const fresh: ModelDirectoryState = {
+        ...directory.store.getSnapshot(),
         current: models.current,
         routable: models.routable,
         groups: models.groups,
@@ -675,22 +522,26 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
       setPreview(index)
       setEffort(next)
 
-      await directory.select({
+      const result = await directory.select({
         provider: models.current.provider,
         model: models.current.model,
         reasoningEffort: next,
       })
+      requireAcceptedSelection(result)
 
       const snapshot = directory.store.getSnapshot()
-      const accepted = effortIndex(freshLevels, snapshot.current?.reasoningEffort)
+      const accepted = acceptedStopIndex(freshLevels, snapshot.current?.reasoningEffort, index)
       const settled = accepted >= 0 ? accepted : index
       const settledId = freshLevels[settled]?.send ?? next
+      committedIndexRef.current = settled
+      syncedModelRef.current = JSON.stringify([models.current.provider, models.current.model])
       committedRef.current = settledId
       previewRef.current = settled
       setEffort(settledId)
       setPreview(settled)
     } catch (cause) {
-      const restore = Math.max(0, effortIndex(levels, previous))
+      const restore = Math.max(0, acceptedStopIndex(levels, previous, previousIndex))
+      committedIndexRef.current = restore
       committedRef.current = previous
       previewRef.current = restore
       setEffort(previous)
@@ -717,6 +568,15 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
     setEffort(levels[clampIndex(raw, levels.length)]?.send ?? '')
   }
 
+  const queuePointerPreview = (raw: number) => {
+    pendingPreviewRef.current = raw
+    if (previewFrameRef.current !== null) return
+    previewFrameRef.current = requestAnimationFrame(() => {
+      previewFrameRef.current = null
+      showPointerPreview(pendingPreviewRef.current)
+    })
+  }
+
   const beginDragging = (input: HTMLInputElement, pointerId: number, clientX: number) => {
     pointerActiveRef.current = true
     activePointerIdRef.current = pointerId
@@ -732,11 +592,13 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
 
   const moveDragging = (input: HTMLInputElement, pointerId: number, clientX: number) => {
     if (!pointerActiveRef.current || activePointerIdRef.current !== pointerId) return
-    showPointerPreview(rawFromPointer(input, clientX))
+    queuePointerPreview(rawFromPointer(input, clientX))
   }
 
   const endDrag = (input: HTMLInputElement | null, pointerId?: number): boolean => {
     if (pointerId !== undefined && activePointerIdRef.current !== pointerId) return false
+    if (previewFrameRef.current !== null) cancelAnimationFrame(previewFrameRef.current)
+    previewFrameRef.current = null
     pointerActiveRef.current = false
     activePointerIdRef.current = null
     draggingRef.current = false
@@ -762,7 +624,7 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
      Upstream routes cancel through stopDragging, which commits. */
   const cancelDragging = (input: HTMLInputElement | null, pointerId?: number) => {
     if (!endDrag(input, pointerId)) return
-    showPointerPreview(Math.max(0, effortIndex(levels, committedRef.current)))
+    showPointerPreview(Math.max(0, acceptedStopIndex(levels, committedRef.current, committedIndexRef.current)))
   }
 
   globalPointerMoveRef.current = (event) => {
@@ -786,6 +648,7 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
     window.addEventListener('pointerup', end, true)
     window.addEventListener('pointercancel', cancel, true)
     return () => {
+      if (previewFrameRef.current !== null) cancelAnimationFrame(previewFrameRef.current)
       window.removeEventListener('pointermove', move, true)
       window.removeEventListener('pointerup', end, true)
       window.removeEventListener('pointercancel', cancel, true)
@@ -815,53 +678,54 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
   /* LOCAL CHANGE: upstream reads `.name` straight off the adapter entry. */
   const effortIndexValue = effortIndex(levels, effort)
   const effortName = effortIndexValue < 0 ? effort : displayLevelName(effort, levelIds(levels), t)
-  const isTop = effortIndexValue === count - 1
+  const isTop = invalidEffort === undefined && clampIndex(preview, count) === count - 1
   const progress = preview / (count - 1) * 100
-  const style = { '--re-progress': `${progress}%` } as CSSProperties
+  const style = { '--re-progress': `${progress}%`, '--re-strength': `${25 + progress * .75}%` } as CSSProperties
 
   /* LOCAL ADDITION: the readout follows the thumb, so the level you are about
      to commit is readable while you are still dragging. Upstream shows nothing
      on the slider at all, and only updates the trigger after the commit. */
   const previewStop = levels[clampIndex(preview, count)]
-  const previewName = previewStop === undefined
+  const showInvalid = invalidEffort !== undefined && !dragging && !committing
+  const previewName = showInvalid ? t('effort.invalid', { effort: invalidEffort }) : previewStop === undefined
     ? effortName
     : displayLevelName(previewStop.id, levelIds(levels), t)
   /* A rung the model does not offer submits a neighbour; say so rather than let
      two rungs look different when they send the same thing. */
-  const previewSends = previewStop !== undefined && !previewStop.native ? previewStop.send : null
+  const previewSends = !showInvalid && previewStop !== undefined && !previewStop.native ? previewStop.send : null
 
-  const title = error === null
+  const title = showInvalid ? t('effort.reselect', { effort: invalidEffort }) : error === null
     ? t('effort.title', { effort: previewSends === null ? previewName : `${previewName} → ${previewSends}` })
     : t('effort.failed', { error })
 
   return (
     <div
-      className={`re-effort has-readout${chibiThumb ? ' is-chibi' : ''}${dragging ? ' is-dragging' : ''}${busy ? ' is-busy' : ''}${error === null ? '' : ' is-error'}`}
+      className={`re-effort re-depth has-readout${chibiThumb ? ' is-chibi' : ''}${dragging ? ' is-dragging' : ''}${busy ? ' is-busy' : ''}${error === null ? '' : ' is-error'}`}
       data-palette={palette}
+      data-top={isTop ? 'true' : undefined}
+      style={{ '--re-accent': paletteColor(palette) } as CSSProperties}
       title={title}
     >
       {/* Visual duplicate of the range input's aria-valuetext, so it is hidden
           from assistive tech rather than announced twice. */}
-      <div className="re-effort-readout" aria-hidden="true">
-        <span className="re-effort-readout-label">{t('effort.label')}</span>
-        <span className="re-effort-readout-value">
+      <div className="re-depth-header" aria-hidden="true">
+        <span className="re-depth-label">{t('effort.label')}</span>
+        <span className="re-depth-value">
           {previewName}
-          {previewSends === null ? null : <span className="re-effort-readout-send">{` → ${previewSends}`}</span>}
+          {previewSends === null ? null : <span className="re-depth-send">{` → ${previewSends}`}</span>}
         </span>
       </div>
+      <div className="re-depth-speed" aria-hidden="true"><span>{t('effort.faster')}</span><span>{t('effort.smarter')}</span></div>
       <div
-        className="re-effort-slider"
+        className="re-depth-slider"
         data-top={isTop ? 'true' : undefined}
         style={style}
       >
-        <div className="re-effort-track" aria-hidden="true" />
-        <div className="re-effort-fx" aria-hidden="true">
-          <canvas ref={canvasRef} className="re-effort-canvas" />
-          <span className="re-effort-flare" />
-        </div>
+        <div className="re-depth-track" aria-hidden="true" />
+        <canvas ref={canvasRef} className="re-depth-canvas" hidden={!isTop} aria-hidden="true" />
         <input
           ref={inputRef}
-          className="re-effort-input"
+          className="re-depth-input"
           type="range"
           min="0"
           max={count - 1}
@@ -871,6 +735,7 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
           aria-label={t('effort.label')}
           aria-valuetext={previewName}
           onChange={(event) => {
+            if (pointerActiveRef.current || committingRef.current) return
             const raw = Number(event.currentTarget.value)
             showPointerPreview(raw)
           }}
@@ -879,15 +744,12 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
             event.currentTarget.focus()
             beginDragging(event.currentTarget, event.pointerId, event.clientX)
           }}
-          onPointerMove={(event) => moveDragging(event.currentTarget, event.pointerId, event.clientX)}
-          onPointerUp={(event) => stopDragging(event.currentTarget, event.pointerId, event.clientX)}
-          onPointerCancel={(event) => cancelDragging(event.currentTarget, event.pointerId)}
           onBlur={(event) => {
             stopDragging(event.currentTarget)
           }}
           onKeyDown={onKeyDown}
         />
-        <span className="re-effort-knob" aria-hidden="true" />
+        <span className="re-depth-thumb" aria-hidden="true" />
       </div>
       {error === null ? null : <span className="re-effort-sr" role="status">{error}</span>}
     </div>
@@ -909,6 +771,7 @@ function AdvancedModelSelect({
     (notify) => directory.subscribe(notify),
     () => directory.getSnapshot(),
   )
+  const palette = useSyncExternalStore(paletteStore.subscribe, paletteStore.getSnapshot)
   const [open, setOpen] = useState(false)
   const [modelsOpen, setModelsOpen] = useState(false)
   const [guidanceResult, setGuidanceResult] = useState<AdaptGuidance | null>(null)
@@ -928,7 +791,8 @@ function AdvancedModelSelect({
   const levels = sliderLevels(state)
   /* LOCAL CHANGE: upstream reads `.name` straight off the adapter entry. */
   const currentLevel = levels[effectiveEffortIndex(levels, state)]
-  const effortName = currentLevel === undefined
+  const invalidEffort = choice === undefined ? undefined : unsupportedEffort(state.current?.reasoningEffort, choice.reasoning?.efforts)
+  const effortName = invalidEffort !== undefined ? t('effort.invalid', { effort: invalidEffort }) : currentLevel === undefined
     ? t('model.defaultEffort')
     : displayLevelName(currentLevel.id, levelIds(levels), t)
   const modelLabel = choice?.name ?? state.current?.model ?? t('model.select')
@@ -1026,8 +890,23 @@ function AdvancedModelSelect({
     if (accepted) setModelsOpen(false)
   }
 
+  const recoveryEffort = choice?.reasoning?.defaultEffort ?? choice?.reasoning?.efforts[0]?.id
+  const invalidEffortNotice = invalidEffort === undefined ? null : (
+    <div className="re-model-error" role="alert">
+      {t('effort.reselect', { effort: invalidEffort })}
+      <button type="button" disabled={busy} onClick={() => {
+        if (state.current === null) return
+        void select({
+          provider: state.current.provider,
+          model: state.current.model,
+          ...(recoveryEffort === undefined ? {} : { reasoningEffort: recoveryEffort }),
+        })
+      }}>{t('effort.use', { effort: recoveryEffort ?? t('model.defaultEffort') })}</button>
+    </div>
+  )
+
   return (
-    <div ref={rootRef} className="re-model-root" onKeyDown={onKeyDown}>
+    <div ref={rootRef} className="re-model-root" style={{ '--re-accent': paletteColor(palette) } as CSSProperties} onKeyDown={onKeyDown}>
       <button
         ref={triggerRef}
         type="button"
@@ -1052,7 +931,7 @@ function AdvancedModelSelect({
       </button>
 
       {open ? (
-        <div ref={menuRef} className="re-model-menu" role="menu" aria-label={t('model.menuAria')} aria-busy={busy}>
+        <div ref={menuRef} className="re-model-menu" data-depth-card={!modelsOpen && levels.length >= 2 && !guidance?.needsGuide ? 'true' : undefined} role="menu" aria-label={t('model.menuAria')} aria-busy={busy}>
           {modelsOpen ? (
             <div className="re-model-pane">
               <button type="button" className="re-model-back" onClick={() => setModelsOpen(false)}>
@@ -1092,17 +971,16 @@ function AdvancedModelSelect({
               {state.status === 'ready' && state.groups.every((group) => group.models.length === 0) ? (
                 <div className="re-model-status">{t('model.none')}</div>
               ) : null}
+              {invalidEffortNotice}
               {state.error === null ? null : <div className="re-model-error">{state.error}</div>}
             </div>
           ) : (
             <>
-              <div className="re-advanced">
-                {levels.length >= 2 ? (
-                  <EffortSlider directory={controller} t={t} />
-                ) : (
-                  <div className="re-model-status">{t('effort.unavailable')}</div>
-                )}
-              </div>
+              {levels.length >= 2 ? (
+                <EffortSlider directory={controller} t={t} />
+              ) : (
+                <div className="re-model-status">{t('effort.unavailable')}</div>
+              )}
               {guidance !== null && guidance.needsGuide ? (
                 <div className="re-adapt">
                   <div className="re-adapt-copy">
@@ -1226,6 +1104,7 @@ function AdvancedModelSelect({
                 <span className="re-model-row-effort">{effortName}</span>
                 <span className="re-row-chevron" aria-hidden="true">›</span>
               </button>
+              {invalidEffortNotice}
               {state.error === null ? null : <div className="re-model-error">{state.error}</div>}
             </>
           )}
@@ -1323,6 +1202,12 @@ function PaletteSetting({ t }: PropsLocale<typeof NS>) {
               />
             )
           })}
+          <label className="re-custom-palette">
+            <span>{t('settings.palette.custom')}</span>
+            <input type="color" value={paletteColor(selected)} disabled={!sliderEnabled}
+              aria-label={t('settings.palette.custom')}
+              onChange={event => paletteStore.set(event.currentTarget.value.toLowerCase())} />
+          </label>
         </div>
       </div>
     </div>
@@ -1342,23 +1227,10 @@ export function apply(ctx: ClientContext) {
   ctx.effect(() => {
     const style = document.createElement('style')
     style.dataset.plugin = 'dsh-reasoning-effort'
-    style.textContent = CSS
+    style.textContent = CSS + PIXEL_CSS
     document.head.appendChild(style)
     return () => style.remove()
   }, 'reasoning-effort: styles')
-
-  /* LOCAL ADDITION: per-palette overrides for the track, flare and thumb glow.
-     Scoped to `.re-effort[data-palette="…"]`, so it outranks the CSS above on
-     specificity and the stylesheet above stays byte-identical to upstream. */
-  ctx.effect(() => {
-    const css = paletteCss()
-    if (css === '') return
-    const style = document.createElement('style')
-    style.dataset.plugin = 'dsh-reasoning-effort-palettes'
-    style.textContent = css
-    document.head.appendChild(style)
-    return () => style.remove()
-  }, 'reasoning-effort: particle palettes')
 
   ctx.effect(() => {
     const syncStorage = (event: StorageEvent) => {
@@ -1417,7 +1289,7 @@ export function apply(ctx: ClientContext) {
               controller,
               directory: controller.store,
               load: () => controller.load().then(() => undefined, () => undefined),
-              select: (selection: ModelSelection) => controller.select(selection).then(() => true, () => false),
+              select: (selection: ModelSelection) => controller.select(selection).then(result => { requireAcceptedSelection(result); return true }).catch(() => false),
               adapt,
               // Read at copy time: a language switch must change the next copy,
               // not require the seat to remount.

@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Reasoning selection acceptance</title>
+<body>
+<div id="mount"></div><pre id="out">Running…</pre>
+<script src="./react-globals.js"></script>
+<script>window.__ModuleLoader__ = { load: module => { window.clientModule = module } }</script>
+<script src="./plugin.js"></script>
+<script>
+;(async () => {
+  const results = []
+  const check = (name, value) => { results.push({ name, ok: Boolean(value) }); if (!value) throw new Error(name) }
+  const wait = () => new Promise(resolve => setTimeout(resolve, 100))
+  const t = (key, params = {}) => Object.entries(params).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, value), window.labels[key] ?? key)
+  const listeners = new Set()
+  let state = { current: { provider: 'p', model: 'm', reasoningEffort: 'high' }, routable: true, status: 'ready', error: null, failures: [],
+    groups: [{ id: 'p', name: 'Provider', models: [{ id: 'm', name: 'Model', reasoning: { defaultEffort: 'high', efforts: [{ id: 'off', name: 'Off' }, { id: 'high', name: 'High' }, { id: 'max', name: 'Max' }] } }] }] }
+  const publish = next => { state = next; for (const listener of listeners) listener() }
+  let accepted = false
+  const selections = []
+  const directory = {
+    store: { subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener) }, getSnapshot: () => state },
+    load: async () => state,
+    select: async selection => {
+      selections.push(selection)
+      if (!accepted) return { ok: false, error: { message: 'Controlled refusal' } }
+      publish({ ...state, current: selection })
+      return { ok: true, value: undefined }
+    },
+  }
+  const captured = []
+  const disposers = []
+  const locale = { register: () => () => {}, getLocale: () => ({ active: 'zh' }) }
+  const directories = { directoryFor: () => directory }
+  const ctx = { locale, get: name => name === 'modelDirectories' ? directories : name === 'locale' ? locale : undefined,
+    effect: fn => { const dispose = fn(); disposers.push(dispose); return dispose },
+    slots: { inject: (_name, fn) => { const dispose = fn(); disposers.push(dispose) }, register: (meta, component) => { captured.push({ meta, component }); return () => {} } },
+  }
+  try {
+    const plugin = window.clientModule.factory(name => {
+      if (name === 'react') return window.React
+      if (name === 'react/jsx-runtime') return window.jsxRuntime
+      throw new Error(`Unexpected import: ${name}`)
+    })
+    plugin.apply(ctx)
+    check('Every Cordis effect supplies a disposer, including empty palette CSS', disposers.every(fn => typeof fn === 'function'))
+    const seat = captured.find(row => row.meta.name === 'conversation.input.model')
+    check('Actual plugin model seat registered', seat !== undefined)
+    const props = { ...seat.meta.inject('controlled-session'), t }
+    check('Resolved RemoteResult refusal is reported as false', await props.select({ ...state.current }) === false)
+    selections.length = 0
+    window.createRoot(document.getElementById('mount')).render(window.React.createElement(seat.component, props))
+    await wait()
+    document.querySelector('.re-model-trigger').click()
+    await wait()
+    const slider = document.querySelector('input[type=range]')
+    check('Existing seven-rung slider preserved', slider?.max === '6')
+    slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+    await wait()
+    check('Slider sends declared max, never its Ultra label', selections[0]?.reasoningEffort === 'max')
+    check('Refused slider choice rolls back', state.current.reasoningEffort === 'high' && document.querySelector('.re-depth-value').textContent === 'High')
+    check('Refusal remains visible', document.querySelector('.re-effort').title.includes('Controlled refusal'))
+    const before = selections.length
+    publish({ ...state, current: { ...state.current, reasoningEffort: 'max' }, groups: [{ id: 'p', name: 'Provider', models: [{ id: 'm', name: 'Model', reasoning: { defaultEffort: 'high', efforts: [{ id: 'off', name: 'Off' }, { id: 'high', name: 'High' }] } }] }] })
+    await wait()
+    check('Refresh never automatically selects an effort', selections.length === before)
+    check('Invalid value shown on trigger and slider', document.querySelector('.re-model-trigger').textContent.includes('max') && document.querySelector('.re-depth-value').textContent.includes('max'))
+    check('Invalid slider is labelled unavailable', document.querySelector('.re-depth-value').textContent.includes('已失效'))
+    publish({ ...state, groups: [{ id: 'p', name: 'Provider', models: [{ id: 'm', name: 'Model' }] }] })
+    await wait()
+    const recovery = document.querySelector('[role=alert] button')
+    check('Disabled capability retains explicit recovery action', recovery !== null)
+    accepted = true
+    recovery.click()
+    await wait()
+    check('Only explicit recovery removes the stale effort', !Object.hasOwn(state.current, 'reasoningEffort') && selections.length === before + 1)
+    check('Cleared selection no longer shows invalid status', document.querySelector('[role=alert]') === null)
+  } catch (error) { results.push({ name: error.stack ?? String(error), ok: false }) }
+  const failed = results.filter(result => !result.ok).length
+  window.__RESULT__ = { pass: results.length - failed, fail: failed, results }
+  document.getElementById('out').textContent = `${results.length - failed}/${results.length} passed\n` + results.map(result => `${result.ok ? 'PASS' : 'FAIL'} ${result.name}`).join('\n')
+  document.title = failed === 0 ? 'PASS — Reasoning selection' : 'FAIL — Reasoning selection'
+})()
+</script>
+</body>

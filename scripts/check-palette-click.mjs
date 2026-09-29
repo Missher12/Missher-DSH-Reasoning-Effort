@@ -10,9 +10,9 @@
  *   click → palette store → data-palette → track background → persisted →
  *   aria-checked → composer level text colour
  *
- * React comes from a sibling plugin project's node_modules (the plugin itself
- * declares React as a peer and never installs it), and Chrome is discovered at
- * its usual macOS path. Both are optional: when either is missing the check
+ * React comes from this package's development dependencies. REACT_FROM and
+ * CHROME_PATH can override the dependencies and browser executable; Chrome
+ * otherwise uses its usual macOS path. Both are optional: when either is missing the check
  * reports that it was skipped instead of failing, so it never blocks a build on
  * a machine that cannot run it.
  *
@@ -27,8 +27,8 @@ import { build } from 'esbuild'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const out = resolve(root, '.test-build', 'harness')
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-const REACT_FROM = '/Users/missher/Documents/Projects/04-Harness-Plugins/dsh-usage-statistics/node_modules'
+const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+const REACT_FROM = resolve(process.env.REACT_FROM ?? resolve(root, 'node_modules'))
 
 function skip(reason) {
   console.log(`• 调色板点击链路：跳过（${reason}）`)
@@ -36,7 +36,7 @@ function skip(reason) {
 }
 
 if (!existsSync(CHROME)) skip('找不到 Chrome')
-if (!existsSync(resolve(REACT_FROM, 'react-dom/client.js'))) skip('找不到 React（同级插件项目的 node_modules）')
+if (!existsSync(resolve(REACT_FROM, 'react-dom/client.js'))) skip('找不到 React DOM（请先安装开发依赖）')
 
 await mkdir(out, { recursive: true })
 
@@ -61,6 +61,9 @@ await build({
   logLevel: 'warning',
   define: { 'process.env.NODE_ENV': '"production"' },
   nodePaths: [REACT_FROM],
+  // Use the same React instance as the selected renderer, even when this
+  // candidate also has its own React development dependency installed.
+  alias: { react: resolve(REACT_FROM, 'react'), 'react-dom': resolve(REACT_FROM, 'react-dom') },
 })
 
 await copyFile(resolve(root, 'lib', 'client', 'index.js'), resolve(out, 'plugin.js'))

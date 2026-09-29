@@ -3,8 +3,8 @@
  *
  * The suites are TypeScript because they import the plugin's own modules, so
  * each one is bundled with esbuild into `.test-build/` and then executed by
- * node. Nothing here needs a DOM: the two modules under test (`levels`,
- * `palettes`) are deliberately free of React and of the canvas.
+ * node. Nothing here needs a DOM: the modules under test (`levels`,
+ * `palettes`, `selection`) are deliberately free of React and of the canvas.
  *
  * Usage: node scripts/test.mjs
  */
@@ -16,7 +16,7 @@ import { build } from 'esbuild'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outdir = resolve(root, '.test-build')
-const suites = ['levels.test.ts', 'palettes.test.ts']
+const suites = ['levels.test.ts', 'palettes.test.ts', 'selection.test.ts', 'pixel-field.test.ts']
 
 await mkdir(outdir, { recursive: true })
 

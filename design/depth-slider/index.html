@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <title>思考深度</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .thinking-control {
+      --position: 100%;
+      --accent: #9864db;
+      --accent-cool: #648cdb;
+      --accent-warm: #c364db;
+      width: 216px;
+      max-width: calc(100vw - 16px);
+      height: 92px;
+      position: relative;
+      border: 1px solid #bfbfbf;
+      border-radius: 9px;
+      background: #fff;
+      padding: 10px 8px 7px 6px;
+      color: #898989;
+    }
+    .thinking-header {
+      height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      font-size: 13px;
+      line-height: 20px;
+    }
+    .mode-stack { position: relative; display: inline-flex; }
+    .thinking-mode { display: inline-block; color: #8e5cff; font-weight: 400; }
+    .outgoing-mode { position: absolute; inset: 0 auto auto 0; pointer-events: none; }
+    .thinking-control[data-effort="ultra"] .thinking-mode {
+      background: linear-gradient(100deg, var(--accent), var(--accent-cool), var(--accent-warm), var(--accent), var(--accent));
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent !important;
+      animation: label-flow 2.8s linear infinite;
+    }
+    @keyframes label-flow { to { background-position: 250% center; } }
+    .color-button {
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 24px;
+      padding: 0;
+      margin-left: auto;
+      border: 0;
+      background: transparent;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .color-button::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 1px rgb(0 0 0 / 8%);
+    }
+    .color-button:focus-visible, .color-option:focus-visible, .custom-color input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .speed-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 15px;
+      user-select: none;
+    }
+    .slider {
+      position: relative;
+      height: 20px;
+      margin-top: 8px;
+      border-radius: 7px;
+      background: linear-gradient(90deg, var(--track-start, #cfc1dc) 0%, var(--track-mid, #b89cd7) 18%, var(--track-end, #9864db) 100%);
+      box-shadow: inset 0 1px 1px rgb(70 50 90 / 6%);
+      isolation: isolate;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(ellipse 65px 30px at var(--pointer-x, 50%) 50%, #ffffffb8, transparent);
+      opacity: 0;
+      transition: opacity 160ms ease;
+      pointer-events: none;
+    }
+    .thinking-control:not([data-effort="ultra"]) .slider:hover::before { opacity: 1; }
+    .particles {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+    .particles[hidden] { display: none; }
+    .slider-thumb {
+      position: absolute;
+      top: 0;
+      left: var(--position);
+      width: 17px;
+      height: 20px;
+      transform: translateX(calc(-1 * var(--position)));
+      border: 1px solid #e2ddec;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 1px 2px rgb(57 35 87 / 5%);
+      pointer-events: none;
+      transition: left 260ms cubic-bezier(.2, .8, .2, 1), transform 260ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms ease;
+    }
+    .thinking-control[data-dragging] .slider-thumb {
+      transition: box-shadow 160ms ease;
+      box-shadow: 0 1px 5px rgb(70 36 120 / 20%);
+    }
+    .depth-range {
+      -webkit-appearance: none;
+      appearance: none;
+      position: absolute;
+      z-index: 1;
+      inset: -6px 0;
+      width: 100%;
+      height: 32px;
+      padding: 0;
+      margin: 0;
+      opacity: 0;
+      cursor: grab;
+      touch-action: pan-y;
+    }
+    .depth-range:active { cursor: grabbing; }
+    .depth-range::-webkit-slider-runnable-track { height: 20px; }
+    .depth-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 17px;
+      height: 20px;
+      border: 0;
+    }
+    .depth-range::-moz-range-track { height: 20px; }
+    .depth-range::-moz-range-thumb { width: 17px; height: 20px; border: 0; }
+    .slider:has(.depth-range:focus-visible) {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+    .color-panel {
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      width: 216px;
+      max-width: calc(100vw - 16px);
+      max-height: calc(100svh - 16px);
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #e6e1ee;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgb(35 20 56 / 8%);
+      color: #777;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .color-panel[hidden] { display: none; }
+    .color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .color-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 30px;
+      padding: 4px;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      background: #fff;
+      color: #666;
+      font: inherit;
+      cursor: pointer;
+    }
+    .color-option::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--swatch);
+    }
+    .color-option[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+    .custom-color { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+    .custom-color input { width: 34px; height: 26px; padding: 2px; border: 1px solid #e5e5e5; border-radius: 4px; background: #fff; cursor: pointer; }
+    @media (prefers-reduced-motion: no-preference) {
+      .thinking-mode { transition: color 120ms ease; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .thinking-control[data-effort="ultra"] .thinking-mode { animation: none; }
+      .slider-thumb, .slider::before { transition: none; }
+    }
+    @media (forced-colors: active) {
+      .slider { border: 1px solid CanvasText; }
+      .slider-thumb { background: Highlight; border-color: Highlight; }
+    }
+  </style>
+</head>
+<body>
+  <main class="thinking-control" aria-label="思考深度设置">
+    <div class="thinking-header">
+      <label for="thinking-depth">思考深度</label>
+      <span class="mode-stack">
+        <output id="thinking-mode" class="thinking-mode" for="thinking-depth">Ultra</output>
+        <span class="outgoing-mode" aria-hidden="true"></span>
+      </span>
+      <button class="color-button" type="button" aria-label="选择颜色" title="选择颜色" aria-expanded="false" aria-controls="color-options"></button>
+    </div>
+    <div class="speed-labels" aria-hidden="true"><span>Faster</span><span>Smarter</span></div>
+    <div class="slider">
+      <canvas class="particles" width="400" height="40" aria-hidden="true"></canvas>
+      <span class="slider-thumb" aria-hidden="true"></span>
+      <input class="depth-range" id="thinking-depth" name="thinkingDepth" type="range" min="0" max="5" step="0.001" value="5" aria-valuetext="Ultra，第 6 档，共 6 档">
+    </div>
+    <div class="color-panel" id="color-options" role="group" aria-label="颜色选择" hidden>
+      <div class="color-grid">
+        <button class="color-option" type="button" data-color="#9864db" style="--swatch:#9864db" aria-pressed="true">紫色</button>
+        <button class="color-option" type="button" data-color="#5d89df" style="--swatch:#5d89df" aria-pressed="false">蓝色</button>
+        <button class="color-option" type="button" data-color="#299eaa" style="--swatch:#299eaa" aria-pressed="false">青色</button>
+        <button class="color-option" type="button" data-color="#5b9e70" style="--swatch:#5b9e70" aria-pressed="false">绿色</button>
+        <button class="color-option" type="button" data-color="#d56694" style="--swatch:#d56694" aria-pressed="false">玫瑰</button>
+        <button class="color-option" type="button" data-color="#c89136" style="--swatch:#c89136" aria-pressed="false">琥珀</button>
+      </div>
+      <label class="custom-color">自定义颜色<input id="custom-color" type="color" value="#9864db" aria-label="自定义颜色"></label>
+    </div>
+  </main>
+  <script>
+    (() => {
+const DEFAULT_COLOR = '#9864db';
+const parseHex = hex => [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
+const blendRgb = (a, b, weight) => a.map((value, index) => Math.round(value + (b[index] - value) * weight));
+const cssRgb = color => `rgb(${color.join(' ')})`;
+
+function rgbToHsl(rgb) {
+  const [r, g, b] = rgb.map(value => value / 255);
+  const high = Math.max(r, g, b), low = Math.min(r, g, b);
+  const delta = high - low, lightness = (high + low) / 2;
+  if (!delta) return [0, 0, lightness];
+  const saturation = delta / (1 - Math.abs(2 * lightness - 1));
+  const hue = high === r ? ((g - b) / delta + 6) % 6 : high === g ? (b - r) / delta + 2 : (r - g) / delta + 4;
+  return [hue * 60, saturation, lightness];
+}
+
+function hslToRgb([h, s, l]) {
+  const hue = ((h % 360) + 360) % 360 / 60;
+  const chroma = (1 - Math.abs(2 * l - 1)) * s;
+  const x = chroma * (1 - Math.abs(hue % 2 - 1));
+  const m = l - chroma / 2;
+  const components = hue < 1 ? [chroma,x,0] : hue < 2 ? [x,chroma,0] : hue < 3 ? [0,chroma,x] : hue < 4 ? [0,x,chroma] : hue < 5 ? [x,0,chroma] : [chroma,0,x];
+  return components.map(value => Math.round((value + m) * 255));
+}
+
+function makePixelPalette(hex) {
+  const base = parseHex(hex);
+  const selected = rgbToHsl(base), original = rgbToHsl(parseHex(DEFAULT_COLOR));
+  const tint = rgb => {
+    const [h,s,l] = rgbToHsl(rgb);
+    return hslToRgb([
+      h + selected[0] - original[0],
+      Math.min(1, s * selected[1] / original[1]),
+      Math.max(.06, Math.min(.97, l + (selected[2] - original[2]) * .65))
+    ]);
+  };
+  return {
+    leftColor: blendRgb([216, 213, 220], base, .22),
+    deepViolet: tint([139, 77, 207]), deepMid: tint([146, 94, 205]),
+    midPurple: tint([155, 115, 216]), softMid: tint([167, 136, 218]),
+    softLilac: tint([179, 151, 222]), paleCool: tint([191, 174, 225]),
+    highlightColor: tint([205, 184, 235]), peakColor: tint([238, 223, 255])
+  };
+}
+
+// Pixel field adapted from MEMZ-JZY/DSH-Claude-Style-Reasoning-Slider.
+/*
+MIT License
+
+Copyright (c) 2026 MEMZ-鱼子酱
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const smoothstep = (edge0, edge1, value) => {
+  const x = clamp((value - edge0) / (edge1 - edge0), 0, 1);
+  return x * x * (3 - 2 * x);
+};
+const mix = (from, to, amount) => from + (to - from) * amount;
+const mixColor = (from, to, amount) =>
+  `rgb(${Math.round(mix(from[0], to[0], amount))} ${Math.round(mix(from[1], to[1], amount))} ${Math.round(mix(from[2], to[2], amount))})`;
+
+class PixelField {
+  constructor(canvas, reducedMotion) {
+    this._canvas = canvas;
+    this._reducedMotion = reducedMotion;
+    this._palette = makePixelPalette(DEFAULT_COLOR);
+    this._isMax = false;
+    this._frame = null;
+    this._reveal = 0;
+    this._maxStartedAt = 0;
+    this._lastFrame = 0;
+    this._tick = (time) => {
+      this._frame = null;
+      if (!this._isMax || document.hidden || this._reducedMotion.matches) return;
+      if (time - this._lastFrame >= 32) {
+        this._lastFrame = time;
+        this._reveal = smoothstep(0, 1, (Date.now() - this._maxStartedAt) / 1000);
+        this._drawPixelField(Date.now());
+      }
+      this._frame = requestAnimationFrame(this._tick);
+    };
+    this.resize();
+  }
+
+  resize() {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    this._canvas.width = Math.round(this._canvas.parentElement.clientWidth * ratio);
+    this._canvas.height = Math.round(this._canvas.parentElement.clientHeight * ratio);
+    this._buildPixelGrid();
+    this._drawPixelField(Date.now());
+  }
+
+  setColor(hex) {
+    this._palette = makePixelPalette(hex);
+    this._drawPixelField(Date.now());
+  }
+
+  setActive(active) {
+    if (active === this._isMax) return;
+    this._isMax = active;
+    this._maxStartedAt = Date.now();
+    this._reveal = this._reducedMotion.matches ? 1 : 0;
+    this.sync();
+  }
+
+  sync() {
+    if (this._frame !== null) cancelAnimationFrame(this._frame);
+    this._frame = null;
+    this._canvas.hidden = !this._isMax;
+    this._canvas.dataset.animation = 'stopped';
+    this._drawPixelField(Date.now());
+    if (!this._isMax || document.hidden) return;
+    if (this._reducedMotion.matches) {
+      this._reveal = 1;
+      this._drawPixelField(Date.now());
+      this._canvas.dataset.animation = 'reduced-motion';
+      return;
+    }
+    this._canvas.dataset.animation = 'running';
+    this._frame = requestAnimationFrame(this._tick);
+  }
+
+  _buildPixelGrid() {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = this._canvas.width / ratio;
+    const height = this._canvas.height / ratio;
+    const rows = 8; // 每列固定 8 颗；20 px 滑轨对应 2.5 px 网格。
+    const cell = height / rows;
+    const gap = 0.65;
+    const columns = Math.ceil(width / cell);
+    const cells = [];
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const x = column * cell;
+        const y = row * cell;
+        const nX = (x + cell * 0.5) / width;
+        cells.push({
+          x,
+          y,
+          row,
+          column,
+          nX,
+          base: Math.abs(Math.sin(column * 12.9898 + row * 78.233) * 43758.5453) % 1,
+          tempo: Math.abs(Math.sin(column * 7.13 + row * 19.41) * 19341.731) % 1,
+          phase: Math.abs(Math.sin(column * 31.17 + row * 11.93) * 28437.123) % 1,
+          chroma: Math.abs(Math.sin(column * 9.47 + row * 67.13) * 15823.917) % 1,
+          purple: 0.35 + smoothstep(0.24, 0.8, nX) * 0.65,
+          intensity: smoothstep(0.22, 0.29, nX),
+          depth: smoothstep(0.25, 0.88, nX),
+        });
+      }
+    }
+    this._pixelGrid = cells;
+    this._pixelCell = cell;
+    this._pixelGap = gap;
+    this._pixelRows = rows;
+  }
+
+
+  _drawPixelField(time) {
+    const context = this._canvas.getContext("2d");
+    if (!context || !this._canvas.width || !this._canvas.height) return;
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = this._canvas.width / ratio;
+    const height = this._canvas.height / ratio;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.clearRect(0, 0, width, height);
+    if (!this._isMax) return;
+
+    const reveal = this._reducedMotion.matches ? 1 : this._reveal;
+    const frontier = 1 - reveal;
+    const cells = this._pixelGrid || [];
+    const cell = this._pixelCell || (height / 8);
+    const gap = this._pixelGap ?? 0.65;
+    const elapsed = Math.max(0, time - this._maxStartedAt) * 0.8; // 比原版慢 20%。
+
+    // Max track palette (share-weighted).
+    const leftColor = this._palette.leftColor;
+    const deepViolet = this._palette.deepViolet;
+    const deepMid = this._palette.deepMid;
+    const midPurple = this._palette.midPurple;
+    const softMid = this._palette.softMid;
+    const softLilac = this._palette.softLilac;
+    const paleCool = this._palette.paleCool;
+    const highlightColor = this._palette.highlightColor;
+    const peakColor = this._palette.peakColor;
+    const tones = [
+      deepViolet, deepViolet, deepMid, deepMid,
+      midPurple, midPurple, midPurple,
+      softMid, softMid, softLilac, paleCool,
+    ];
+
+    const flowDuration = 4000;
+    const rawFlow = elapsed / flowDuration;
+    const flowCycle = Math.floor(rawFlow);
+    const easedFlow = flowCycle + smoothstep(0, 1, rawFlow - flowCycle);
+
+    context.save();
+    context.beginPath();
+    if (typeof context.roundRect === "function") {
+      context.roundRect(0, 0, width, height, 10);
+    } else {
+      context.rect(0, 0, width, height);
+    }
+    context.clip();
+
+    for (const c of cells) {
+      const { x, y, row, nX, base, tempo, phase, chroma, purple, intensity, depth } = c;
+      const revealAlpha = smoothstep(frontier - 0.1, frontier + 0.07, nX);
+      if (revealAlpha <= 0.002) continue;
+
+      const period = 500 + tempo * 1500;
+      const localTime = elapsed + phase * period;
+      const cycle = Math.floor(localTime / period);
+      const cycleProgress = (localTime % period) / period;
+      const cycleHash = Math.abs(
+        Math.sin(c.column * 17.17 + row * 41.73 + cycle * 13.11) * 24634.6345,
+      ) % 1;
+      const widthHash = Math.abs(
+        Math.sin(c.column * 5.37 + row * 29.11 + cycle * 7.43) * 17391.443,
+      ) % 1;
+
+      const pulseCenter = 0.2 + cycleHash * 0.55;
+      const pulseWidth = 0.09 + widthHash * 0.08;
+      const pulseDistance = (cycleProgress - pulseCenter) / pulseWidth;
+      const pulseEnvelope = Math.exp(-pulseDistance * pulseDistance * 1.45);
+      const activeCycle = cycleHash > 0.12 ? 1 : 0.26;
+      const irregularFlicker = pulseEnvelope * activeCycle;
+
+      const flowCoordinate = (nX + easedFlow) * 9;
+      const flowIndex = Math.floor(flowCoordinate);
+      const flowProgress = smoothstep(0, 1, flowCoordinate - flowIndex);
+      const flowHashA = Math.abs(
+        Math.sin(flowIndex * 18.31 + row * 37.17) * 19283.173,
+      ) % 1;
+      const flowHashB = Math.abs(
+        Math.sin((flowIndex + 1) * 18.31 + row * 37.17) * 19283.173,
+      ) % 1;
+      const clusterGate = smoothstep(0.46, 0.84, mix(flowHashA, flowHashB, flowProgress));
+      const wavePhase = (nX + easedFlow + row * 0.06 + base * 0.02) * Math.PI * 2;
+      const directionalWave = Math.pow(0.5 + 0.5 * Math.cos(wavePhase), 5);
+      const directionalFlow = Math.max(clusterGate, directionalWave * 0.62);
+      const flowingFlicker = Math.max(
+        irregularFlicker * (0.48 + directionalFlow * 0.58),
+        directionalFlow * (0.38 + base * 0.28),
+      );
+
+      let lightAmount = flowingFlicker;
+      const revealGlow = reveal < 0.995
+        ? Math.exp(-((nX - frontier) ** 2) / 0.012) * (1 - smoothstep(0.7, 1, reveal))
+        : 0;
+      lightAmount = Math.max(lightAmount, revealGlow * (0.4 + base * 0.4));
+
+      const peakHighlight =
+        lightAmount > 0.4
+        && irregularFlicker > 0.16
+        && cycleHash > 0.26
+        && clusterGate > 0.04;
+      const hottestHighlight =
+        lightAmount > 0.68
+        && irregularFlicker > 0.3
+        && cycleHash > 0.48
+        && clusterGate > 0.12;
+      const highlightAmount = peakHighlight
+        ? 0.97
+        : clamp(lightAmount * (0.44 + cycleHash * 0.3), 0, 0.64);
+
+      const toneDrift =
+        base * 0.28
+        + depth * 0.28
+        + cycleProgress * 0.38
+        + easedFlow * 0.18
+        + cycleHash * 0.2
+        + Math.sin(elapsed * 0.00135 + phase * Math.PI * 2) * 0.14;
+      const tonePosition = (((toneDrift % 1) + 1) % 1) * tones.length;
+      const toneIndex = Math.floor(tonePosition);
+      const toneMix = tonePosition - toneIndex;
+      const toneA = tones[toneIndex];
+      const toneB = tones[(toneIndex + 1) % tones.length];
+      const cellTone = [
+        mix(toneA[0], toneB[0], toneMix),
+        mix(toneA[1], toneB[1], toneMix),
+        mix(toneA[2], toneB[2], toneMix),
+      ];
+
+      const chromaNudge = (chroma - 0.5) * 10 + depth * 12;
+      const variedPurple = [
+        clamp(cellTone[0] + chromaNudge * 0.35 - depth * 8, 0, 255),
+        clamp(cellTone[1] - depth * 16 + (base - 0.5) * 8, 0, 255),
+        clamp(cellTone[2] + depth * 6 + (cycleHash - 0.5) * 6, 0, 255),
+      ];
+      const baseColor = [
+        mix(leftColor[0], variedPurple[0], purple),
+        mix(leftColor[1], variedPurple[1], purple),
+        mix(leftColor[2], variedPurple[2], purple),
+      ];
+      const color = hottestHighlight
+        ? mixColor(baseColor, peakColor, 0.95)
+        : mixColor(baseColor, highlightColor, highlightAmount);
+
+      const baseOpacity = 0.86 + base * 0.12;
+      context.globalAlpha = peakHighlight || hottestHighlight
+        ? revealAlpha * intensity
+        : revealAlpha * intensity * clamp(baseOpacity + flowingFlicker * 0.12, 0, 1);
+      context.fillStyle = color;
+      context.fillRect(x + gap * 0.5, y + gap * 0.5, cell - gap, cell - gap);
+    }
+
+    context.restore();
+    context.globalAlpha = 1;
+  }
+
+
+}
+
+const control = document.querySelector('.thinking-control');
+const range = document.querySelector('.depth-range');
+const output = document.querySelector('.thinking-mode');
+const outgoing = document.querySelector('.outgoing-mode');
+const colorButton = document.querySelector('.color-button');
+const colorPanel = document.querySelector('.color-panel');
+const customColor = document.querySelector('#custom-color');
+const colorOptions = [...document.querySelectorAll('.color-option')];
+const canvas = document.querySelector('.particles');
+const slider = document.querySelector('.slider');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const pixels = new PixelField(canvas, reducedMotion);
+
+// 客户端档位；真实集成时需按所选模型过滤。Ultra 不是通用 API 参数。
+const levels = [
+  { effort: 'low', label: 'Low' },
+  { effort: 'medium', label: 'Medium' },
+  { effort: 'high', label: 'High' },
+  { effort: 'xhigh', label: 'Extra High' },
+  { effort: 'max', label: 'Max' },
+  { effort: 'ultra', label: 'Ultra' }
+];
+let selectedIndex = -1;
+let dragging = false;
+let labelAnimations = [];
+let themeColor = DEFAULT_COLOR;
+try {
+  const savedColor = localStorage.getItem('thinking-slider-color');
+  if (/^#[0-9a-f]{6}$/i.test(savedColor || '')) themeColor = savedColor;
+} catch { /* 本地文件或禁用存储时仍可正常切换颜色。 */ }
+
+function paintTheme(index) {
+  const base = parseHex(themeColor);
+  const [h,s,l] = rgbToHsl(base);
+  const start = blendRgb([216, 213, 220], base, .22);
+  const end = blendRgb([200, 195, 208], base, .25 + index / 5 * .75);
+  control.style.setProperty('--accent', themeColor);
+  control.style.setProperty('--accent-cool', cssRgb(hslToRgb([h - 28, s, l])));
+  control.style.setProperty('--accent-warm', cssRgb(hslToRgb([h + 28, s, l])));
+  control.style.setProperty('--track-start', cssRgb(start));
+  control.style.setProperty('--track-mid', cssRgb(blendRgb(start, end, .4)));
+  control.style.setProperty('--track-end', cssRgb(end));
+  output.style.color = cssRgb(blendRgb([137, 137, 137], base, index / 5));
+}
+
+function setTheme(hex, remember = true) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return;
+  themeColor = hex.toLowerCase();
+  control.dataset.color = themeColor;
+  customColor.value = themeColor;
+  colorOptions.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.color === themeColor)));
+  paintTheme(Math.max(0, selectedIndex));
+  pixels.setColor(themeColor);
+  if (remember) {
+    try { localStorage.setItem('thinking-slider-color', themeColor); } catch { /* 可选的本地记忆。 */ }
+  }
+}
+
+function swapLabel(label, forward, animate) {
+  labelAnimations.forEach(animation => animation.cancel());
+  labelAnimations = [];
+  outgoing.textContent = '';
+  if (!animate || reducedMotion.matches) {
+    output.value = label;
+    return;
+  }
+  outgoing.textContent = output.value;
+  output.value = label;
+  const direction = forward ? 1 : -1;
+  const timing = { duration: 240, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' };
+  labelAnimations = [
+    output.animate([
+      { opacity: 0, transform: `translateY(${direction * 7}px)`, filter: 'blur(2px)' },
+      { opacity: 1, transform: 'translateY(0)', filter: 'blur(0)' }
+    ], timing),
+    outgoing.animate([
+      { opacity: .7, transform: 'translateY(0)', filter: 'blur(0)' },
+      { opacity: 0, transform: `translateY(${-direction * 7}px)`, filter: 'blur(2px)' }
+    ], timing)
+  ];
+}
+
+function updateDepth() {
+  const value = Number(range.value);
+  const index = Math.round(value);
+  const level = levels[index];
+  const previousIndex = selectedIndex;
+  control.style.setProperty('--position', `${value / 5 * 100}%`);
+  control.dataset.effort = level.effort;
+  paintTheme(index);
+  range.setAttribute('aria-valuetext', `${level.label}，第 ${index + 1} 档，共 6 档`);
+  if (index !== previousIndex) {
+    swapLabel(level.label, index > previousIndex, previousIndex !== -1);
+    selectedIndex = index;
+    control.dispatchEvent(new CustomEvent('thinkingchange', {
+      bubbles: true,
+      detail: { index, effort: level.effort, label: level.label, highest: index === 5 }
+    }));
+  }
+  // 按选中的档位判断；拖动到最高档时展开像素场，退出立即清空。
+  pixels.setActive(index === levels.length - 1);
+}
+
+function finishDrag() {
+  if (!dragging) return;
+  dragging = false;
+  control.removeAttribute('data-dragging');
+  range.value = String(Math.round(Number(range.value)));
+  updateDepth();
+}
+
+range.addEventListener('pointerdown', () => {
+  dragging = true;
+  control.setAttribute('data-dragging', '');
+});
+range.addEventListener('input', updateDepth);
+document.addEventListener('pointerup', finishDrag);
+document.addEventListener('pointercancel', finishDrag);
+range.addEventListener('blur', finishDrag);
+window.addEventListener('blur', finishDrag);
+range.addEventListener('keydown', event => {
+  const current = Math.round(Number(range.value));
+  const keys = {
+    ArrowRight: current + 1, ArrowUp: current + 1,
+    ArrowLeft: current - 1, ArrowDown: current - 1,
+    PageUp: current + 2, PageDown: current - 2, Home: 0, End: 5
+  };
+  if (!(event.key in keys)) return;
+  event.preventDefault();
+  range.value = String(clamp(keys[event.key], 0, 5));
+  updateDepth();
+  range.dispatchEvent(new Event('change', { bubbles: true }));
+});
+slider.addEventListener('pointermove', event => {
+  const bounds = slider.getBoundingClientRect();
+  slider.style.setProperty('--pointer-x', `${event.clientX - bounds.left}px`);
+});
+
+function closeColors() {
+  colorPanel.hidden = true;
+  colorButton.setAttribute('aria-expanded', 'false');
+}
+function positionColors() {
+  if (colorPanel.hidden) return;
+  const rect = control.getBoundingClientRect();
+  const width = colorPanel.offsetWidth, height = colorPanel.offsetHeight;
+  const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
+  const below = rect.bottom + 8;
+  const top = below + height <= window.innerHeight - 8 ? below : Math.max(8, rect.top - height - 8);
+  colorPanel.style.left = `${left}px`;
+  colorPanel.style.top = `${top}px`;
+}
+colorButton.addEventListener('click', () => {
+  colorPanel.hidden = !colorPanel.hidden;
+  colorButton.setAttribute('aria-expanded', String(!colorPanel.hidden));
+  positionColors();
+});
+window.addEventListener('resize', positionColors);
+colorOptions.forEach(button => button.addEventListener('click', () => {
+  setTheme(button.dataset.color);
+  closeColors();
+  colorButton.focus();
+}));
+customColor.addEventListener('input', () => setTheme(customColor.value));
+document.addEventListener('pointerdown', event => {
+  if (!colorButton.contains(event.target) && !colorPanel.contains(event.target)) closeColors();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !colorPanel.hidden) {
+    closeColors();
+    colorButton.focus();
+  }
+});
+document.addEventListener('visibilitychange', () => pixels.sync());
+reducedMotion.addEventListener('change', () => {
+  labelAnimations.forEach(animation => animation.cancel());
+  outgoing.textContent = '';
+  pixels.sync();
+});
+new ResizeObserver(() => pixels.resize()).observe(slider);
+setTheme(themeColor, false);
+updateDepth();
+
+    })();
+  </script>
+</body>
+</html>

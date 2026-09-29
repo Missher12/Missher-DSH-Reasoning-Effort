@@ -1,85 +1,19 @@
-<div align="center">
-
-<img src="assets/readme/hero.webp" alt="dsh-reasoning-effort brings a Codex-style model and reasoning-effort slider to DeepSeek Harness" width="100%">
-
 # dsh-reasoning-effort
 
-**A Codex-style model and reasoning-effort control, built directly into DeepSeek Harness.**
+[中文](README.md) · [Source](https://github.com/Missher12/dsh-reasoning-effort) · [Issues](https://github.com/Missher12/dsh-reasoning-effort/issues) · [Design sources](design/depth-slider/README.md)
 
-[中文首页](README.md) · [Latest release](https://github.com/HanaAyane/dsh-reasoning-effort/releases/latest) · [Report an issue](https://github.com/HanaAyane/dsh-reasoning-effort/issues)
+Model selection and a thinking-depth slider for DeepSeek Harness. The public customization **0.7.5-local.4** targets **DSH 0.2.0-rc.1**; other Host versions are unverified. See [FORK.md](FORK.md) for upstream attribution and MIT licensing.
 
-[![v0.7.3](https://img.shields.io/badge/release-0.7.3-6f83ff?style=flat-square)](https://github.com/HanaAyane/dsh-reasoning-effort/releases/tag/v0.7.3)
-[![DSH RC](https://img.shields.io/badge/DSH-RC-8b5cf6?style=flat-square)](#version-support-policy)
-[![MIT License](https://img.shields.io/badge/license-MIT-536990?style=flat-square)](LICENSE)
-
-</div>
-
-Switch models and adjust reasoning effort below the DSH composer, with an eight-frame Big Fat Fish runner that speeds up as you drag. Levels come from the selected model, and selections stay synchronized with `/model`.
-
-- **Model-defined levels** — adapts to their count, names, and order; failed updates roll back.
-- **Native appearance** — dark and light themes, with Simplified Chinese and English following DSH's active language immediately.
-- **Optional motion** — the runner is on by default, with a plain-thumb option and reduced-motion support.
-- **Custom-model guidance** — copy a configuration snippet, or one-click copy a whole brief for an agent to diagnose and fill in.
-
-<img src="assets/readme/themes.webp" alt="The reasoning effort selector running in DeepSeek Harness dark and light themes" width="100%">
-
-[What changed](#whats-new-in-v073) · [Install and update](#install-and-update) · [Version support](#version-support-policy) · [Appearance](#the-big-fat-fish-slider) · [Troubleshooting](#troubleshooting)
-
-## What's new in v0.7.3
-
-- Adapt to the settings API in DSH `0.1.7-rc.1`, restoring Host activation in the Web Profile.
-- Use the configuration document and model location reported by the active Host. Copied snippets now match the indentation of legacy `settings.yaml` or the newer profile patch.
-- Retain the legacy RC settings path.
-
-See the [v0.7.3 release notes](https://github.com/HanaAyane/dsh-reasoning-effort/releases/tag/v0.7.3) and [CHANGELOG](CHANGELOG.md) for details.
-
-## Version support policy
-
-This plugin targets relatively stable **DSH RC versions** for compatibility work, testing, and bug fixes. **Individual alpha versions are not maintained.** During alpha development, client APIs, dependencies, and plugin loading may undergo frequent breaking changes. Supporting multiple transitional versions increases maintenance costs and makes compatibility difficult to sustain.
-
-The current release is **plugin `v0.7.3`**, targeting **DSH `0.1.7-rc.1` (Web Profile)**. If you need an alpha version, maintain a temporary adaptation yourself. RC means release candidate; it does not imply automatic compatibility with every past or future RC.
-
-| Item | Current status |
-| --- | --- |
-| Plugin release | [v0.7.3](https://github.com/HanaAyane/dsh-reasoning-effort/releases/tag/v0.7.3) |
-| Target DSH version | DSH `0.1.7-rc.1`, Web Profile |
-| Upgrade notes | Install `v0.7.3`, then restart the Web Host manually and refresh the page |
-| Alpha versions | No separate adaptations; patch locally or switch to the target RC |
+- A single card, plain white thumb, and top-level pixel field. Preset and custom colours live only in General Settings.
+- Seven visual stops map to model-declared values. The model's highest supported value sits at the right edge; rejected selections roll back.
+- Drag frames are coalesced and release commits once. A fixed-height label row keeps the track stationary when mapping hints change.
+- Light and dark themes, Chinese and English, reduced motion, and custom-model declaration guidance.
 
 ## Install and update
 
-### 1. Install a pinned release
+This repository includes built Host and Client modules. Add its GitHub address in the DSH plugin manager and enable it in your chosen profile. Follow the Host's restart notice and refresh the interface. Source availability or package installation alone does not verify Loader activation or provider behaviour.
 
-Run these commands in the terminal environment you use to start DSH:
-
-```powershell
-dsh plugin --profile web add github:HanaAyane/dsh-reasoning-effort#v0.7.3
-dsh --profile web --dump-config
-```
-
-Confirm that the output includes `name: dsh-reasoning-effort`. Use the same `add` command to update an existing installation. To try development changes, replace `#v0.7.3` with `#main`; the main branch may contain unreleased changes.
-
-<details>
-<summary>Ask an agent to install it: copy this prompt</summary>
-
-```text
-Install dsh-reasoning-effort v0.7.3 for the DeepSeek Harness web profile.
-Run only these two commands and do not change any other profile:
-dsh plugin --profile web add github:HanaAyane/dsh-reasoning-effort#v0.7.3
-dsh --profile web --dump-config
-Confirm that dsh-reasoning-effort appears in the configuration and report the result.
-Do not stop or restart the running DSH process. Remind me to restart the Web Host and refresh the page manually.
-```
-
-</details>
-
-### 2. Restart and refresh
-
-The plugin loads when the Web Host starts. After installation, restart the DSH Web Host manually and refresh the page.
-
-### 3. Choose a model and effort level
-
-Open a session and click the model control below the composer. Drag the thumb or click the track; release to snap to the nearest valid level. Click the model row below it to expand the model list.
+The package declares `dsh.bundle.patch` and needs no extra compatibility plugin. See [CONTRIBUTING.md](CONTRIBUTING.md) for builds and packaging, or open [design/depth-slider/index.html](design/depth-slider/index.html) for the standalone design. Preview colour controls are demonstration tools; the DSH colour controls remain in Settings.
 
 ## Where the levels come from
 
@@ -93,7 +27,7 @@ This section is vendor-neutral and applies to every model you declare yourself u
 
 **Why the levels are missing**: DSH's model directory only reports what the adapter declares. A model you declare has no catalog entry, so the directory exposes no levels — and no slider — until you write `reasoningEfforts`.
 
-**What to write**: open the configuration file shown in the guidance panel (older builds use `settings.yaml`; DSH `0.1.7-rc.1` uses the profile's `cordis.patch.yml`). Add `reasoningEfforts` under the model's `llm-pi-ai` entry, matching its existing indentation. Each key is a DSH level, each value is the spelling the endpoint accepts, and a level left out counts as unsupported:
+**What to write**: open the configuration file shown in the guidance panel (older builds use `settings.yaml`; DSH `0.2.0-rc.1` uses the profile's `cordis.patch.yml`). Add `reasoningEfforts` under the model's `llm-pi-ai` entry, matching its existing indentation. Each key is a DSH level, each value is the spelling the endpoint accepts, and a level left out counts as unsupported:
 
 ```yaml
 models:
@@ -133,7 +67,7 @@ If you would rather not fill it in yourself, or the declaration still fails, pre
 <details>
 <summary>Advanced: extend the plugin knowledge base</summary>
 
-The built-in entries cover only a few models, purely to save typing. With DSH `0.1.7-rc.1`, add `entries` under `config` in the existing `id: reasoning-effort` profile row. With older RCs, add them under `dsh-reasoning-effort` in `settings.yaml`. This example shows relative content; keep the indentation of the containing row. User entries win over built-ins:
+The built-in entries cover only a few models, purely to save typing. With DSH `0.2.0-rc.1`, add `entries` under `config` in the existing `id: reasoning-effort` profile row. With older RCs, add them under `dsh-reasoning-effort` in `settings.yaml`. This example shows relative content; keep the indentation of the containing row. User entries win over built-ins:
 
 ```yaml
 entries:
@@ -156,9 +90,13 @@ The plugin only provides snippets — it never writes configuration, and catalog
 
 </details>
 
+## Local thinking depth design
+
+`0.7.5-local.4` uses the supplied Desktop card and eight-row pixel field. The top display level animates; hidden pages stop and reduced motion shows a static field. Track, level label and pixels share the selected colour. The slider has one outer frame. Pointer updates are coalesced and submitted on release; models capped at high or xhigh keep their maximum at the right edge. Presets and custom colour are available only in **Settings → General → Thinking slider colour**. The conversation model menu adjusts depth only. Existing model capability mapping and rejected-selection rollback remain; the six sample levels do not redefine model capabilities. The pixel engine licence is included in `THIRD-PARTY-LICENSE.txt`.
+
 ## The Big Fat Fish slider
 
-The eight-frame runner is **enabled by default**. To switch back to the plain white thumb:
+The local version defaults to the plain white thumb and preserves an explicit existing runner preference. To adjust it:
 
 1. Open **Settings → General**.
 2. Find **Big Fat Fish slider** below Appearance.
@@ -166,7 +104,7 @@ The eight-frame runner is **enabled by default**. To switch back to the plain wh
 
 <img src="assets/readme/settings.webp" alt="The reasoning effort and Big Fat Fish slider switches in DeepSeek Harness General Settings" width="100%">
 
-The runner changes only the thumb artwork. Snapping, keyboard control, radiation effects, and model selection remain unchanged. It animates faster while dragging and freezes on a stable frame when reduced motion is enabled.
+The runner changes only the thumb artwork. Snapping, keyboard control, pixel effects, and model selection remain unchanged. It uses a stable frame when reduced motion is enabled.
 
 The **Reasoning effort selector** switch on the same page disables the complete enhancement without uninstalling it. DSH's built-in model selector returns immediately. Both preferences stay in the current browser.
 
@@ -176,7 +114,7 @@ The **Reasoning effort selector** switch on the same page disables the complete 
 
 Check that:
 
-1. Check the running version with `dsh --version`; plugin `v0.7.3` targets DSH `0.1.7-rc.1`.
+1. Check the running version with `dsh --version`; plugin `v0.7.3` targets DSH `0.2.0-rc.1`.
 2. You restarted the DSH Web Host after installation.
 3. **Settings → General → Reasoning effort selector** is enabled.
 4. The selected model exposes at least two effort levels in the DSH model directory (see the next entry for models without any), and thinking is not disabled by the deployment.

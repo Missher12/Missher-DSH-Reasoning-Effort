@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><title>Slider drag regression</title>
+<style>body{font:14px system-ui;padding:24px;--dsw-alias-bg-layer-2:#fff;--dsw-alias-bg-skeleton:#eee;--dsw-alias-label-primary:#111;--dsw-alias-label-secondary:#555;--dsw-alias-label-tertiary:#777;--dsw-alias-border-l2:#ccc}#mount{margin-top:250px;margin-left:300px;width:250px}pre{white-space:pre-wrap}button,select{margin:4px}</style>
+<label>最高档 <select id="maximum"><option>high</option><option>xhigh</option><option>max</option></select></label><div id="mount"></div><pre id="out">Ready</pre>
+<script src="./react-globals.js"></script><script>window.__ModuleLoader__={load:m=>{window.clientModule=m}}</script><script src="./plugin.js"></script>
+<script>
+const listeners=new Set(), captured=[], reports=[];
+let maximum='high',selections=0;
+const groups=()=>[{id:'fixture',name:'Controlled capability',models:[{id:maximum,name:'最高 '+maximum,reasoning:{defaultEffort:'low',efforts:[{id:'low',name:'Low'},{id:maximum,name:maximum}]}}]}];
+let state={current:{provider:'fixture',model:maximum,reasoningEffort:'low'},routable:true,status:'ready',error:null,failures:[],groups:groups()};
+const publish=next=>{state=next;listeners.forEach(fn=>fn())};
+const report=()=>{document.getElementById('out').textContent=JSON.stringify({maximum,selections,sent:state.current.reasoningEffort,position:document.querySelector('input[type=range]')?.value,drag:reports.at(-1)},null,2)};
+const directory={store:{subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn)},getSnapshot:()=>state},load:async()=>state,select:async selection=>{selections++;publish({...state,current:selection});setTimeout(report,80);return{ok:true,value:undefined}}};
+const locale={register:()=>()=>{},getLocale:()=>({active:'zh'})}, directories={directoryFor:()=>directory};
+const ctx={locale,get:n=>n==='modelDirectories'?directories:n==='locale'?locale:undefined,effect:fn=>fn(),slots:{inject:(_n,fn)=>fn(),register:(meta,component)=>{captured.push({meta,component});return()=>{}}}};
+const plugin=window.clientModule.factory(n=>n==='react'?window.React:n==='react/jsx-runtime'?window.jsxRuntime:(()=>{throw Error(n)})());plugin.apply(ctx);
+const seat=captured.find(x=>x.meta.name==='conversation.input.model');const t=(key,params={})=>Object.entries(params).reduce((s,[k,v])=>s.replaceAll('{'+k+'}',v),window.labels[key]??key);
+window.createRoot(document.getElementById('mount')).render(window.React.createElement(seat.component,{...seat.meta.inject('fixture'),t}));
+document.getElementById('maximum').onchange=e=>{maximum=e.target.value;selections=0;publish({...state,current:{provider:'fixture',model:maximum,reasoningEffort:'low'},groups:groups()});setTimeout(report,80)};
+let active=false,samples=[],raf;
+const sample=()=>{if(!active)return;const input=document.querySelector('input[type=range]');const thumb=document.querySelector('.re-depth-thumb');samples.push({value:Number(input.value),transition:getComputedStyle(thumb).transitionDuration,thumbTop:thumb.getBoundingClientRect().top,trackTop:document.querySelector('.re-depth-slider').getBoundingClientRect().top,headerHeight:document.querySelector('.re-depth-header').getBoundingClientRect().height,menuTop:document.querySelector('.re-model-menu').getBoundingClientRect().top,scrollTop:document.querySelector('.re-model-menu').scrollTop});raf=requestAnimationFrame(sample)};
+window.addEventListener('pointerdown',e=>{if(e.target.matches('input[type=range]')){active=true;samples=[];raf=requestAnimationFrame(sample)}},true);
+window.addEventListener('pointerup',()=>{if(!active)return;active=false;cancelAnimationFrame(raf);const range=key=>Math.max(...samples.map(x=>x[key]))-Math.min(...samples.map(x=>x[key]));reports.push({samples:samples.length,verticalTravel:range('thumbTop'),trackTravel:range('trackTop'),headerChange:range('headerHeight'),menuTravel:range('menuTop'),scrollTravel:range('scrollTop'),reversals:samples.filter((x,i)=>i&&x.value<samples[i-1].value-0.02).length,animatedFrames:samples.filter(x=>x.transition!=='0s').length});setTimeout(report,100)},true);
+</script>

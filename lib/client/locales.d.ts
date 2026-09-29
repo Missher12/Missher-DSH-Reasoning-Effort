@@ -10,8 +10,22 @@ export declare const zh: {
     'level.high': string;
     'level.xhigh': string;
     'level.max': string;
+    'level.ultra': string;
     'level.none': string;
+    'palette.upstream': string;
+    'palette.violet': string;
+    'palette.ice': string;
+    'palette.cyan': string;
+    'palette.green': string;
+    'palette.amber': string;
+    'palette.rose': string;
+    'effort.invalid': string;
+    'effort.reselect': string;
+    'effort.use': string;
     'effort.label': string;
+    'effort.faster': string;
+    'effort.smarter': string;
+    'settings.palette.custom': string;
     'effort.title': string;
     'effort.failed': string;
     'effort.unavailable': string;
@@ -67,6 +81,9 @@ export declare const zh: {
     'settings.chibi.title': string;
     'settings.chibi.description': string;
     'settings.chibi.aria': string;
+    'settings.palette.title': string;
+    'settings.palette.description': string;
+    'settings.palette.aria': string;
     'settings.enabled': string;
     'settings.disabled': string;
 };
@@ -74,6 +91,9 @@ export declare const zh: {
 export type ReasoningEffortLocaleKey = keyof typeof zh;
 /** English dictionary, checked against the Chinese key set. */
 export declare const en: {
+    'effort.invalid': string;
+    'effort.reselect': string;
+    'effort.use': string;
     'level.off': string;
     'level.minimal': string;
     'level.low': string;
@@ -81,8 +101,19 @@ export declare const en: {
     'level.high': string;
     'level.xhigh': string;
     'level.max': string;
+    'level.ultra': string;
     'level.none': string;
+    'palette.upstream': string;
+    'palette.violet': string;
+    'palette.ice': string;
+    'palette.cyan': string;
+    'palette.green': string;
+    'palette.amber': string;
+    'palette.rose': string;
     'effort.label': string;
+    'effort.faster': string;
+    'effort.smarter': string;
+    'settings.palette.custom': string;
     'effort.title': string;
     'effort.failed': string;
     'effort.unavailable': string;
@@ -138,6 +169,9 @@ export declare const en: {
     'settings.chibi.title': string;
     'settings.chibi.description': string;
     'settings.chibi.aria': string;
+    'settings.palette.title': string;
+    'settings.palette.description': string;
+    'settings.palette.aria': string;
     'settings.enabled': string;
     'settings.disabled': string;
 };

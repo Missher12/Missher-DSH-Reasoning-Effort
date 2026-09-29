@@ -92,14 +92,16 @@ export function effortStops(offered: readonly string[]): EffortStop[] {
 /**
  * Rung index for a submitted effort.
  *
- * Several rungs can share one `send`, so a native rung wins: landing on the rung
- * whose own level is the effort keeps the thumb where the user put it.
+ * The real maximum always resolves to the right edge. Other values prefer a
+ * native rung; acceptedStopIndex retains an explicit mapped visual choice.
  *
  * @param stops - The ladder.
  * @param effort - Effort currently in effect, as submitted.
  * @returns The rung index, or -1 when nothing matches.
  */
 export function stopIndex(stops: readonly EffortStop[], effort: string | undefined): number {
+  // The right edge is the model's real maximum, even when its wire id is high/xhigh.
+  if (effort !== undefined && stops.at(-1)?.send === effort) return stops.length - 1
   const native = stops.findIndex((stop) => stop.native && stop.send === effort)
   if (native >= 0) return native
   return stops.findIndex((stop) => stop.send === effort)
@@ -129,4 +131,10 @@ export function levelsText(levels: readonly string[], t: ReasoningEffortTranslat
   return levels.length === 0
     ? t('level.none')
     : levels.map((level) => displayLevelName(level, levels, t)).join(' / ')
+}
+
+/** Keep an accepted visual rung when several rungs share the same wire value. */
+export function acceptedStopIndex(stops: readonly EffortStop[], effort: string | undefined, preferred: number): number {
+  if (effort !== undefined && Number.isInteger(preferred) && stops[preferred]?.send === effort) return preferred
+  return stopIndex(stops, effort)
 }

@@ -13,6 +13,7 @@ import {
   levelName,
   levelsText,
   stopIndex,
+  acceptedStopIndex,
 } from '../src/client/levels.js'
 import { zh } from '../src/client/locales.js'
 
@@ -145,6 +146,21 @@ check('当前 low 落在 native 的 Low，而不是 Minimal', stopIndex(deep, 'l
 check('当前 high 落在 native 的 High，而不是 Medium', stopIndex(deep, 'high'), 4)
 check('认不出的档位返回 -1', stopIndex(deep, 'nope'), -1)
 check('undefined 返回 -1', stopIndex(deep, undefined), -1)
+
+// Every supported capability subset must put its real maximum at the right edge.
+let allMaximaReachable = true
+for (let mask = 1; mask < 1 << CANONICAL_LEVELS.length; mask++) {
+  const offered = CANONICAL_LEVELS.filter((_, i) => mask & (1 << i))
+  if (offered.length < 2) continue
+  const stops = effortStops(offered)
+  allMaximaReachable &&= stops.at(-1)?.send === offered.at(-1) && stopIndex(stops, offered.at(-1)) === 6
+}
+check('全部 120 种多档能力组合：最高档保持在最右端', allMaximaReachable, true)
+check('最高只支持 high 的模型不会从最右端跳回中间', stopIndex(effortStops(['low', 'high']), 'high'), 6)
+check('最高只支持 xhigh 的模型也保持在最右端', stopIndex(effortStops(['medium', 'xhigh']), 'xhigh'), 6)
+check('被接受的映射档位保留手动位置', acceptedStopIndex(deep, 'high', 3), 3)
+check('后端实际值不同才重新定位', acceptedStopIndex(deep, 'low', 3), 2)
+check('不接受未声明的值', acceptedStopIndex(deep, 'invalid', 3), -1)
 
 console.log(`\nlevels: ${pass} / ${pass + fail}${fail ? `  —— ${fail} 项不通过` : '  —— 全部通过'}`)
 if (fail > 0) process.exit(1)

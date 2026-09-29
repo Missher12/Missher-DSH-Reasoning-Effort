@@ -1,6 +1,26 @@
 # Changelog
 
+## 0.7.5-local.4 (2026-09-29)
+
+- Keep the readout at a fixed height: mixed-size mapping hints no longer move the track vertically while dragging.
+- Add vertical geometry measurements to the real-browser drag fixture.
+- Publish the supplied standalone design sources and document this public fork; remove machine-specific browser-test dependency paths.
+
+## 0.7.5-local.3 (2026-09-29)
+
+- Coalesce drag frames, remove competing native pointer updates and label jumps, retain accepted visual positions, and map every advertised maximum to the right edge.
+- Replace the former padded slider wrapper; the popup is the single outer card.
+- Adopt the user-supplied thinking depth card and pixel field; keep colours in General Settings, including custom colour.
+- Share the accent across the track and model label; pause pixels on hidden pages and honour reduced motion.
+- Preserve capability mapping, selection rollback, and explicit legacy runner preferences. Include the pixel engine MIT notice.
+
 All notable changes to this project are documented in this file.
+
+## [0.7.4-local.1] - 2026-09-29
+
+- Private Cordis candidate for DSH `0.2.0-rc.1`; pin development and Host peers to that exact version.
+- Preserve the REQ-02 model-advertised effort selection, explicit recovery after capability changes, seven-rung presentation, and locale-owned copy.
+- Keep upstream release history below. This local candidate has not been published.
 
 ## [Unreleased]
 
