@@ -1,6 +1,6 @@
 {
   "name": "@missher/dsh-reasoning-effort",
-  "version": "0.7.5-local.9",
+  "version": "0.7.5-local.12",
   "description": "DeepSeek Harness model and reasoning selector with a pixel depth slider, model-declared effort mapping, and settings-only theme colours.",
   "keywords": [
     "deepseek",
@@ -83,7 +83,8 @@
         "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-api-remotes",
-        "@deepseek-ai/dsh-client-ui-renderer"
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings-models"
       ],
       "platform": "web"
     }
@@ -99,7 +100,8 @@
     "@deepseek-ai/dsh-client-ui-settings": "*",
     "@deepseek-ai/dsh-client-ui-slots": "*",
     "@deepseek-ai/schemastery": "3.18.4",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "@deepseek-ai/dsh-client-ui-settings-models": "*"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.4",
@@ -120,7 +122,8 @@
     "esbuild": "^0.25.0",
     "react": "^18.2.0",
     "typescript": "^6.0.3",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@deepseek-ai/dsh-client-ui-settings-models": "0.2.0-rc.2"
   },
   "license": "MIT"
 }

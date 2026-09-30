@@ -9,6 +9,12 @@ Model selection and a thinking-depth slider for DeepSeek Harness. The public cus
 - Drag frames are coalesced and release commits once. A fixed-height label row keeps the track stationary when mapping hints change.
 - Light and dark themes, Chinese and English, reduced motion, and custom-model declaration guidance.
 
+## Model settings extension
+
+**0.7.5-local.12** places reasoning mode and maximum level beside text/image input in each `llm-pi-ai` model row. Wire mappings stay internal; only reasoning mode and the maximum level are displayed. Missing mappings keep automatic mode available without inventing endpoint values. Controls share the card's draft and original revision-checked save; no separate model picker, persistence path, or save button is added. Sparse endpoint mappings and unrelated model fields are preserved.
+
+This position requires the Models module's `settings.models.model-fields` extension. Official rc.2 does not declare it: registration waits without disabling the slider, but the new controls cannot appear there until the module supplies the extension. The Bundle contains no copied host module or compatibility package. The Bundle and enhanced Models module have passed isolated loading with official rc.2.
+
 ## Install and update
 
 This repository includes built Host and Client modules. Add its GitHub address in the DSH plugin manager and enable it in your chosen profile. Follow the Host's restart notice and refresh the interface. Source availability or package installation alone does not verify Loader activation or provider behaviour.

@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.5-local.12
+
+- Keep endpoint mappings internal and display only reasoning mode and maximum level.
+- Align capability labels, input heights and spacing with the Models card.
+- Preserve automatic mode when endpoint mappings are unavailable.
+
+## 0.7.5-local.11
+
+- Move reasoning mode and maximum into each model row beside input types, sharing its draft and save action.
+- Require the optional Models row extension; preserve the slider when the extension is absent.
+- Supersedes the uninstalled local.10 provider-card preview.
+
+## 0.7.5-local.10
+
+- Add a single-page text/image and reasoning capability editor with atomic saves through the official Models provider-card slot; no custom host module is required.
+- Preserve sparse endpoint mappings and unrelated fields, use revision-fenced saves, and show rejected writes without claiming success.
+- Retain the local.9 pixel design and existing slider behavior.
+
 ## 0.7.5-local.9
 
 - Tint the whole particle track with the selected hue, pale at the left and deeper at the right; keep gaps coloured on dark surfaces.

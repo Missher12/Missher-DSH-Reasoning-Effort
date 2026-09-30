@@ -32,6 +32,7 @@ import {
 } from './locales.js'
 import { CSS } from './styles.js'
 import { PIXEL_CSS } from './pixel-styles.js'
+import { registerModelSettings, MODEL_SETTINGS_CSS } from './model-settings.js'
 import { PixelField } from './pixel-field.js'
 import { displayLevelName, effortStops, levelIds, levelsText, stopIndex, acceptedStopIndex, type EffortStop } from './levels.js'
 import { positionModelMenu } from './menu-position.js'
@@ -1162,7 +1163,7 @@ export function apply(ctx: ClientContext) {
   ctx.effect(() => {
     const style = document.createElement('style')
     style.dataset.plugin = '@missher/dsh-reasoning-effort'
-    style.textContent = CSS + PIXEL_CSS
+    style.textContent = CSS + PIXEL_CSS + MODEL_SETTINGS_CSS
     document.head.appendChild(style)
     return () => style.remove()
   }, 'reasoning-effort: styles')
@@ -1179,6 +1180,8 @@ export function apply(ctx: ClientContext) {
     window.addEventListener('storage', syncStorage)
     return () => window.removeEventListener('storage', syncStorage)
   }, 'reasoning-effort: preference sync')
+
+  registerModelSettings(ctx)
 
   ctx.slots.inject(SETTINGS_SLOT, () =>
     ctx.slots.register(

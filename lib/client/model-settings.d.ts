@@ -1,0 +1,10 @@
+import type { Context } from '@deepseek-ai/cordis';
+import type { ModelFieldsOwnerProps } from './model-fields-slot.js';
+import type { ReasoningEffortTranslate } from './locales.js';
+/** Register when the Models module declares the row extension; disposal follows that module. */
+export declare function registerModelSettings(ctx: Context): void;
+/** Edit one model; only its owner writes settings and enforces the revision. */
+export declare function ModelReasoningSettings({ model, inherited, position, disabled, onChange, t }: ModelFieldsOwnerProps & {
+    t: ReasoningEffortTranslate;
+}): import("react").JSX.Element;
+export declare const MODEL_SETTINGS_CSS = "\n.re-model-reasoning { min-width: 0; margin: 0; padding: 0; border: 0; color: var(--dsw-alias-label-primary, inherit); }\n.re-model-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }\n.re-model-controls > label { display: grid; gap: 4px; min-width: 0; margin: 0; }\n.re-model-controls > label > span { color: var(--dsw-alias-label-tertiary, #858a95); font-size: 12px; line-height: 18px; }\n.re-model-reasoning select { box-sizing: border-box; min-width: 0; width: 100%; height: 32px; padding: 0 28px 0 10px; border: .5px solid var(--dsw-alias-border-l4, #d4d4d8); border-radius: var(--dsw-radius-md, 8px); color: inherit; background-color: var(--dsw-alias-bg-layer-1, transparent); font: inherit; font-size: 14px; line-height: 22px; appearance: none; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2381858C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\"); background-repeat: no-repeat; background-position: right 10px center; }\n.re-model-reasoning [role=alert] { color: var(--dsw-alias-state-danger-primary, #be4343); margin: 8px 0 0; font-size: 12px; line-height: 18px; }\n.re-model-reasoning :disabled { opacity: .6; cursor: default; }\n";

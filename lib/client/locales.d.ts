@@ -75,6 +75,13 @@ export declare const zh: {
     'yaml.keyComment': string;
     'yaml.valueComment': string;
     'yaml.compatComment': string;
+    'models.automatic': string;
+    'models.mode': string;
+    'models.inherit': string;
+    'models.disabled': string;
+    'models.custom': string;
+    'models.maximum': string;
+    'models.invalid': string;
     'settings.effort.title': string;
     'settings.effort.description': string;
     'settings.effort.aria': string;
@@ -160,6 +167,13 @@ export declare const en: {
     'yaml.keyComment': string;
     'yaml.valueComment': string;
     'yaml.compatComment': string;
+    'models.automatic': string;
+    'models.mode': string;
+    'models.inherit': string;
+    'models.disabled': string;
+    'models.custom': string;
+    'models.maximum': string;
+    'models.invalid': string;
     'settings.effort.title': string;
     'settings.effort.description': string;
     'settings.effort.aria': string;

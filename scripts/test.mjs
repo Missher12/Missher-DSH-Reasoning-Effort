@@ -16,7 +16,7 @@ import { build } from 'esbuild'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outdir = resolve(root, '.test-build')
-const suites = ['levels.test.ts', 'palettes.test.ts', 'selection.test.ts', 'pixel-field.test.ts']
+const suites = ['levels.test.ts', 'palettes.test.ts', 'selection.test.ts', 'pixel-field.test.ts', 'model-capabilities.test.ts']
 
 await mkdir(outdir, { recursive: true })
 
