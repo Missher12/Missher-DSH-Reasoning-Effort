@@ -82,6 +82,8 @@ if (!outcome.ok) {
   console.error(`✗ 客户端产物在求值期抛错（DSH 会因此丢掉插件的全部注册）：\n\n${outcome.error}\n`)
   process.exit(1)
 }
+const expectedId = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).name
+if (outcome.id !== expectedId) throw new Error(`Client id ${outcome.id} differs from package ${expectedId}`)
 for (const name of ['inject', 'apply']) {
   if (!outcome.exports.includes(name)) {
     console.error(`✗ 产物缺少导出 ${name}（实际导出：${outcome.exports.join(', ')}）`)

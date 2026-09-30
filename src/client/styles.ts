@@ -7,7 +7,6 @@
  *
  * @module dsh-reasoning-effort/client/styles
  */
-import chibiRunnerSprite from '../../assets/chibi-runner-strip.png'
 
 export const CSS = `
 .re-effort {
@@ -121,33 +120,6 @@ export const CSS = `
   transform: translate(-50%, -50%);
   transition: left 190ms cubic-bezier(.22,1,.36,1), transform 160ms ease, box-shadow 180ms ease;
   pointer-events: none;
-}
-.re-effort.is-chibi {
-  height: 56px;
-}
-.re-effort.is-chibi .re-effort-knob {
-  left: clamp(10px, var(--re-progress), calc(100% - 10px));
-  width: 40px;
-  height: 55px;
-  border: 0;
-  border-radius: 8px;
-  background-color: transparent;
-  background-image: url("${chibiRunnerSprite}");
-  background-repeat: no-repeat;
-  background-position: 0 0;
-  background-size: 800% 100%;
-  box-shadow: none !important;
-  filter:
-    drop-shadow(0 1px 1px rgba(0, 0, 0, .28))
-    drop-shadow(0 0 5px rgba(92, 105, 255, .34));
-  animation: re-chibi-run 720ms step-end infinite;
-  transform-origin: 50% 68%;
-}
-.re-effort.is-chibi.is-dragging .re-effort-knob {
-  animation-duration: 420ms;
-  filter:
-    drop-shadow(0 2px 1px rgba(0, 0, 0, .28))
-    drop-shadow(0 0 8px rgba(87, 137, 255, .68));
 }
 .re-effort-input {
   position: absolute;
@@ -426,7 +398,7 @@ export const CSS = `
 /* LOCAL ADDITION: live level readout above the slider.
    .re-effort is a fixed-height flex row upstream; carrying a readout turns it
    into a column that sizes to its content. Specificity, not source order, wins
-   these over the upstream rules — including the chibi variant's 56px.
+   these over the upstream rules — while keeping the readout above the track.
    NB: this whole sheet is a JS template literal, so no backticks in comments. */
 .re-effort.has-readout {
   flex-direction: column;
@@ -434,7 +406,6 @@ export const CSS = `
   height: auto;
   gap: 6px;
 }
-.re-effort.is-chibi.has-readout { height: auto; }
 .re-effort-readout {
   display: flex;
   align-items: baseline;
@@ -536,15 +507,6 @@ body:not([data-ds-dark-theme]) .re-effort.is-dragging .re-effort-knob {
 @keyframes re-effort-light-breathe {
   0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(67,124,193,.16), 0 3px 10px rgba(48,101,165,.13); }
   50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.96), inset 0 0 0 1px rgba(31,102,190,.22), 0 0 19px rgba(31,105,201,.24); }
-}
-@keyframes re-chibi-run {
-  0% { background-position: 14.285714% 0; }
-  14.285714% { background-position: 28.571429% 0; }
-  28.571429% { background-position: 42.857143% 0; }
-  42.857143% { background-position: 57.142857% 0; }
-  57.142857% { background-position: 71.428571% 0; }
-  71.428571% { background-position: 85.714286% 0; }
-  85.714286%, 100% { background-position: 100% 0; }
 }
 .re-adapt {
   padding: 10px 14px 12px;
@@ -713,6 +675,5 @@ body[data-ds-dark-theme] .re-adapt-panel {
   .re-effort-flare,
   body:not([data-ds-dark-theme]) .re-effort-track::before { transition: none; }
   .re-model-menu { animation: none; }
-  .re-effort.is-chibi .re-effort-knob { animation: none; }
 }
 `

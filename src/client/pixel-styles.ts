@@ -1,5 +1,3 @@
-import chibiRunnerSprite from '../../assets/chibi-runner-strip.png'
-
 /** Desktop-supplied slider geometry, using the host surface and settings colour. */
 export const PIXEL_CSS = `
 .re-effort.re-depth.has-readout {
@@ -46,11 +44,10 @@ export const PIXEL_CSS = `
 .re-palette-picker { flex-wrap: wrap; }
 .re-custom-palette { display: inline-flex; align-items: center; gap: 6px; color: var(--dsw-alias-label-secondary); font-size: 12px; }
 .re-custom-palette input { width: 26px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.re-depth.is-chibi .re-depth-thumb { top: -30px; width: 36px; height: 50px; border: 0; background: transparent url("${chibiRunnerSprite}") 0 0 / 800% 100% no-repeat; box-shadow: none; animation: re-chibi-run 720ms step-end infinite; }
 @keyframes re-depth-flow { to { background-position: 250% center; } }
 @keyframes re-depth-enter { from { opacity: .3; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
-  .re-depth .re-depth-value, .re-depth[data-top] .re-depth-value, .re-depth.is-chibi .re-depth-thumb { animation: none; }
+  .re-depth .re-depth-value, .re-depth[data-top] .re-depth-value { animation: none; }
   .re-depth .re-depth-thumb { transition: none; }
 }
 `

@@ -206,11 +206,6 @@ export function paletteCss(): string {
       `${scope} .re-effort-flare { filter: blur(2px) saturate(1.25)${rot}; }`,
       `${light} .re-effort-flare { filter: blur(2px) saturate(1.12)${rot}; }`,
       `${scope}.is-dragging .re-effort-flare { filter: blur(1.5px) saturate(1.4) brightness(1.1)${rot}; }`,
-      /* The chibi sprite is artwork: rotating its hue would recolour the
-         character, so its drop-shadow is rewritten in the palette's own colour
-         instead of filtered. */
-      `${scope}.is-chibi .re-effort-knob { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .28)) drop-shadow(0 0 5px rgba(${glow}, .34)); }`,
-      `${scope}.is-chibi.is-dragging .re-effort-knob { filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .28)) drop-shadow(0 0 8px rgba(${glow}, .68)); }`,
       `${scope} .re-effort-slider[data-top] .re-effort-track { animation-name: ${darkBreathe}; }`,
       `${light} .re-effort-slider[data-top] .re-effort-track { animation-name: ${lightBreathe}; }`,
       `@keyframes ${darkBreathe} {`

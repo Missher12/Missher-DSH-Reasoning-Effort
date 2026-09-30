@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.5-local.8
+
+- Use the user-selected local.5 particle engine; preserve drag stability and settings-only colors.
+- Unify the Bundle name as `@missher/dsh-reasoning-effort`, remove the fish option, and allow current DSH runtimes.
+- Build and Loader compatibility verified against DSH 0.2.0-rc.2.
+
 ## 0.7.5-local.4 (2026-09-29)
 
 - Keep the readout at a fixed height: mixed-size mapping hints no longer move the track vertically while dragging.

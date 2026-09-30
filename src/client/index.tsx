@@ -240,7 +240,6 @@ const SLOT = 'conversation.input.model'
 const SETTINGS_SLOT = 'settings.general.item'
 const ENABLED_STORAGE_KEY = 'dsh-reasoning-effort.enabled'
 const LEGACY_ENABLED_STORAGE_KEY = '@dsh-external/dsh-reasoning-effort.enabled'
-const CHIBI_THUMB_STORAGE_KEY = 'dsh-reasoning-effort.chibi-thumb'
 /** LOCAL ADDITION: particle palette id. */
 const PALETTE_STORAGE_KEY = 'dsh-reasoning-effort.palette'
 export const inject = ['slots', 'modelDirectories', 'connection', 'locale', 'remote', 'remote.session']
@@ -278,40 +277,7 @@ const enabledStore = {
   },
 }
 
-function readChibiThumbPreference(): boolean {
-  try {
-    // The supplied design uses a plain thumb; preserve an explicit legacy choice.
-    return window.localStorage.getItem(CHIBI_THUMB_STORAGE_KEY) === 'true'
-  } catch {
-    return false
-  }
-}
-
-let chibiThumbPreference = readChibiThumbPreference()
-const chibiThumbListeners = new Set<() => void>()
-
-const chibiThumbStore = {
-  getSnapshot: () => chibiThumbPreference,
-  subscribe: (listener: () => void) => {
-    chibiThumbListeners.add(listener)
-    return () => chibiThumbListeners.delete(listener)
-  },
-  set: (enabled: boolean, persist = true) => {
-    if (chibiThumbPreference === enabled) return
-    chibiThumbPreference = enabled
-    if (persist) {
-      try {
-        window.localStorage.setItem(CHIBI_THUMB_STORAGE_KEY, String(enabled))
-      } catch {
-        // The current page still follows the choice when storage is unavailable.
-      }
-    }
-    chibiThumbListeners.forEach((listener) => listener())
-  },
-}
-
-/* LOCAL ADDITION: particle palette preference. Same shape as the two stores
-   above so it survives reloads and syncs across tabs the same way. */
+/** Particle palette preference, synchronized across tabs. */
 function validPalette(id: string): boolean {
   return /^#[0-9a-f]{6}$/i.test(id) || PALETTES.some(palette => palette.id === id)
 }
@@ -409,7 +375,6 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
   const [committing, setCommitting] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
-  const chibiThumb = useSyncExternalStore(chibiThumbStore.subscribe, chibiThumbStore.getSnapshot)
   /* LOCAL ADDITION: the palette both scopes the generated CSS and drives the canvas. */
   const palette = useSyncExternalStore(paletteStore.subscribe, paletteStore.getSnapshot)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -700,7 +665,7 @@ function EffortSlider({ directory, t }: { directory: ModelDirectory; t: Reasonin
 
   return (
     <div
-      className={`re-effort re-depth has-readout${chibiThumb ? ' is-chibi' : ''}${dragging ? ' is-dragging' : ''}${busy ? ' is-busy' : ''}${error === null ? '' : ' is-error'}`}
+      className={`re-effort re-depth has-readout${dragging ? ' is-dragging' : ''}${busy ? ' is-busy' : ''}${error === null ? '' : ' is-error'}`}
       data-palette={palette}
       data-top={isTop ? 'true' : undefined}
       style={{ '--re-accent': paletteColor(palette) } as CSSProperties}
@@ -1140,37 +1105,7 @@ function ReasoningEffortSetting({ t }: PropsLocale<typeof NS>) {
   )
 }
 
-function ChibiThumbSetting({ t }: PropsLocale<typeof NS>) {
-  const sliderEnabled = useSyncExternalStore(enabledStore.subscribe, enabledStore.getSnapshot)
-  const enabled = useSyncExternalStore(chibiThumbStore.subscribe, chibiThumbStore.getSnapshot)
-
-  return (
-    <div className="re-setting-row">
-      <div className="re-setting-copy">
-        <div className="re-setting-title">{t('settings.chibi.title')}</div>
-        <div className="re-setting-description">{t('settings.chibi.description')}</div>
-      </div>
-      <div className="re-setting-control">
-        <span className="re-setting-state">{enabled ? t('settings.enabled') : t('settings.disabled')}</span>
-        <button
-          type="button"
-          role="switch"
-          aria-label={t('settings.chibi.aria')}
-          aria-checked={enabled}
-          disabled={!sliderEnabled}
-          className={`re-setting-switch${enabled ? ' is-on' : ''}`}
-          onClick={() => chibiThumbStore.set(!enabled)}
-        >
-          <span className="re-setting-switch-knob" aria-hidden="true" />
-        </button>
-      </div>
-    </div>
-  )
-}
-
-/* LOCAL ADDITION: particle colour picker. Mirrors ChibiThumbSetting's shape so
-   the rows read as one family, and is disabled with the slider for the same
-   reason — nothing to colour when the slider is off. */
+/** Particle colours are configured in General Settings. */
 function PaletteSetting({ t }: PropsLocale<typeof NS>) {
   const sliderEnabled = useSyncExternalStore(enabledStore.subscribe, enabledStore.getSnapshot)
   const selected = useSyncExternalStore(paletteStore.subscribe, paletteStore.getSnapshot)
@@ -1226,7 +1161,7 @@ export function apply(ctx: ClientContext) {
 
   ctx.effect(() => {
     const style = document.createElement('style')
-    style.dataset.plugin = 'dsh-reasoning-effort'
+    style.dataset.plugin = '@missher/dsh-reasoning-effort'
     style.textContent = CSS + PIXEL_CSS
     document.head.appendChild(style)
     return () => style.remove()
@@ -1236,8 +1171,7 @@ export function apply(ctx: ClientContext) {
     const syncStorage = (event: StorageEvent) => {
       if (event.key === ENABLED_STORAGE_KEY) {
         enabledStore.set(event.newValue !== 'false', false)
-      } else if (event.key === CHIBI_THUMB_STORAGE_KEY) {
-        chibiThumbStore.set(event.newValue === 'true', false)
+
       } else if (event.key === PALETTE_STORAGE_KEY) {
         paletteStore.set(event.newValue ?? DEFAULT_PALETTE_ID, false)
       }
@@ -1253,14 +1187,6 @@ export function apply(ctx: ClientContext) {
     ),
   )
 
-  ctx.slots.inject(SETTINGS_SLOT, () =>
-    ctx.slots.register(
-      { name: SETTINGS_SLOT, id: 'reasoning-effort-chibi-thumb', order: 16, locale: NS },
-      ChibiThumbSetting,
-    ),
-  )
-
-  /* LOCAL ADDITION: particle palette row, right under the two rows above. */
   ctx.slots.inject(SETTINGS_SLOT, () =>
     ctx.slots.register(
       { name: SETTINGS_SLOT, id: 'reasoning-effort-palette', order: 17, locale: NS },

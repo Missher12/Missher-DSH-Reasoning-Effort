@@ -32,10 +32,9 @@ for (const palette of themed) {
   const scope = `.re-effort[data-palette="${palette.id}"]`
   const light = `body:not([data-ds-dark-theme]) ${scope}`
   check(
-    `${palette.id}：轨道 / 辉光 / 大肥鱼阴影都覆盖到了`,
+    `${palette.id}：轨道和辉光覆盖所有配色`,
     css.includes(`${scope} .re-effort-track`)
-      && css.includes(`${scope} .re-effort-flare`)
-      && css.includes(`${scope}.is-chibi .re-effort-knob`),
+      && css.includes(`${scope} .re-effort-flare`),
   )
   check(`${palette.id}：浅色那几条带正确的 body 前缀`, css.includes(`${light} .re-effort-track `))
   check(
