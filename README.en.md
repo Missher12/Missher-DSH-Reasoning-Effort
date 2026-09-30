@@ -2,7 +2,7 @@
 
 [中文](README.md) · [Source](https://github.com/Missher12/dsh-reasoning-effort) · [Issues](https://github.com/Missher12/dsh-reasoning-effort/issues) · [Design sources](design/depth-slider/README.md)
 
-Model selection and a thinking-depth slider for DeepSeek Harness. The public customization **0.7.5-local.4** targets **DSH 0.2.0-rc.1**; other Host versions are unverified. See [FORK.md](FORK.md) for upstream attribution and MIT licensing.
+Model selection and a thinking-depth slider for DeepSeek Harness. The public customization **0.7.5-local.9** uses the selected local.5 design with a pale-to-deep tint of the chosen colour, an opaque track beneath the cells, and randomized granular flicker. Colours remain in General Settings. DSH runtime versions are not restricted; rc.1 and rc.2 are the verified baselines for the preceding build, with current validation recorded separately. See [FORK.md](FORK.md) for upstream attribution and MIT licensing.
 
 - A single card, plain white thumb, and top-level pixel field. Preset and custom colours live only in General Settings.
 - Seven visual stops map to model-declared values. The model's highest supported value sits at the right edge; rejected selections roll back.

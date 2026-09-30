@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.5-local.9
+
+- Tint the whole particle track with the selected hue, pale at the left and deeper at the right; keep gaps coloured on dark surfaces.
+- Vary each instance and flicker cycle independently while preserving the supplied eight-row geometry, model mapping, drag behavior, and reduced-motion support.
+
 ## 0.7.5-local.8
 
 - Use the user-selected local.5 particle engine; preserve drag stability and settings-only colors.

@@ -1,7 +1,5 @@
 export const DEFAULT_COLOR = '#9864db';
 const parseHex = hex => [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
-const blendRgb = (a, b, weight) => a.map((value, index) => Math.round(value + (b[index] - value) * weight));
-const cssRgb = color => `rgb(${color.join(' ')})`;
 
 function rgbToHsl(rgb) {
   const [r, g, b] = rgb.map(value => value / 255);
@@ -22,22 +20,17 @@ function hslToRgb([h, s, l]) {
   return components.map(value => Math.round((value + m) * 255));
 }
 
+// All track tones share the selected hue, including the lightest left edge.
 export function makePixelPalette(hex) {
-  const base = parseHex(hex);
-  const selected = rgbToHsl(base), original = rgbToHsl(parseHex(DEFAULT_COLOR));
-  const tint = rgb => {
-    const [h,s,l] = rgbToHsl(rgb);
-    return hslToRgb([
-      h + selected[0] - original[0],
-      Math.min(1, s * selected[1] / original[1]),
-      Math.max(.06, Math.min(.97, l + (selected[2] - original[2]) * .65))
-    ]);
-  };
+  const [hue, saturation, lightness] = rgbToHsl(parseHex(hex));
+  const chroma = Math.min(.9, saturation * 1.08);
+  const deep = Math.max(.3, Math.min(.48, lightness * .86));
+  const tone = (light, strength = 1) => hslToRgb([hue, chroma * strength, light]);
   return {
-    leftColor: blendRgb([216, 213, 220], base, .22),
-    deepViolet: tint([139, 77, 207]), deepMid: tint([146, 94, 205]),
-    midPurple: tint([155, 115, 216]), softMid: tint([167, 136, 218]),
-    softLilac: tint([179, 151, 222]), paleCool: tint([191, 174, 225]),
-    highlightColor: tint([205, 184, 235]), peakColor: tint([238, 223, 255])
+    leftColor: tone(.83, .84),
+    deepViolet: tone(deep), deepMid: tone(deep + .055),
+    midPurple: tone(deep + .11), softMid: tone(deep + .16),
+    softLilac: tone(.71, .9), paleCool: tone(.77, .86),
+    highlightColor: tone(.82, .8), peakColor: tone(.91, .76),
   };
 }

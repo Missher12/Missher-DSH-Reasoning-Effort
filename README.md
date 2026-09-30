@@ -1,5 +1,7 @@
 # dsh-reasoning-effort
 
+当前候选 `0.7.5-local.9`：同色浅至深渐变填满轨道，细化格间隙并增加独立随机闪烁；保留滑块尺寸、提交和档位映射。
+
 [English](README.en.md) · [源码](https://github.com/Missher12/dsh-reasoning-effort) · [反馈](https://github.com/Missher12/dsh-reasoning-effort/issues) · [设计预览源码](design/depth-slider/README.md)
 
 为 DeepSeek Harness 提供模型选择和思考深度滑块。当前公开定制版为 **0.7.5-local.4**，适配 **DSH 0.2.0-rc.1**；其他宿主版本尚未验收。上游来源与 MIT 许可见 [FORK.md](FORK.md)。

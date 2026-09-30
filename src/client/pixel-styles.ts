@@ -28,7 +28,7 @@ export const PIXEL_CSS = `
 .re-depth-send { font-size: 11px; line-height: 1; color: var(--dsw-alias-label-secondary); }
 .re-depth-speed { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; line-height: 15px; color: var(--dsw-alias-label-tertiary); }
 .re-depth-slider { position: relative; height: 20px; margin-top: 8px; border-radius: 7px; isolation: isolate; }
-.re-depth-track { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--dsw-alias-bg-skeleton) 78%, var(--re-accent)) 0%, color-mix(in srgb, var(--dsw-alias-bg-skeleton) 60%, var(--re-accent)) 18%, color-mix(in srgb, var(--re-accent) var(--re-strength), var(--dsw-alias-bg-skeleton)) 100%); }
+.re-depth-track { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--re-accent) 30%, white), color-mix(in srgb, var(--re-accent) 85%, black)); }
 .re-depth-canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; }
 .re-depth-canvas[hidden] { display: none; }
 .re-depth-thumb { position: absolute; z-index: 2; top: 0; left: var(--re-progress); width: 17px; height: 20px; transform: translateX(calc(-1 * var(--re-progress))); border: .5px solid var(--dsw-alias-border-l2); border-radius: 6px; background: var(--dsw-alias-label-on-primary, white); box-shadow: 0 1px 2px color-mix(in srgb, var(--re-accent) 12%, transparent); pointer-events: none; transition: left 260ms cubic-bezier(.2,.8,.2,1), transform 260ms cubic-bezier(.2,.8,.2,1); }
