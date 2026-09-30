@@ -46,11 +46,9 @@ export class PixelField {
     this._tick = (time) => {
       this._frame = null;
       if (!this._isMax || document.hidden || this._reducedMotion.matches) return;
-      if (time - this._lastFrame >= 32) {
-        this._lastFrame = time;
-        this._reveal = smoothstep(0, 1, (Date.now() - this._maxStartedAt) / 1000);
-        this._drawPixelField(Date.now());
-      }
+      this._lastFrame = time;
+      this._reveal = smoothstep(0, 1, (Date.now() - this._maxStartedAt) / 1000);
+      this._drawPixelField(Date.now());
       this._frame = requestAnimationFrame(this._tick);
     };
     this.resize();
@@ -120,7 +118,7 @@ export class PixelField {
           phase: Math.abs(Math.sin(column * 31.17 + row * 11.93) * 28437.123) % 1,
           chroma: Math.abs(Math.sin(column * 9.47 + row * 67.13) * 15823.917) % 1,
           purple: 0.35 + smoothstep(0.24, 0.8, nX) * 0.65,
-          intensity: smoothstep(0.22, 0.29, nX),
+          intensity: 0.25 + smoothstep(0, 0.29, nX) * 0.75,
           depth: smoothstep(0.25, 0.88, nX),
         });
       }
