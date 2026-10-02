@@ -11,7 +11,10 @@ export function positionModelMenu(root: HTMLElement, menu: HTMLElement): () => v
     const bottom = anchor.top - 8
     const above = bottom - top
     menu.style.setProperty('--re-menu-width', `${width}px`)
-    menu.style.setProperty('--re-menu-height', `${Math.min(480, above >= 120 ? Math.min(above, height) : height)}px`)
+    const maxHeight = Math.min(480, above >= 120 ? Math.min(above, height) : height)
+    menu.style.setProperty('--re-menu-height', `${maxHeight}px`)
+    // A short popover must scroll as a whole so its actions cannot hide the body.
+    menu.toggleAttribute('data-short-menu', maxHeight < 240)
 
     // offsetWidth/Height exclude transforms, so repeated updates cannot accumulate
     // an animated scale or an earlier correction into the next position.

@@ -1,6 +1,8 @@
 # dsh-reasoning-effort
 
-`0.7.5-local.12`：在每个模型卡片的输入类型右侧编辑思考等级和最高档位，共用原卡片的草稿和保存按钮。保留 `.9` 粒子效果。
+`0.7.5-local.14` 本地候选：档位缺失提示仅显示一次；指引外框和操作区固定，正文独立滚动并保留边缘留白，极矮菜单回退整卡滚动。按钮等宽等高，复制反馈不跳动，长路径安全换行。尚未替换日常安装。
+
+保留 `.12` 的模型卡片行内思考等级、最高档位及共用保存，保留 `.9` 粒子效果。
 
 [English](README.en.md) · [源码](https://github.com/Missher12/dsh-reasoning-effort) · [反馈](https://github.com/Missher12/dsh-reasoning-effort/issues) · [设计预览源码](design/depth-slider/README.md)
 

@@ -1,6 +1,6 @@
 {
   "name": "@missher/dsh-reasoning-effort",
-  "version": "0.7.5-local.12",
+  "version": "0.7.5-local.14",
   "description": "DeepSeek Harness model and reasoning selector with a pixel depth slider, model-declared effort mapping, and settings-only theme colours.",
   "keywords": [
     "deepseek",

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.5-local.14 (local candidate)
+
+- Remove the duplicate missing-level notice and explicitly wrap guidance text.
+- Keep the outer frame and action footer fixed, with one inset, keyboard-focusable scroll region.
+- Scroll the entire menu when available height is below 240px, keeping every control reachable.
+- Keep long errors within the body so they cannot squeeze out guidance or actions.
+- Preserve equal button sizes, copied instructions, model settings, and normal particle geometry.
+
+## 0.7.5-local.13 (local candidate)
+
+- Align guidance actions in equal-width columns with consistent heights and spacing.
+- Reserve localized copy labels so successful clipboard feedback does not resize buttons.
+- Wrap long paths and capability descriptions, retain YAML formatting, and use the menu's vertical scroll region.
+- Preserve model selection, copied agent instructions, and the compact particle card.
+
 ## 0.7.5-local.12
 
 - Keep endpoint mappings internal and display only reasoning mode and maximum level.

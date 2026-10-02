@@ -1,5 +1,7 @@
 # dsh-reasoning-effort
 
+**0.7.5-local.14 local candidate:** show the missing-level notice once, keep the guidance frame and actions stable while its inset body scrolls, and fall back to scrolling the whole menu when space is very limited. Copy feedback retains button geometry and long paths wrap. The daily installation has not been replaced; model settings and particle behaviour are preserved.
+
 [中文](README.md) · [Source](https://github.com/Missher12/dsh-reasoning-effort) · [Issues](https://github.com/Missher12/dsh-reasoning-effort/issues) · [Design sources](design/depth-slider/README.md)
 
 Model selection and a thinking-depth slider for DeepSeek Harness. The public customization **0.7.5-local.9** uses the selected local.5 design with a pale-to-deep tint of the chosen colour, an opaque track beneath the cells, and randomized granular flicker. Colours remain in General Settings. DSH runtime versions are not restricted; rc.1 and rc.2 are the verified baselines for the preceding build, with current validation recorded separately. See [FORK.md](FORK.md) for upstream attribution and MIT licensing.

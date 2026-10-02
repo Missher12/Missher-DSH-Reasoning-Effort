@@ -897,7 +897,7 @@ function AdvancedModelSelect({
       </button>
 
       {open ? (
-        <div ref={menuRef} className="re-model-menu" data-depth-card={!modelsOpen && levels.length >= 2 && !guidance?.needsGuide ? 'true' : undefined} role="menu" aria-label={t('model.menuAria')} aria-busy={busy}>
+        <div ref={menuRef} className="re-model-menu" data-guidance-card={!modelsOpen && guidance?.needsGuide ? 'true' : undefined} data-depth-card={!modelsOpen && levels.length >= 2 && !guidance?.needsGuide ? 'true' : undefined} role="menu" aria-label={t('model.menuAria')} aria-busy={busy}>
           {modelsOpen ? (
             <div className="re-model-pane">
               <button type="button" className="re-model-back" onClick={() => setModelsOpen(false)}>
@@ -942,122 +942,128 @@ function AdvancedModelSelect({
             </div>
           ) : (
             <>
-              {levels.length >= 2 ? (
-                <EffortSlider directory={controller} t={t} />
-              ) : (
-                <div className="re-model-status">{t('effort.unavailable')}</div>
-              )}
-              {guidance !== null && guidance.needsGuide ? (
-                <div className="re-adapt">
-                  <div className="re-adapt-copy">
-                    <div className="re-adapt-title">
-                      {guidance.reason === 'missing' ? t('effort.unavailable') : t('guidance.mismatch')}
+              <div className="re-model-body" tabIndex={guidance?.needsGuide ? 0 : undefined}>
+                {levels.length >= 2 ? (
+                  <EffortSlider directory={controller} t={t} />
+                ) : !guidance?.needsGuide ? (
+                  <div className="re-model-status">{t('effort.unavailable')}</div>
+                ) : null}
+                {guidance !== null && guidance.needsGuide ? (
+                  <div className="re-adapt">
+                    <div className="re-adapt-copy">
+                      <div className="re-adapt-title">
+                        {guidance.reason === 'missing' ? t('effort.unavailable') : t('guidance.mismatch')}
+                      </div>
+                      <div className="re-adapt-desc">
+                        {guidance.matched
+                          ? t('guidance.matched', {
+                              expected: levelsText(guidance.expected, t),
+                              current: levelsText(guidance.current, t),
+                              note: localizedNote,
+                            })
+                          : t('guidance.unmatched', {
+                              current: levelsText(guidance.current, t),
+                              note: localizedNote,
+                            })}
+                      </div>
                     </div>
-                    <div className="re-adapt-desc">
-                      {guidance.matched
-                        ? t('guidance.matched', {
-                            expected: levelsText(guidance.expected, t),
-                            current: levelsText(guidance.current, t),
-                            note: localizedNote,
-                          })
-                        : t('guidance.unmatched', {
-                            current: levelsText(guidance.current, t),
-                            note: localizedNote,
-                          })}
-                    </div>
-                  </div>
-                  {panelOpen ? (
-                    <div className="re-adapt-panel">
-                      <div className="re-adapt-scroll">
-                        {guidance.matched ? (
-                          <div className="re-adapt-panel-line">
-                            <span className="re-adapt-arrow">{levelsText(guidance.current, t)}</span>
-                            <span aria-hidden="true">→</span>
-                            <span className="re-adapt-arrow">{levelsText(guidance.expected, t)}</span>
-                          </div>
-                        ) : null}
-                        <div className="re-adapt-howto">{t('guidance.howto')}</div>
-                        <div className="re-adapt-switch-intro">{t('guidance.switch.intro')}</div>
-                        <ul className="re-adapt-switches">
-                          <li>{t('guidance.switch.thinkingFormat')}</li>
-                          <li>{t('guidance.switch.reasoningEffort')}</li>
-                          <li>{t('guidance.switch.developerRole')}</li>
-                          <li>{t('guidance.switch.replay')}</li>
-                        </ul>
-                        {localizedWarning === null ? null : (
-                          <div className="re-adapt-warning">{localizedWarning}</div>
-                        )}
-                        <div className="re-adapt-label">{t('guidance.paste')}</div>
-                        <pre className="re-adapt-yaml">{localizedSnippet}</pre>
-                        <div className="re-adapt-steps">
-                          <span>
-                            {t('guidance.step1.open')}<code>{configDocumentName(guidance.settingsPath)}</code>
-                            {guidance.settingsPath === null ? '' : t('guidance.step1.path', { path: guidance.settingsPath })}
-                            {t('guidance.step1.find')}<code>{guidance.entryPath}</code>
-                            {t('guidance.step1.list')}<code>{guidance.entryLine}</code>{t('guidance.step1.end')}
-                          </span>
-                          {guidance.mode === 'replace' ? (
-                            <span>
-                              {t('guidance.step2.replacePrefix')}<code>{guidance.entryLine}</code>
-                              {t('guidance.step2.replaceSuffix')}
-                            </span>
-                          ) : (
-                            <span>
-                              {t('guidance.step2.insertPrefix')}<code>id</code>
-                              {t('guidance.step2.insertSuffix')}
-                            </span>
+                    {panelOpen ? (
+                      <div className="re-adapt-panel">
+                        <div className="re-adapt-scroll">
+                          {guidance.matched ? (
+                            <div className="re-adapt-panel-line">
+                              <span className="re-adapt-arrow">{levelsText(guidance.current, t)}</span>
+                              <span aria-hidden="true">→</span>
+                              <span className="re-adapt-arrow">{levelsText(guidance.expected, t)}</span>
+                            </div>
+                          ) : null}
+                          <div className="re-adapt-howto">{t('guidance.howto')}</div>
+                          <div className="re-adapt-switch-intro">{t('guidance.switch.intro')}</div>
+                          <ul className="re-adapt-switches">
+                            <li>{t('guidance.switch.thinkingFormat')}</li>
+                            <li>{t('guidance.switch.reasoningEffort')}</li>
+                            <li>{t('guidance.switch.developerRole')}</li>
+                            <li>{t('guidance.switch.replay')}</li>
+                          </ul>
+                          {localizedWarning === null ? null : (
+                            <div className="re-adapt-warning">{localizedWarning}</div>
                           )}
-                          <span>{t('guidance.step3')}</span>
+                          <div className="re-adapt-label">{t('guidance.paste')}</div>
+                          <pre className="re-adapt-yaml">{localizedSnippet}</pre>
+                          <div className="re-adapt-steps">
+                            <span>
+                              {t('guidance.step1.open')}<code>{configDocumentName(guidance.settingsPath)}</code>
+                              {guidance.settingsPath === null ? '' : t('guidance.step1.path', { path: guidance.settingsPath })}
+                              {t('guidance.step1.find')}<code>{guidance.entryPath}</code>
+                              {t('guidance.step1.list')}<code>{guidance.entryLine}</code>{t('guidance.step1.end')}
+                            </span>
+                            {guidance.mode === 'replace' ? (
+                              <span>
+                                {t('guidance.step2.replacePrefix')}<code>{guidance.entryLine}</code>
+                                {t('guidance.step2.replaceSuffix')}
+                              </span>
+                            ) : (
+                              <span>
+                                {t('guidance.step2.insertPrefix')}<code>id</code>
+                                {t('guidance.step2.insertSuffix')}
+                              </span>
+                            )}
+                            <span>{t('guidance.step3')}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="re-adapt-actions">
-                        <button
-                          type="button"
-                          className="re-adapt-apply"
-                          disabled={busy || guidanceBusy}
-                          onClick={() => {
-                            void copyText(localizedSnippet).then((ok) => setCopied(ok))
-                          }}
-                        >
-                          {copied ? t('guidance.copied') : t('guidance.copy')}
-                        </button>
-                        <button
-                          type="button"
-                          className="re-adapt-agent"
-                          disabled={busy || guidanceBusy}
-                          onClick={() => {
-                            void copyText(agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t))
-                              .then((ok) => setAgentCopied(ok))
-                          }}
-                        >
-                          {agentCopied ? t('guidance.copied') : t('agent.copy')}
-                        </button>
-                        <button type="button" className="re-adapt-cancel" onClick={() => setPanelOpen(false)}>
-                          {t('guidance.collapse')}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="re-adapt-open-row">
-                      <button type="button" className="re-adapt-open" onClick={() => { setCopied(false); setPanelOpen(true) }}>
-                        {guidanceBusy ? t('guidance.checking') : t('guidance.open')}
-                      </button>
-                      <button
-                        type="button"
-                        className="re-adapt-agent"
-                        disabled={busy || guidanceBusy}
-                        onClick={() => {
-                          void copyText(agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t))
-                            .then((ok) => setAgentCopied(ok))
-                        }}
-                      >
-                        {agentCopied ? t('guidance.copied') : t('agent.copy')}
-                      </button>
-                    </div>
-                  )}
+                    ) : null}
+                  </div>
+                ) : null}
+                {guidanceFailed ? <div className="re-model-status" role="status">{t('guidance.unavailable')}</div> : null}
+                {guidance?.needsGuide ? invalidEffortNotice : null}
+                {guidance?.needsGuide && state.error !== null ? <div className="re-model-error">{state.error}</div> : null}
+              </div>
+              {guidance?.needsGuide ? (panelOpen ? (
+                <div className="re-adapt-actions">
+                  <button
+                    type="button"
+                    className="re-adapt-apply"
+                    disabled={busy || guidanceBusy}
+                    onClick={() => {
+                      void copyText(localizedSnippet).then((ok) => setCopied(ok))
+                    }}
+                  >
+                    <CopyButtonLabel copied={copied} label={t('guidance.copy')} feedback={t('guidance.copied')} />
+                  </button>
+                  <button
+                    type="button"
+                    className="re-adapt-agent"
+                    disabled={busy || guidanceBusy}
+                    onClick={() => {
+                      void copyText(agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t))
+                        .then((ok) => setAgentCopied(ok))
+                    }}
+                  >
+                    <CopyButtonLabel copied={agentCopied} label={t('agent.copy')} feedback={t('guidance.copied')} />
+                  </button>
+                  <button type="button" className="re-adapt-cancel" onClick={() => setPanelOpen(false)}>
+                    {t('guidance.collapse')}
+                  </button>
                 </div>
-              ) : null}
-              {guidanceFailed ? <div className="re-model-status" role="status">{t('guidance.unavailable')}</div> : null}
+              ) : (
+                <div className="re-adapt-open-row">
+                  <button type="button" className="re-adapt-open" onClick={() => { setCopied(false); setPanelOpen(true) }}>
+                    {guidanceBusy ? t('guidance.checking') : t('guidance.open')}
+                  </button>
+                  <button
+                    type="button"
+                    className="re-adapt-agent"
+                    disabled={busy || guidanceBusy}
+                    onClick={() => {
+                      void copyText(agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t))
+                        .then((ok) => setAgentCopied(ok))
+                    }}
+                  >
+                    <CopyButtonLabel copied={agentCopied} label={t('agent.copy')} feedback={t('guidance.copied')} />
+                  </button>
+                </div>
+              )) : null}
               <div className="re-menu-separator" />
               <button
                 type="button"
@@ -1070,14 +1076,22 @@ function AdvancedModelSelect({
                 <span className="re-model-row-effort">{effortName}</span>
                 <span className="re-row-chevron" aria-hidden="true">›</span>
               </button>
-              {invalidEffortNotice}
-              {state.error === null ? null : <div className="re-model-error">{state.error}</div>}
+              {guidance?.needsGuide ? null : invalidEffortNotice}
+              {!guidance?.needsGuide && state.error !== null ? <div className="re-model-error">{state.error}</div> : null}
             </>
           )}
         </div>
       ) : null}
     </div>
   )
+}
+
+/** Reserve the original label's size while showing clipboard feedback. */
+function CopyButtonLabel({ copied, label, feedback }: { copied: boolean; label: string; feedback: string }) {
+  return <>
+    <span className="re-adapt-button-size" aria-hidden="true">{label}</span>
+    <span>{copied ? feedback : label}</span>
+  </>
 }
 
 function ReasoningEffortSetting({ t }: PropsLocale<typeof NS>) {
