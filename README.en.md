@@ -1,168 +1,80 @@
-# dsh-reasoning-effort
+# Missher DSH Reasoning Effort
 
-**0.7.5-local.14 local candidate:** show the missing-level notice once, keep the guidance frame and actions stable while its inset body scrolls, and fall back to scrolling the whole menu when space is very limited. Copy feedback retains button geometry and long paths wrap. The daily installation has not been replaced; model settings and particle behaviour are preserved.
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; version: `0.7.5-local.15`.
 
-[中文](README.md) · [Source](https://github.com/Missher12/dsh-reasoning-effort) · [Issues](https://github.com/Missher12/dsh-reasoning-effort/issues) · [Design sources](design/depth-slider/README.md)
+[中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
-Model selection and a thinking-depth slider for DeepSeek Harness. The public customization **0.7.5-local.9** uses the selected local.5 design with a pale-to-deep tint of the chosen colour, an opaque track beneath the cells, and randomized granular flicker. Colours remain in General Settings. DSH runtime versions are not restricted; rc.1 and rc.2 are the verified baselines for the preceding build, with current validation recorded separately. See [FORK.md](FORK.md) for upstream attribution and MIT licensing.
+## Features
 
-- A single card, plain white thumb, and top-level pixel field. Preset and custom colours live only in General Settings.
-- Seven visual stops map to model-declared values. The model's highest supported value sits at the right edge; rejected selections roll back.
-- Drag frames are coalesced and release commits once. A fixed-height label row keeps the track stationary when mapping hints change.
-- Light and dark themes, Chinese and English, reduced motion, and custom-model declaration guidance.
+- Choose a model and adjust thinking depth from the conversation model control. Displayed steps map to the model's declared levels; failed selections roll back. The slider requires at least two available levels.
+- Preserve the selected single-card design, white thumb, eight-row particle field at the highest level, colour gradient, light/dark themes and Chinese/English UI. Colours live in General Settings. Reduced-motion mode shows a stable frame; hidden pages pause particles.
+- For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The body scrolls independently of the actions; very short menus scroll as a whole.
+- **Inline model settings require a Host extension:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside text/image controls and share the model card's save action. This plugin does not add text/image capabilities or maintain another model catalog.
 
-## Model settings extension
+## Host requirements and verification scope
 
-**0.7.5-local.12** places reasoning mode and maximum level beside text/image input in each `llm-pi-ai` model row. Wire mappings stay internal; only reasoning mode and the maximum level are displayed. Missing mappings keep automatic mode available without inventing endpoint values. Controls share the card's draft and original revision-checked save; no separate model picker, persistence path, or save button is added. Sparse endpoint mappings and unrelated model fields are preserved.
+Requires DSH's model directory, session model selection, settings, Slots, Web client and Host `settings` / `llm` services. DSH peers remain `*`, with development SDK `0.2.0-rc.2`; Cordis `4.0.4`, Schemastery `3.18.4` and React `^18.2.0` are supplied by the Host. Permissive version admission does not establish compatibility with every release.
 
-This position requires the Models module's `settings.models.model-fields` extension. Official rc.2 does not declare it: registration waits without disabling the slider, but the new controls cannot appear there until the module supplies the extension. The Bundle contains no copied host module or compatibility package. The Bundle and enhanced Models module have passed isolated loading with official rc.2.
-
-## Install and update
-
-This repository includes built Host and Client modules. Add its GitHub address in the DSH plugin manager and enable it in your chosen profile. Follow the Host's restart notice and refresh the interface. Source availability or package installation alone does not verify Loader activation or provider behaviour.
-
-The package declares `dsh.bundle.patch` and needs no extra compatibility plugin. See [CONTRIBUTING.md](CONTRIBUTING.md) for builds and packaging, or open [design/depth-slider/index.html](design/depth-slider/index.html) for the standalone design. Preview colour controls are demonstration tools; the DSH colour controls remain in Settings.
-
-## Where the levels come from
-
-The slider reads `reasoning.efforts` from the current model in DSH's model directory. The model and route determine the count, names, and order. Levels are not fixed to three steps and can differ between endpoints.
-
-The slider appears when at least two levels are available; otherwise the menu shows a notice. DSH validates and dispatches the selected value, so the plugin cannot bypass model or deployment limits.
-
-## Declaring levels for any custom model
-
-This section is vendor-neutral and applies to every model you declare yourself under `llm-pi-ai`.
-
-**Why the levels are missing**: DSH's model directory only reports what the adapter declares. A model you declare has no catalog entry, so the directory exposes no levels — and no slider — until you write `reasoningEfforts`.
-
-**What to write**: open the configuration file shown in the guidance panel (older builds use `settings.yaml`; DSH `0.2.0-rc.1` uses the profile's `cordis.patch.yml`). Add `reasoningEfforts` under the model's `llm-pi-ai` entry, matching its existing indentation. Each key is a DSH level, each value is the spelling the endpoint accepts, and a level left out counts as unsupported:
-
-```yaml
-models:
-  - id: <your model id>
-    reasoningEfforts:
-      low: "<value the endpoint accepts>"
-      high: "<value the endpoint accepts>"
-```
-
-**When to add `compat`** (beside `reasoningEfforts`, only when the endpoint needs it):
-
-| Endpoint behaviour | What to add |
+| Host/platform | Evidence and limits |
 | --- | --- |
-| expresses effort directly through `reasoning_effort` | nothing |
-| needs its thinking switch turned on first | `compat.thinkingFormat`: `"qwen"` (sends `enable_thinking`) / `"zai"` / `"deepseek"` |
-| does not accept `reasoning_effort` | `compat.supportsReasoningEffort: false` |
-| fails with 400 `invalid_parameter_error` | `compat.supportsDeveloperRole: false` |
-| fails while replaying history | `compat.requiresReasoningContentOnAssistantMessages: true` |
-| does not reason at all | `reasoningEfforts: false` |
+| Intel macOS / customized Missher Desktop rc.2 | `.14` has daily installation, Loader and served-client byte checks. `.15` changes packaging and documentation only, preserving runtime code. See [VERIFICATION.md](VERIFICATION.md) for this delivery. |
+| Official DSH `0.2.0-rc.2` Web | Prior isolated loading and controlled UI evidence exists. Official Models lacks the inline extension above; the slider and guidance do not provide that missing model-row control. |
+| Windows, Linux, other DSH versions | Native acceptance for this plugin was not performed on these platforms in this delivery. A working Desktop installer does not establish plugin feature parity. |
 
-With no `compat`, the adapter decides from the endpoint address: an address it does not recognize is treated as standard OpenAI, and a recognized vendor endpoint gets that vendor's format automatically. **Guessing the format is worse than leaving it out.**
+Without the model-row extension, registration waits while the existing slider remains available. No extra compatibility plugin is needed, and this Bundle does not embed Host modules. Endpoint acceptance of individual reasoning parameters must be verified separately.
 
-**How to verify**: open the model menu after saving — the slider appearing means it worked. If the slider appears but requests fail, work through the table above. The plugin's built-in knowledge entries are shortcuts, not a requirement.
+## Install a fixed version
 
-## Effort guidance for custom providers
+Distribution uses a built GitHub Release tarball; **this scoped package is not published to npm**. Use `missher-dsh-reasoning-effort-0.7.5-local.15.tgz` from `v0.7.5-local.15` and its accompanying SHA256 checksum. If that Release is not yet present, publication has not finished; an older Release is not this version.
 
-Built-in routes get their levels from the pi-ai catalog and the plugin never touches them. Only models you declare yourself in `llm-pi-ai` receive guidance:
+**Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
-1. Open the model menu. If the current model is your own declaration and the directory exposes no levels (or the declaration disagrees with the knowledge base), a **View declaration guidance** entry appears.
-2. The panel shows suggested levels (from the knowledge base or a generic template), YAML indented for the active configuration file, its path, and the model entry location.
-3. Follow the panel's replace or insert instruction for the matching `- id:` entry, preserve other configuration, and save. DSH reloads automatically; if not, restart the Web Host and refresh.
-
-Models the knowledge base does not know get a generic template you can edit directly. When a gateway rejects requests for a reason the template cannot express — an endpoint refusing the `developer` message role, for instance — the panel names the matching `compat` switch (`supportsDeveloperRole: false`).
-
-If you would rather not fill it in yourself, or the declaration still fails, press **Copy for your agent** beside the panel: it puts a single brief on the clipboard — the observed facts (route, model id, active configuration file, entry line, levels the directory reads, knowledge-base suggestion, endpoint caveat), your task, the complete declaration rules, and a starting snippet. Paste it into a coding agent so it can read the target file, check the endpoint documentation, complete the configuration, and explain the result.
-
-<details>
-<summary>Advanced: extend the plugin knowledge base</summary>
-
-The built-in entries cover only a few models, purely to save typing. With DSH `0.2.0-rc.1`, add `entries` under `config` in the existing `id: reasoning-effort` profile row. With older RCs, add them under `dsh-reasoning-effort` in `settings.yaml`. This example shows relative content; keep the indentation of the containing row. User entries win over built-ins:
-
-```yaml
-entries:
-  - id: my-model
-    provider: "*"          # provider route, * wildcard
-    model: "my-model-id"   # model id, * wildcard
-    note: description
-    efforts:               # display level -> wire value the endpoint accepts
-      low: "low"
-      high: "high"
-      max: "max"
-    # compat:              # only when the endpoint needs a fixed format
-    #   thinkingFormat: "qwen"
-    #   supportsReasoningEffort: false
+```text
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
 ```
 
-A `compat` block is copied into the generated snippet **verbatim**, so fill it in only when the endpoint really needs a fixed format: with none, the adapter decides from the endpoint address (an unrecognized address is treated as standard OpenAI, a recognized vendor gets that vendor's format), and a wrong format overrides that correct decision. On a protocol that does not take the field (e.g. `anthropic-messages`) the pasted entry makes the whole route fail to resolve.
+**Standalone Web/CLI profiles:** with DSH CLI installed:
 
-The plugin only provides snippets — it never writes configuration, and catalog-declared level sets (even a single level) are never flagged.
-
-</details>
-
-## Local thinking depth design
-
-`0.7.5-local.4` uses the supplied Desktop card and eight-row pixel field. The top display level animates; hidden pages stop and reduced motion shows a static field. Track, level label and pixels share the selected colour. The slider has one outer frame. Pointer updates are coalesced and submitted on release; models capped at high or xhigh keep their maximum at the right edge. Presets and custom colour are available only in **Settings → General → Thinking slider colour**. The conversation model menu adjusts depth only. Existing model capability mapping and rejected-selection rollback remain; the six sample levels do not redefine model capabilities. The pixel engine licence is included in `THIRD-PARTY-LICENSE.txt`.
-
-## The Big Fat Fish slider
-
-The local version defaults to the plain white thumb and preserves an explicit existing runner preference. To adjust it:
-
-1. Open **Settings → General**.
-2. Find **Big Fat Fish slider** below Appearance.
-3. Disable it and return to the model control.
-
-<img src="assets/readme/settings.webp" alt="The reasoning effort and Big Fat Fish slider switches in DeepSeek Harness General Settings" width="100%">
-
-The runner changes only the thumb artwork. Snapping, keyboard control, pixel effects, and model selection remain unchanged. It uses a stable frame when reduced motion is enabled.
-
-The **Reasoning effort selector** switch on the same page disables the complete enhancement without uninstalling it. DSH's built-in model selector returns immediately. Both preferences stay in the current browser.
-
-## Troubleshooting
-
-### The slider does not appear
-
-Check that:
-
-1. Check the running version with `dsh --version`; plugin `v0.7.3` targets DSH `0.2.0-rc.1`.
-2. You restarted the DSH Web Host after installation.
-3. **Settings → General → Reasoning effort selector** is enabled.
-4. The selected model exposes at least two effort levels in the DSH model directory (see the next entry for models without any), and thinking is not disabled by the deployment.
-
-### A model declares no effort levels
-
-First check **View declaration guidance** in the model menu. For manual configuration, use the file path shown in the panel and the current model and endpoint documentation to fill in that entry's `reasoningEfforts` and `compat`. Do not reuse another model's levels or context limits without checking them.
-
-The knowledge base provides guidance; the endpoint determines accepted values. If saving does not take effect, restart the Web Host and refresh the page.
-
-### Report a problem on an RC version
-
-Open an [issue](https://github.com/HanaAyane/dsh-reasoning-effort/issues) with your DSH version, plugin version, client type (Web or desktop wrapper), reproduction steps, and relevant console errors. Remove tokens and credentials before posting.
-
-### Confirm that the plugin loaded
-
-```powershell
+```sh
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
 dsh --profile web --dump-config
 ```
 
-The output should contain `name: dsh-reasoning-effort`.
+Replace `web` with your actual Web/CLI profile. The composition should include `id: reasoning-effort` and `name: '@missher/dsh-reasoning-effort'`; configuration presence alone does not prove active loading. Start or restart that profile and check its conversation model control. Do not enable the upstream package alongside this customization: their guidance channel and settings keys overlap.
 
-### Uninstall
+Keep the previous tarball and current profile configuration before updating. Tarballs are fixed snapshots; pulling Git does not update an installed plugin.
 
-```powershell
-dsh plugin --profile web remove dsh-reasoning-effort
+## Usage and capability semantics
+
+The slider reads `reasoning.efforts` from the model directory. Maximum supported level, default level and current conversation choice are distinct. The Ultra label and top-level particles do not grant additional capability. Lowering and raising the configuration limit preserves existing draft mappings; sparse levels retain their actual endpoint values, and unrecognized mappings keep automatic mode available.
+
+For a custom model without declarations, open View level declaration guidance. Follow the displayed configuration path and endpoint documentation to update the appropriate `llm-pi-ai` model entry, for example:
+
+```yaml
+reasoningEfforts:
+  low: "<lower effort value accepted by the endpoint>"
+  high: "<higher effort value accepted by the endpoint>"
 ```
 
-Restart the DSH Web Host afterward. The native model selector will return automatically.
+Unlisted levels are not declared as selectable. `reasoningEfforts: false` supplies no selectable effort levels; it does not guarantee that the endpoint performs no internal reasoning. Use `modelOverrides` for a single existing catalog model; a nonempty `models` list can replace the provider catalog.
 
-## Development
+Add `compat` fields such as `thinkingFormat`, `supportsReasoningEffort`, `supportsDeveloperRole` or `requiresReasoningContentOnAssistantMessages` only when endpoint documentation or a specific error supports them. Built-in knowledge is advisory, not a vendor guarantee. A visible slider proves directory/UI recognition, not server acceptance of the parameters.
 
-```powershell
-pnpm install
-pnpm run check
-pnpm pack
+Copy for your agent places the model identity, real configuration path, diagnosis and starting snippet on the clipboard. It does not call another agent or apply changes automatically. Host guidance is read-only; inline model edits use the Host's existing save action. Custom `entries` can extend the knowledge base; see the [English configuration tutorial](src/client/agent-tutorial.en.md) and [Host configuration](src/index.ts).
+
+## Disable, uninstall and retained data
+
+- To restore the native model selector temporarily, turn off Reasoning effort slider in General Settings. This switch controls the slider entry; disable the Bundle in the plugin manager to stop the whole plugin.
+- On Desktop, uninstall `@missher/dsh-reasoning-effort` through the same plugin manager. For a Web/CLI profile, use the exact scoped package name below, then restart or refresh the Host.
+
+```sh
+dsh plugin --profile web remove @missher/dsh-reasoning-effort
 ```
 
-Use Node.js `22.19+` (also meeting the target DSH requirements) and `pnpm@11.7.0`. `pnpm run check` validates TypeScript and locale dictionaries, then rebuilds the host entry, browser module, and type declarations. See [design/visual-spec.md](design/visual-spec.md) for the complete interaction contract and [SECURITY.md](SECURITY.md) for vulnerability reporting.
+The plugin has no chat or learning database. It does not actively delete Host sessions, credentials, model declarations or other plugins' data on removal. Saved model settings remain Host-owned. It does not clear browser preferences `dsh-reasoning-effort.enabled` and `dsh-reasoning-effort.palette` (the legacy enabled key is also read); restarting after disabling restores the native entry. Back up custom `entries` and profile overrides before removal: their retention depends on the Host's uninstall operation. Do not delete an entire profile to reset appearance.
 
-## License
+## Development and licenses
 
-[MIT](LICENSE) © HanaAyane
+Use Node.js `22.19+` and pnpm `11.7.0`. In an isolated checkout, run `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm test`, then `pnpm pack` sequentially. Test suites run serially. See [CONTRIBUTING.md](CONTRIBUTING.md), [VERIFICATION.md](VERIFICATION.md) and [SECURITY.md](SECURITY.md). Controls in the [design preview](design/depth-slider/README.md) are demonstrations; daily colours remain in Settings.
+
+Based on HanaAyane's upstream `dsh-reasoning-effort`, retaining the [MIT license](LICENSE) and attribution. The particle engine adapts MEMZ-鱼子酱's design under its retained [MIT notice](THIRD-PARTY-LICENSE.txt). See [FORK.md](FORK.md) for provenance and customization boundaries.

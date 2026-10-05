@@ -1,194 +1,80 @@
-# dsh-reasoning-effort
+# Missher DSH Reasoning Effort
 
-[← 桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [全部插件](https://github.com/Missher12/Missher-DeepseekHarness-Desktop/blob/main/plugins/README.zh.md) · [通用安装指南](https://github.com/Missher12/Missher-DeepseekHarness-Desktop/blob/main/docs/cookbook/install-cordis-plugins.zh.md)
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；版本：`0.7.5-local.15`。
 
-## 新手上手：思考强度
+[English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
-在模型入口调整思考深度，并在同一张模型卡片中设置文本、图片与可用思考档位。
+## 功能
 
-| 你需要知道的事 | 说明 |
+- 在对话模型入口选择模型、调整思考深度；显示阶梯映射到模型实际声明的档位，选择失败会回退。至少两个可用档位才显示滑块。
+- 单层卡片、白色滑块和最高档点阵；保持已选定的八行粒子设计、渐变配色、深浅主题与中英文。颜色仅在“设置 → 通用设置 → 思考滑块配色”调整。减少动态效果时显示稳定帧，页面隐藏时暂停粒子。
+- 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。正文独立滚动，操作区保持可见；极矮窗口允许整卡滚动。
+- **模型行内设置需要宿主扩展**：配套 Missher Desktop 的 Models 模块声明 `settings.models.model-fields` 后，思考模式和最高档位显示在文本/图片右侧，共用该模型卡片的保存操作。插件本身不增加文本/图片能力，也不另存模型目录。
+
+## 宿主要求与验证范围
+
+需要 DSH 的模型目录、会话选模、设置、Slots、Web 客户端和 Host 的 `settings` / `llm` 服务。DSH peer 版本保持 `*`，开发 SDK 基线为 `0.2.0-rc.2`；Cordis `4.0.4`、Schemastery `3.18.4`、React `^18.2.0` 由宿主提供。宽松版本准入不代表任意版本兼容。
+
+| 宿主/平台 | 已有证据与限制 |
 | --- | --- |
-| 插件包名 | `@missher/dsh-reasoning-effort` |
-| 当前源码版本 | `0.7.5-local.14` |
-| 装好后在哪里使用 | 对话中的模型入口；设置中的模型卡片与思考滑块配色 |
-| 下载 / 源码 | [查看当前源码与包信息](https://github.com/Missher12/Missher-DSH-Reasoning-Effort)（当前源码版本没有对应的正式 Release，勿把旧 Release 当作最新版） |
+| macOS Intel / Missher Desktop 定制 rc.2 | `.14` 已有日常安装、Loader 与客户端字节核验；`.15` 只修订包装及文档，运行代码保持一致。本轮验证见 [VERIFICATION.md](VERIFICATION.md)。 |
+| 官方 DSH `0.2.0-rc.2` Web | 已有隔离加载与受控 UI 证据。官方 Models 模块不提供上述模型行扩展；滑块与指引不因此变成模型行控件。 |
+| Windows、Linux、其他 DSH 版本 | 本插件本轮未做这些平台的原生验收；桌面发行包能启动不等于插件全部功能已通过。 |
 
-### 安装、启用与第一次使用
+没有模型行扩展时，插件等待扩展注册，原滑块仍可用。不需要额外兼容插件，本包不含宿主模块副本。真实模型是否接受具体参数需按所用端点另行验证。
 
-1. 先从[桌面端主页](https://github.com/Missher12/Missher-DeepseekHarness-Desktop)下载适合电脑的应用，完成模型配置。这个仓库是可选插件，不是独立桌面应用。
-2. 阅读[通用安装指南](https://github.com/Missher12/Missher-DeepseekHarness-Desktop/blob/main/docs/cookbook/install-cordis-plugins.zh.md)及本页原有安装说明，核对宿主与插件版本。桌面版使用“插件 → 添加插件”；Web/CLI 使用自己的目标配置组，不混用两种安装位置。
-3. 安装后按宿主提示启用并重新加载，进入上表列出的入口。更新已有插件前保留配置和数据，不同时启用旧包名与新包名。
-4. 先在模型设置声明支持的最高档位，再回到会话拖动滑块。模型档位不足或能力未声明时先检查模型设置。
+## 固定版本安装
 
-### 使用前了解这些边界
+本插件通过 GitHub Release 的构建后 tarball 分发，**未发布同名 npm 包**。使用 `v0.7.5-local.15` 的 `missher-dsh-reasoning-effort-0.7.5-local.15.tgz` 和同次发布的 SHA256 校验文件；若该 Release 尚未出现，表示发布流程尚未结束，不要用旧 Release 代替此版本。
 
-滑块只提交模型真正支持的档位；不能让不支持图片的模型获得视觉能力。颜色在设置中调整。
+**桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
-如果页面或功能没出现，先检查当前应用版本、插件是否启用以及加载错误。反馈时附版本、复现步骤和已脱敏错误；不要上传 API Key、真实会话、账号 Cookie 或学习数据库。Git 中的代码更新不会自动替换电脑上已安装的插件。
-
-### 继续阅读
-
-下文保留本插件的详细行为、配置、开发和验证说明。跨平台是否实际通过，以对应版本的验证记录为准；桌面安装包能启动，不代表全部插件和外部服务都已验收。
-
----
-
-`0.7.5-local.14` 本地候选：档位缺失提示仅显示一次；指引外框和操作区固定，正文独立滚动并保留边缘留白，极矮菜单回退整卡滚动。按钮等宽等高，复制反馈不跳动，长路径安全换行。尚未替换日常安装。
-
-保留 `.12` 的模型卡片行内思考等级、最高档位及共用保存，保留 `.9` 粒子效果。
-
-[English](README.en.md) · [源码](https://github.com/Missher12/dsh-reasoning-effort) · [反馈](https://github.com/Missher12/dsh-reasoning-effort/issues) · [设计预览源码](design/depth-slider/README.md)
-
-为 DeepSeek Harness 提供模型选择和思考深度滑块。`.12` 已与配套模型模块通过官方 **DSH 0.2.0-rc.2** 隔离整组加载。上游来源与 MIT 许可见 [FORK.md](FORK.md)。
-
-- 单层卡片、白色滑块和最高档点阵；配色预设与自定义颜色只在“设置 → 通用设置 → 思考滑块配色”调整。
-- 七个显示档位映射到模型实际声明的取值；模型支持的最高值始终在最右侧，选择失败会回退。
-- 拖动按帧更新、松手只提交一次。档位及映射提示共用固定高度，切换文字时轨道保持原位。
-- 深浅主题、中文与英文、减少动态效果，以及自定义模型档位声明指引。
-
-## 安装与更新
-
-本仓库提交了 Host 和 Client 构建件，可在 DSH 插件管理页添加本仓库的 GitHub 地址并启用。选择你实际使用的 profile；安装完成后按宿主提示重启并刷新界面。源码或安装成功不能代替实际 Loader 与模型验证。
-
-插件包声明 `dsh.bundle.patch`，不需要额外搭配兼容插件。开发构建与打包见 [CONTRIBUTING.md](CONTRIBUTING.md)，界面设计可直接打开 [design/depth-slider/index.html](design/depth-slider/index.html)。设计预览的调色控件仅用于演示，DSH 中的调色入口仍在设置页。
-
-## 同一张模型卡片编辑能力
-
-在“设置 → 模型”的 `llm-pi-ai` 模型卡片中，文本、图片在左侧，思考等级和最高档位在右侧，档位映射在插件内部保留，页面只显示思考模式与最高档位。思考编辑只更新该卡片的草稿，与图片及其他模型字段一起通过原来的保存操作提交；没有第二份模型目录或独立保存按钮。继承、禁用和自定义保持区分，非连续档位保留实际 API 值，降低再提高上限不会丢失当前草稿的映射。未识别到有效映射时，保持自动模式，不生成猜测的端点参数。
-
-这一位置需要模型设置模块声明 `settings.models.model-fields`。官方 rc.2 尚无此扩展位：插件会等待声明，原有滑块仍可加载，但不能把该版本上未出现的模型行控件当成已兼容。配套改动只在既有模型设置模块内提供草稿扩展入口；本 Bundle 不包含宿主模块副本或额外兼容包。尚未完成纯官方日常替换。
-
-## 档位从哪里来
-
-滑块读取当前模型在 DSH 模型目录中公开的 `reasoning.efforts`。档数、名称和顺序由模型与路由决定，并非固定三档，也不保证不同端点提供相同档位。
-
-模型公开至少两档时显示滑块；不足两档时显示提示。插件提交目录中的档位值，由 DSH 校验和发送，不会绕过模型或部署的能力限制。
-
-## 给任意自定义模型声明档位
-
-这一节与厂商无关，适用于你在 `llm-pi-ai` 里自己声明的任何模型。
-
-**为什么读不到档位**：DSH 的模型目录只报告适配器声明的能力。你自己声明的模型没有目录条目，除非写出 `reasoningEfforts`，否则目录里永远没有档位，滑块也不会出现。
-
-**怎么填**：打开指引面板显示的配置文件（旧版使用 `settings.yaml`，DSH `0.2.0-rc.1` 使用 Profile 的 `cordis.patch.yml`），在 `llm-pi-ai` 的对应模型条目下加 `reasoningEfforts`，并保持原有缩进。键是 DSH 档位，值是端点接受的写法；没写的档位视为不支持：
-
-```yaml
-models:
-  - id: <你的模型 id>
-    reasoningEfforts:
-      low: "<端点接受的取值>"
-      high: "<端点接受的取值>"
+```text
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
 ```
 
-**什么时候还要加 `compat`**（与 `reasoningEfforts` 平级，只在端点需要时写）：
+**独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
-| 端点情况 | 加什么 |
-| --- | --- |
-| 直接用 `reasoning_effort` 表达强度 | 不用写 compat |
-| 要先打开思考开关才认强度 | `compat.thinkingFormat`: `"qwen"`（发 `enable_thinking`）/ `"zai"` / `"deepseek"` |
-| 不接受 `reasoning_effort` | `compat.supportsReasoningEffort: false` |
-| 请求返回 400 `invalid_parameter_error` | `compat.supportsDeveloperRole: false` |
-| 回放历史消息报错 | `compat.requiresReasoningContentOnAssistantMessages: true` |
-| 模型完全不推理 | `reasoningEfforts: false` |
-
-不写 `compat` 时由适配器按端点地址自行判断：它不认识的地址按标准 OpenAI 处理，认识的厂商端点会自动套用该厂商的格式，所以**猜错格式比不写更糟**。
-
-**怎么验证**：保存后打开模型菜单，滑块出现即成功；滑块出现但请求报错，就按上表逐项排查。插件内置的知识条目只是**快捷方式**，不是必要条件。
-
-## 档位指引（自定义 provider）
-
-DSH 内置路由的档位来自 pi-ai 目录，插件**完全只读、绝不修改**。只有你在 `llm-pi-ai` 配置里自己声明的模型，插件才会给指引：
-
-1. 打开模型菜单。若当前模型是你自定义声明、且目录读不到档位（或声明与知识库不符），菜单里会出现 **查看档位声明指引**；
-2. 面板展示建议档位（知识库命中时给出该模型记录的档位，未收录时给出通用模板）、按当前配置文件缩进生成的 YAML、文件路径与条目位置；
-3. 按面板提示替换对应的 `- id:` 条目，或把字段块插入该条目；保留其他配置，保存后让 DSH 重新加载。若未生效，重启 Web Host 并刷新页面。
-
-知识库未收录的模型会得到通用的、可直接修改的模板。遇到"端点因 developer 角色拒绝请求"之类的情况，面板会给出警告和对应的 `compat` 开关（例如提示 `supportsDeveloperRole: false`）。
-
-不想自己填、或者填完仍然报错，就点面板旁的 **复制给 Agent**：它会把当前模型的现象与位置（路由、模型 id、实际配置文件路径、条目行、目录读到的档位、知识库建议、端点提示）、你的任务、完整的档位声明规则和一份起始片段合成一篇简报放进剪贴板。直接粘给任意 coding agent，它就能读取目标文件、查端点文档、补全配置并告诉你原因。
-
-<details>
-<summary>高级配置：扩展插件知识库</summary>
-
-内置条目只覆盖少数模型，作用仅是省去手填。要补充其他模型，DSH `0.2.0-rc.1` 在 Profile 中已有 `id: reasoning-effort` 条目的 `config` 下添加 `entries`；旧版 RC 则在 `settings.yaml` 的 `dsh-reasoning-effort` 命名空间下添加。下面只展示相对内容，粘贴时保持所在条目的缩进；用户条目优先于内置：
-
-```yaml
-entries:
-  - id: my-model
-    provider: "*"          # provider 路由名，* 通配
-    model: "my-model-id"   # 模型 id，* 通配
-    note: 说明文字
-    efforts:               # 档位名 → 端点实际接受的取值
-      low: "low"
-      high: "high"
-      max: "max"
-    # compat:              # 只在端点需要固定格式时才写
-    #   thinkingFormat: "qwen"
-    #   supportsReasoningEffort: false
-```
-
-条目里的 `compat` 会**原样**写进生成的片段，所以只在端点确实需要固定格式时才填：不填时适配器按端点地址自行判断（未识别地址按标准 OpenAI，已识别厂商自动套用该厂商格式），写错格式会覆盖掉这个正确判断；而在不接受该字段的协议上（例如 `anthropic-messages`），粘贴后那条路由会直接解析失败。
-
-注意：插件只提供片段，**不会替你修改任何配置**；内置目录里的档位集合（即使只有一档）也不会被标记——那是上游的刻意数据。
-
-</details>
-
-## 本地思考深度样式
-
-`0.7.5-local.4` 接入用户提供的「思考深度滑块」卡片和八行点阵，最高显示档播放点阵；页面不可见时停止，系统减少动态效果时静止显示。轨道、档位文字和点阵共用设置颜色，选择档位不会变回蓝色。外观只保留单层外框；拖动按帧合并并在松手时提交，最高只支持 high 或 xhigh 的模型拉满后也保留在最右端。配色预设和自定义颜色均位于 **设置 → 通用设置 → 思考滑块配色**，对话中的模型菜单只调整深度。保留原来的真实档位映射和失败回退，不将样例的六档写死到模型能力中。第三方点阵代码许可见 `THIRD-PARTY-LICENSE.txt`。
-
-## 外观与开关
-
-滑块按钮使用当前点阵设计，不再提供“大肥鱼”开关。颜色在设置页调整，对话中的模型入口用于调整深度。可通过“推理强度滑块”总开关暂时恢复 DSH 原生模型选择器；系统开启“减少动态效果”时显示稳定帧。
-
-## 常见问题
-
-### 安装后看不到滑块
-
-请依次确认：
-
-1. 用 `dsh --version` 确认实际运行版本；插件 `v0.7.3` 面向 DSH `0.2.0-rc.1`。
-2. 安装后已经重启 DSH Web Host。
-3. **设置 → 通用设置 → 推理强度滑块** 处于启用状态。
-4. 当前模型在 DSH 模型目录中公开了至少两档推理强度（未声明的模型见下一条），且部署没有关闭 thinking。
-
-### 模型没有声明档位怎么办
-
-先查看模型菜单中的 **查看档位声明指引**。若需要手动配置，请根据面板给出的实际文件路径和当前模型、端点文档填写对应条目的 `reasoningEfforts` 与 `compat`，不要直接套用其他模型的档位或上下文参数。
-
-知识库只提供参考；实际支持的取值以端点能力为准。保存后若未生效，重启 Web Host 并刷新页面。
-
-### RC 版本仍有问题，如何反馈
-
-请在 [Issue](https://github.com/HanaAyane/dsh-reasoning-effort/issues) 中附上 DSH 版本、插件版本、客户端类型（Web 或桌面封装）、复现步骤，以及相关控制台报错。报告前请隐去令牌和凭据。
-
-### 如何确认插件已经载入
-
-运行：
-
-```powershell
+```sh
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
 dsh --profile web --dump-config
 ```
 
-配置中应当出现 `name: dsh-reasoning-effort`。
+将 `web` 换成自己实际使用的 Web/CLI profile。配置应包含 `id: reasoning-effort`、`name: '@missher/dsh-reasoning-effort'`；仅出现在配置中不代表 Loader 已激活。然后启动或重启该 profile，打开对话模型入口检查。不要同时启用旧上游包与本定制包，它们使用相同的指引通道和设置键。
 
-### 如何卸载
+更新前保留旧 tarball 和当前 profile 配置。tarball 是固定快照，Git 拉取不会自动更新日常安装。
 
-```powershell
-dsh plugin --profile web remove dsh-reasoning-effort
+## 使用与模型能力
+
+滑块读取模型目录的 `reasoning.efforts`。最高支持档位、默认档位与当前会话选中档位各有含义；显示为 Ultra 或最高点阵不会产生额外能力。降低再提高模型配置上限不会丢失草稿中已有映射，稀疏档位保留端点实际值，无法识别映射时保持自动模式。
+
+自定义模型缺失声明时，打开“查看档位声明指引”，根据当前配置文件路径及端点文档，编辑 `llm-pi-ai` 的对应模型条目，例如：
+
+```yaml
+reasoningEfforts:
+  low: "<端点接受的较低强度值>"
+  high: "<端点接受的较高强度值>"
 ```
 
-卸载后重启 DSH Web Host，原生模型选择器会自动恢复。
+未列出的档位不声明为可选。`reasoningEfforts: false` 表示不提供可选强度档位，不能保证端点内部完全不思考。对既有目录模型的单项覆盖使用 `modelOverrides`；不要无意用非空 `models` 列表替换整个提供方目录。
 
-## 开发与构建
+仅在端点文档或具体错误支持时添加 `compat`，如 `thinkingFormat`、`supportsReasoningEffort`、`supportsDeveloperRole` 或 `requiresReasoningContentOnAssistantMessages`。内置知识条目仅供参考，不是供应商承诺。滑块出现只证明目录与界面识别成功；请求参数是否被服务端接受仍需验证。
 
-```powershell
-pnpm install
-pnpm run check
-pnpm pack
+“复制给 Agent”将当前模型标识、实际配置路径、诊断与建议片段放入剪贴板，不会自动调用其他 Agent 或提交修改。Host 指引只读；模型行编辑须使用宿主原有保存操作。可通过插件配置 `entries` 补充自己的知识条目，详见 [中文配置教程](src/client/agent-tutorial.zh.md)及 [Host 配置定义](src/index.ts)。
+
+## 启停、卸载与数据保留
+
+- 临时恢复原生模型选择器：关闭“设置 → 通用设置 → 推理强度滑块”。该开关只控制滑块入口；停用整个插件请在插件管理器禁用对应 Bundle。
+- 桌面端通过同一插件管理器卸载 `@missher/dsh-reasoning-effort`；Web/CLI profile 使用下面的准确包名，再重启或刷新宿主。
+
+```sh
+dsh plugin --profile web remove @missher/dsh-reasoning-effort
 ```
 
-开发环境使用 Node.js `22.19+`（同时满足目标 DSH 的要求）和 `pnpm@11.7.0`。`pnpm run check` 会进行 TypeScript 与国际化校验，并重建 Host 入口、浏览器模块及类型声明。完整交互与颜色约定见 [design/visual-spec.md](design/visual-spec.md)，安全问题请按照 [SECURITY.md](SECURITY.md) 报告。
+插件没有聊天或学习数据库。卸载不主动删除宿主的会话、凭据、模型声明或其他插件数据；已保存的模型设置仍属于宿主。插件不主动清除浏览器偏好 `dsh-reasoning-effort.enabled`、`dsh-reasoning-effort.palette`（兼容读取旧 enabled 键），停用后重启可恢复原生入口。自定义 `entries` 和 profile 覆盖在卸载前自行备份；是否清理由宿主卸载流程决定，不要为重置外观删除整个 profile。
 
-## 许可证
+## 开发与许可
 
-[MIT](LICENSE) © HanaAyane
+使用 Node.js `22.19+`、pnpm `11.7.0`；在隔离目录构建，顺序执行 `pnpm install --frozen-lockfile`、`pnpm run check`、`pnpm test`、`pnpm pack`。测试套件串行执行。具体见 [CONTRIBUTING.md](CONTRIBUTING.md)，验证分层见 [VERIFICATION.md](VERIFICATION.md)，安全反馈见 [SECURITY.md](SECURITY.md)。[设计预览](design/depth-slider/README.md)的控件仅用于演示，日常颜色入口仍在设置页。
+
+基于 HanaAyane 的上游 `dsh-reasoning-effort`，保留 [MIT 许可证](LICENSE)与作者署名；点阵引擎改编自 MEMZ-鱼子酱的设计并保留其 [MIT 声明](THIRD-PARTY-LICENSE.txt)。来源和定制边界见 [FORK.md](FORK.md)。

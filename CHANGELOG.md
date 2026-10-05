@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.5-local.15
+
+- Prepare the renamed public repository for marketplace distribution with fixed-version tarball instructions and accurate install, uninstall, and data-retention documentation.
+- Correct package repository, homepage and issue URLs; include provenance and verification documents in the published payload.
+- State the optional Missher Models extension requirement and platform verification limits explicitly.
+- Keep all runtime code, particle geometry, model mappings and saved preferences unchanged from local.14.
+
 ## 0.7.5-local.14 (local candidate)
 
 - Remove the duplicate missing-level notice and explicitly wrap guidance text.

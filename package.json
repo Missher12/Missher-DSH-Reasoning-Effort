@@ -1,6 +1,6 @@
 {
   "name": "@missher/dsh-reasoning-effort",
-  "version": "0.7.5-local.14",
+  "version": "0.7.5-local.15",
   "description": "DeepSeek Harness model and reasoning selector with a pixel depth slider, model-declared effort mapping, and settings-only theme colours.",
   "keywords": [
     "deepseek",
@@ -17,11 +17,11 @@
   "author": "HanaAyane",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Missher12/dsh-reasoning-effort.git"
+    "url": "git+https://github.com/Missher12/Missher-DSH-Reasoning-Effort.git"
   },
-  "homepage": "https://github.com/Missher12/dsh-reasoning-effort#readme",
+  "homepage": "https://github.com/Missher12/Missher-DSH-Reasoning-Effort#readme",
   "bugs": {
-    "url": "https://github.com/Missher12/dsh-reasoning-effort/issues"
+    "url": "https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues"
   },
   "engines": {
     "node": ">=22.19"
@@ -50,9 +50,14 @@
     "cordis.patch.yml",
     "README.md",
     "README.en.md",
+    "README.zh.md",
     "CHANGELOG.md",
     "LICENSE",
-    "THIRD-PARTY-LICENSE.txt"
+    "THIRD-PARTY-LICENSE.txt",
+    "FORK.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "VERIFICATION.md"
   ],
   "scripts": {
     "build": "pnpm run build:host && pnpm run build:client && pnpm run build:client-types",
