@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.5-local.16 — 2026-10-12 (candidate)
+
+- Keep the missing/mismatched reasoning-level heading outside the scrolling guidance body so scrolling cannot cut the notice in half.
+- Keep that heading visible when a short viewport requires the body and actions to scroll together. Equal-size copy actions and model selection behavior are preserved.
+- Local browser fixture and build validation are recorded in the candidate handoff; desktop publication and installation remain pending.
+
 ## 0.7.5-local.15
 
 - Prepare the renamed public repository for marketplace distribution with fixed-version tarball instructions and accurate install, uninstall, and data-retention documentation.

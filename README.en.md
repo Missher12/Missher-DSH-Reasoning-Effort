@@ -1,6 +1,9 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; version: `0.7.5-local.15`.
+Current Git delivery: **0.7.5-local.16**. See [validation and installation limits](./PUBLICATION.md). Git sync does not update installed devices.
+
+
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; candidate version: `0.7.5-local.16` (not yet published or installed).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -8,7 +11,7 @@ Model selection, a thinking-depth slider mapped to declared model capabilities, 
 
 - Choose a model and adjust thinking depth from the conversation model control. Displayed steps map to the model's declared levels; failed selections roll back. The slider requires at least two available levels.
 - Preserve the selected single-card design, white thumb, eight-row particle field at the highest level, colour gradient, light/dark themes and Chinese/English UI. Colours live in General Settings. Reduced-motion mode shows a stable frame; hidden pages pause particles.
-- For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The body scrolls independently of the actions; very short menus scroll as a whole.
+- For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The heading stays fully visible while the body scrolls independently of the actions; very short menus scroll the body and actions together below the heading.
 - **Inline model settings require a Host extension:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside text/image controls and share the model card's save action. This plugin does not add text/image capabilities or maintain another model catalog.
 
 ## Host requirements and verification scope
@@ -24,6 +27,8 @@ Requires DSH's model directory, session model selection, settings, Slots, Web cl
 Without the model-row extension, registration waits while the existing slider remains available. No extra compatibility plugin is needed, and this Bundle does not embed Host modules. Endpoint acceptance of individual reasoning parameters must be verified separately.
 
 ## Install a fixed version
+
+The instructions below target the previous `.15` package and do not include the `.16` heading-clipping fix. See [VERIFICATION.md](VERIFICATION.md) for the `.16` candidate; publication and installation remain with the Desktop owner.
 
 Distribution uses a built GitHub Release tarball; **this scoped package is not published to npm**. Use `missher-dsh-reasoning-effort-0.7.5-local.15.tgz` from `v0.7.5-local.15` and its accompanying SHA256 checksum. If that Release is not yet present, publication has not finished; an older Release is not this version.
 

@@ -13,7 +13,7 @@ export function positionModelMenu(root: HTMLElement, menu: HTMLElement): () => v
     menu.style.setProperty('--re-menu-width', `${width}px`)
     const maxHeight = Math.min(480, above >= 120 ? Math.min(above, height) : height)
     menu.style.setProperty('--re-menu-height', `${maxHeight}px`)
-    // A short popover must scroll as a whole so its actions cannot hide the body.
+    // In a short popover, scroll the body and actions together below the heading.
     menu.toggleAttribute('data-short-menu', maxHeight < 240)
 
     // offsetWidth/Height exclude transforms, so repeated updates cannot accumulate

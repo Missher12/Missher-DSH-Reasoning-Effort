@@ -1,5 +1,16 @@
 # Verification scope / 验证范围
 
+## 2026-10-12 layout candidate: 0.7.5-local.16
+
+- Source recovered by a fresh clone of main at `5ac04cbc2845e330cb3a8445324391ded4331cd7`, with an initially clean worktree. No historical migration copy was overwritten.
+- The previous built component reproduced the reported bug: after 9 px of body scrolling, the heading's top was at 83 px while the body clipped at 88 px. The fix moves the heading outside the scrolling content.
+- Browser checks use the actual built client with a simulated model directory and guidance result. At 360 × 620, copy buttons remained 137 × 36 before/after feedback. At 260 × 620, the English heading wrapped to two lines and both actions were 99 × 52. At 320 × 360 the body retained 89 px of scrolling space. At 220 × 240, the heading remained separate while copy and collapse actions could be reached in the lower scroller. No horizontal menu overflow was measured.
+- Light/dark theme fixtures, Chinese/English headings and copied feedback were visually checked. The existing browser selection fixture passed all 13 checks, including refusal rollback and explicit invalid-effort recovery.
+- TypeScript, bilingual checks, Host/client builds and client-loader checks passed. After the final scroll-boundary adjustment, the client build/load, TypeScript, client declarations and diff whitespace checks passed again.
+- This is a local candidate, with no new native DSH installation, alpha.2 Host acceptance or real provider request. Final Git/release/profile installation remains assigned to the Desktop owner. Earlier evidence below is historical, not a substitute for a fresh integration check.
+
+## Previous metadata delivery: 0.7.5-local.15
+
 `0.7.5-local.15` prepares marketplace metadata and documentation. Host/client source and generated runtime bytes are unchanged from `0.7.5-local.14`; particle geometry and model behaviour were not redesigned.
 
 ## 2026-10-05 delivery

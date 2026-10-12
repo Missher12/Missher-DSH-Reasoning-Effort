@@ -253,6 +253,7 @@ export const CSS = `
   box-shadow: 0 14px 42px rgba(18, 24, 42, .18), 0 3px 10px rgba(18, 24, 42, .08);
   animation: re-menu-in 150ms cubic-bezier(.22,1,.36,1);
 }
+.re-model-content,
 .re-model-body { display: contents; }
 .re-model-menu[data-guidance-card] {
   white-space: normal;
@@ -261,24 +262,36 @@ export const CSS = `
   flex-direction: column;
   overflow: hidden;
 }
-.re-model-menu[data-guidance-card] > :not(.re-model-body) { flex-shrink: 0; }
+.re-model-menu[data-guidance-card] > .re-adapt-heading,
+.re-model-menu[data-guidance-card] .re-model-content > :not(.re-model-body) { flex-shrink: 0; }
+.re-model-menu[data-guidance-card] .re-model-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.re-adapt-heading {
+  min-width: 0;
+  padding: 12px 14px 4px;
+  background: inherit;
+}
 .re-model-menu[data-guidance-card] .re-model-body {
   display: block;
   min-height: 0;
-  margin: 8px 0;
+  margin: 0 0 8px;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
-.re-model-menu[data-guidance-card] > .re-adapt-open-row,
-.re-model-menu[data-guidance-card] > .re-adapt-actions {
+.re-model-menu[data-guidance-card] .re-model-content > .re-adapt-open-row,
+.re-model-menu[data-guidance-card] .re-model-content > .re-adapt-actions {
   margin: 0;
   padding: 0 14px 12px;
 }
-.re-model-menu[data-guidance-card][data-short-menu] {
+.re-model-menu[data-guidance-card][data-short-menu] .re-model-content {
   display: block;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .re-model-menu[data-guidance-card][data-short-menu] .re-model-body {
   overflow: visible;

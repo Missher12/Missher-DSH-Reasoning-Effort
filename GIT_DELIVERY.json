@@ -1,0 +1,27 @@
+{
+  "version": "0.7.5-local.16",
+  "date": "2026-10-12",
+  "scope": "source and matching frozen runtime; no release or installation implied",
+  "sourceBase": "5ac04cbc2845e330cb3a8445324391ded4331cd7",
+  "frozenPackageSha256": "d30788cc92b951bb937c1b2d182193851a97f0185ab1edd0961215b674726e73",
+  "runtimeFiles": {
+    "lib/client/index.js": "85be04bd65c45f12408e104fecdc10d3a706e33bd870c606ab210ee9053162cb",
+    "lib/index.js": "27970cad0deff2a3c8bf0406329435551b5b7c49d3b5b437df4cd83ec67cc3c8",
+    "lib/knowledge.js": "0be199895bf2f2042a35dc2bbe9354f35d23dc4668edbe328effcd8a908f259b",
+    "lib/client/index.d.ts": "cea7433cc6a0fdfdf96431281ebe465a3a3dd371d8b83b12e17db19c0eb3bed8",
+    "lib/index.d.ts": "58f97c38a451b0ce51b69435fa8e0277ccfffa3549d56a9c326eb7c04eec9552",
+    "lib/knowledge.d.ts": "1a3be975cbcc24ef868b1b0791450eb75593ab398147b69f6a01b8a2941f703e",
+    "lib/client/levels.d.ts": "a30c3550ff785af616815f3c7dbd14d69f06dd0b03c65e9d34aaf6eeb44c684e",
+    "lib/client/locales.d.ts": "4b142fbbec971c5f43d41b677db670afe0e9fe04c0810c6244f46a0b93c6eeeb",
+    "lib/client/menu-position.d.ts": "d73249e94d201aeccc598db2572a6b5b41e23ec5ca140a5d5635c677415c612d",
+    "lib/client/model-capabilities.d.ts": "90955563865b58bd8f069e8f3b4c919cd7bb37e84fabb7581f09475bfa7c2000",
+    "lib/client/model-fields-slot.d.ts": "57ed97522cecc76e3ebc211c898ea98edbd6e589c56f1ed4ff037e5dc6ced95e",
+    "lib/client/model-settings.d.ts": "39518bf58782661ccb992e18794e1cafe384a05a1d040a23e71af906bd814b4d",
+    "lib/client/palettes.d.ts": "fdc4cd57275c9f96f230f554f5491cf66c6ffd11ce3f24250a6fcfc16c25b6f0",
+    "lib/client/pixel-styles.d.ts": "c7857639501396417b5a1018b2a8edd3b3ea45a80c22d6600f71617798d1ec35",
+    "lib/client/selection.d.ts": "943361ed7d8f5e7fffd336a667c808f8636135a84138cadfad6a8816b3b15d34",
+    "lib/client/styles.d.ts": "6325e61dc258c729b673d647bf1e891e8dbeac819268da86b7969270601e56fc"
+  },
+  "validation": "类型、构建、深浅主题及中英文布局、13项选模用例、新版Host加载与组合通过；受控浏览器结果不替代平台原生验收。",
+  "publicExportAdjustments": "Publication docs and local path placeholders only; product source and runtime unchanged."
+}

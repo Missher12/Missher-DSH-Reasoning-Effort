@@ -1,6 +1,9 @@
 # Missher DSH Reasoning Effort
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；版本：`0.7.5-local.15`。
+当前 Git 交付：**0.7.5-local.16**，包含匹配的源码与运行文件。[验证范围与安装说明](./PUBLICATION.md)。Git 同步不会自动更新已安装设备。
+
+
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；候选版本：`0.7.5-local.16`（尚未发布或安装）。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -8,7 +11,7 @@
 
 - 在对话模型入口选择模型、调整思考深度；显示阶梯映射到模型实际声明的档位，选择失败会回退。至少两个可用档位才显示滑块。
 - 单层卡片、白色滑块和最高档点阵；保持已选定的八行粒子设计、渐变配色、深浅主题与中英文。颜色仅在“设置 → 通用设置 → 思考滑块配色”调整。减少动态效果时显示稳定帧，页面隐藏时暂停粒子。
-- 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。正文独立滚动，操作区保持可见；极矮窗口允许整卡滚动。
+- 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。标题保持完整，正文独立滚动，操作区保持可见；极矮窗口将正文与操作一起滚动，标题不参与滚动。
 - **模型行内设置需要宿主扩展**：配套 Missher Desktop 的 Models 模块声明 `settings.models.model-fields` 后，思考模式和最高档位显示在文本/图片右侧，共用该模型卡片的保存操作。插件本身不增加文本/图片能力，也不另存模型目录。
 
 ## 宿主要求与验证范围
@@ -24,6 +27,8 @@
 没有模型行扩展时，插件等待扩展注册，原滑块仍可用。不需要额外兼容插件，本包不含宿主模块副本。真实模型是否接受具体参数需按所用端点另行验证。
 
 ## 固定版本安装
+
+以下为上一版 `.15` 的安装说明，不包含 `.16` 的标题裁切修复；`.16` 候选验证见 [VERIFICATION.md](VERIFICATION.md)，待桌面负责人统一发布安装。
 
 本插件通过 GitHub Release 的构建后 tarball 分发，**未发布同名 npm 包**。使用 `v0.7.5-local.15` 的 `missher-dsh-reasoning-effort-0.7.5-local.15.tgz` 和同次发布的 SHA256 校验文件；若该 Release 尚未出现，表示发布流程尚未结束，不要用旧 Release 代替此版本。
 
