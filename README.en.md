@@ -3,7 +3,7 @@
 Current Git delivery: **0.7.5-local.16**. See [validation and installation limits](./PUBLICATION.md). Git sync does not update installed devices.
 
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; candidate version: `0.7.5-local.16` (not yet published or installed).
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; current formal release: `0.7.5-local.16`.
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -16,32 +16,31 @@ Model selection, a thinking-depth slider mapped to declared model capabilities, 
 
 ## Host requirements and verification scope
 
-Requires DSH's model directory, session model selection, settings, Slots, Web client and Host `settings` / `llm` services. DSH peers remain `*`, with development SDK `0.2.0-rc.2`; Cordis `4.0.4`, Schemastery `3.18.4` and React `^18.2.0` are supplied by the Host. Permissive version admission does not establish compatibility with every release.
+Requires DSH's model directory, session model selection, settings, Slots, Web client and Host `settings` / `llm` services. Maintenance targets a reasonable Host range and continued adaptation to the latest release, using interface capabilities rather than a tested version as the sole admission rule. DSH peers are `*`; this package retains historical exact Cordis / Schemastery peer declarations in `package.json`. Permissive DSH peers alone do not prove every combination works. Official modules are supplied by the Host.
 
 | Host/platform | Evidence and limits |
 | --- | --- |
 | Intel macOS / customized Missher Desktop rc.2 | `.14` has daily installation, Loader and served-client byte checks. `.15` changes packaging and documentation only, preserving runtime code. See [VERIFICATION.md](VERIFICATION.md) for this delivery. |
 | Official DSH `0.2.0-rc.2` Web | Prior isolated loading and controlled UI evidence exists. Official Models lacks the inline extension above; the slider and guidance do not provide that missing model-row control. |
-| Windows, Linux, other DSH versions | Native acceptance for this plugin was not performed on these platforms in this delivery. A working Desktop installer does not establish plugin feature parity. |
+| Ubuntu / Missher Desktop `0.2.1-alpha.2.20261014.1` | `.16` is installed; installed files match the public archive and the plugin entry is active. Full drag interaction and real-provider parameter acceptance require separate validation. |
+| Other Hosts or platforms | Full native feature acceptance is unverified. Check the required interfaces; a tested version is not the only intended compatible version. |
 
 Without the model-row extension, registration waits while the existing slider remains available. No extra compatibility plugin is needed, and this Bundle does not embed Host modules. Endpoint acceptance of individual reasoning parameters must be verified separately.
 
-## Install a fixed version
+## Installation and updates
 
-The instructions below target the previous `.15` package and do not include the `.16` heading-clipping fix. See [VERIFICATION.md](VERIFICATION.md) for the `.16` candidate; publication and installation remain with the Desktop owner.
-
-Distribution uses a built GitHub Release tarball; **this scoped package is not published to npm**. Use `missher-dsh-reasoning-effort-0.7.5-local.15.tgz` from `v0.7.5-local.15` and its accompanying SHA256 checksum. If that Release is not yet present, publication has not finished; an older Release is not this version.
+Download the plugin `.tgz` and its SHA256 checksum from the [latest formal Release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/latest). This scoped package is not published to npm. The current `.16` package includes the heading-clipping fix. The fixed URLs below identify the current delivery; use Latest to select future updates.
 
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
 dsh --profile web --dump-config
 ```
 

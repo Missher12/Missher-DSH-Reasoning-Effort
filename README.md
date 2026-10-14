@@ -3,7 +3,7 @@
 当前 Git 交付：**0.7.5-local.16**，包含匹配的源码与运行文件。[验证范围与安装说明](./PUBLICATION.md)。Git 同步不会自动更新已安装设备。
 
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；候选版本：`0.7.5-local.16`（尚未发布或安装）。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前正式交付版本：`0.7.5-local.16`。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -16,32 +16,31 @@
 
 ## 宿主要求与验证范围
 
-需要 DSH 的模型目录、会话选模、设置、Slots、Web 客户端和 Host 的 `settings` / `llm` 服务。DSH peer 版本保持 `*`，开发 SDK 基线为 `0.2.0-rc.2`；Cordis `4.0.4`、Schemastery `3.18.4`、React `^18.2.0` 由宿主提供。宽松版本准入不代表任意版本兼容。
+需要 DSH 的模型目录、会话选模、设置、Slots、Web 客户端和 Host 的 `settings` / `llm` 服务。兼容维护以支持合理的宿主范围、持续适配最新版为目标，按接口能力判断；已测版本只是验证基线。DSH peer 声明为 `*`，当前包对 Cordis / Schemastery 仍有历史精确 peer 声明，详见 `package.json`；宽松 DSH 声明本身不证明所有组合已通过。官方模块由宿主提供。
 
 | 宿主/平台 | 已有证据与限制 |
 | --- | --- |
 | macOS Intel / Missher Desktop 定制 rc.2 | `.14` 已有日常安装、Loader 与客户端字节核验；`.15` 只修订包装及文档，运行代码保持一致。本轮验证见 [VERIFICATION.md](VERIFICATION.md)。 |
 | 官方 DSH `0.2.0-rc.2` Web | 已有隔离加载与受控 UI 证据。官方 Models 模块不提供上述模型行扩展；滑块与指引不因此变成模型行控件。 |
-| Windows、Linux、其他 DSH 版本 | 本插件本轮未做这些平台的原生验收；桌面发行包能启动不等于插件全部功能已通过。 |
+| Ubuntu / Missher Desktop `0.2.1-alpha.2.20261014.1` | `.16` 已安装，公开包文件与安装目录匹配，插件入口 active；完整拖动交互与真实模型参数仍需单独验收。 |
+| 其他宿主或平台 | 未完成完整原生功能验收；按实际接口检查，不以测试版本号作为唯一准入条件。 |
 
 没有模型行扩展时，插件等待扩展注册，原滑块仍可用。不需要额外兼容插件，本包不含宿主模块副本。真实模型是否接受具体参数需按所用端点另行验证。
 
-## 固定版本安装
+## 安装与更新
 
-以下为上一版 `.15` 的安装说明，不包含 `.16` 的标题裁切修复；`.16` 候选验证见 [VERIFICATION.md](VERIFICATION.md)，待桌面负责人统一发布安装。
-
-本插件通过 GitHub Release 的构建后 tarball 分发，**未发布同名 npm 包**。使用 `v0.7.5-local.15` 的 `missher-dsh-reasoning-effort-0.7.5-local.15.tgz` 和同次发布的 SHA256 校验文件；若该 Release 尚未出现，表示发布流程尚未结束，不要用旧 Release 代替此版本。
+从[最新正式 Release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/latest)下载插件 `.tgz` 和同次发布的 SHA256 校验文件。本插件未发布同名 npm 包。当前正式包为 `.16`，已包含标题裁切修复；以下固定地址便于复现当前交付，后续更新从 Latest 选择新包。
 
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.15/missher-dsh-reasoning-effort-0.7.5-local.15.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
 dsh --profile web --dump-config
 ```
 
