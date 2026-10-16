@@ -1,6 +1,6 @@
 {
   "name": "@missher/dsh-reasoning-effort",
-  "version": "0.7.5-local.16",
+  "version": "0.7.6",
   "description": "DeepSeek Harness model and reasoning selector with a pixel depth slider, model-declared effort mapping, and settings-only theme colours.",
   "keywords": [
     "deepseek",
@@ -46,6 +46,7 @@
     "lib",
     "src",
     "assets/chibi-runner-strip.png",
+    "docs/images",
     "design",
     "cordis.patch.yml",
     "README.md",
@@ -88,14 +89,13 @@
         "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-api-remotes",
-        "@deepseek-ai/dsh-client-ui-renderer",
-        "@deepseek-ai/dsh-client-ui-settings-models"
+        "@deepseek-ai/dsh-client-ui-renderer"
       ],
       "platform": "web"
     }
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "4.0.4",
+    "@deepseek-ai/cordis": "^4.0.4 || ^4.0.5-alpha.1",
     "@deepseek-ai/dsh-api-remotes": "*",
     "@deepseek-ai/dsh-client-connection": "*",
     "@deepseek-ai/dsh-client-locale": "*",
@@ -104,9 +104,9 @@
     "@deepseek-ai/dsh-client-ui-renderer": "*",
     "@deepseek-ai/dsh-client-ui-settings": "*",
     "@deepseek-ai/dsh-client-ui-slots": "*",
-    "@deepseek-ai/schemastery": "3.18.4",
-    "react": "^18.2.0",
-    "@deepseek-ai/dsh-client-ui-settings-models": "*"
+    "@deepseek-ai/dsh-client-ui-settings-models": "*",
+    "@deepseek-ai/schemastery": "^3.18.4 || ^3.18.5-alpha.1",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.4",

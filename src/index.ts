@@ -19,14 +19,28 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import z from '@deepseek-ai/schemastery'
 import { BUILTIN_ENTRIES, displayLevels, matchEntry, type KnowledgeEntry } from './knowledge.js'
+import {
+  channelMessage,
+  hostCapabilities,
+  namespaceMessage,
+  scopeReadable,
+  unsupportedMessage,
+  type HostConnectionLike,
+  type HostLlmLike,
+  type HostSettingsLike,
+  type HostWebServerLike,
+} from './compat.js'
 
 export const name = 'dsh-reasoning-effort'
 
 /**
  * Hard dependencies: the loader waits for these services before calling
  * `apply`, so the row never races the boot order of the base bundle rows.
- * `connection` is deliberately absent — only Web profiles provide it, so the
- * RPC channel is mounted through `ctx.inject` instead of blocking this row.
+ *
+ * `connection` and `webServer` are deliberately absent — they carry only the
+ * optional browser-facing RPC channel, and a host that lacks either must keep
+ * the row mounted rather than block it here. They are reached through
+ * `ctx.inject` below, which mounts the channel exactly when both exist.
  */
 export const inject = ['settings', 'llm']
 
@@ -49,7 +63,7 @@ interface StoreShape {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type JsonObject = Record<string, any>
 
-interface HostSettingsService {
+interface HostSettingsService extends HostSettingsLike {
   readonly writable: boolean
   get?(ns: string): unknown
   register?(ns: string, schema: unknown, options?: JsonObject): SettingsScopeLike
@@ -58,12 +72,14 @@ interface HostSettingsService {
 }
 
 interface SettingsScopeLike {
-  get(): unknown
+  get?(): unknown
 }
 
-interface HostLlmService {
-  listProviders(): Array<{ id: string; name: string }>
-  listModels(provider: string): Promise<Array<{ provider: string; id: string; name: string; description?: string }>>
+/**
+ * Only the member this half calls. Provider/model listing exists on the host
+ * service but is never used here, so it is not part of the declared minimum.
+ */
+interface HostLlmService extends HostLlmLike {
   resolveModelInfo(provider: string, model: string): Promise<{
     provider: string
     id: string
@@ -87,7 +103,7 @@ interface HostRouteResponse {
   end(body?: string): void
 }
 
-interface HostWebServer {
+interface HostWebServer extends HostWebServerLike {
   register(route: {
     readonly kind: 'prefix'
     readonly path: string
@@ -100,7 +116,7 @@ interface HostWebServer {
  * channel reads it from the connection service so it stays exactly as
  * unreachable as the rest of the Host API.
  */
-interface HostConnection {
+interface HostConnection extends HostConnectionLike {
   requestRejection(request: HostRouteRequest): 401 | 403 | undefined
 }
 
@@ -284,17 +300,38 @@ function entryHead(existing: JsonObject | undefined, model: string, modelIndent:
 export function apply(ctx: Context, config?: StoreShape): void {
   const settings = ctx.get('settings') as HostSettingsService | undefined
   const llm = ctx.get('llm') as HostLlmService | undefined
-  if (settings === undefined || llm === undefined) return
+
+  /* `inject` above keeps this row pending until both services exist, so this is
+     only reachable on a host that provides the names but not the members. Say
+     which member is missing: staying silent here is what makes an incomplete
+     host look like a model with no reasoning levels. */
+  const report = hostCapabilities({ settings, llm })
+  if (settings === undefined || llm === undefined || !report.supported) {
+    console.error(unsupportedMessage(report))
+    return
+  }
+
   // Aliased after the guard so closures below keep the narrowed types.
   const settingsService = settings
   const llmService = llm
   const usesProfileConfig = typeof settingsService.register !== 'function'
+  const namespaceNote = namespaceMessage(report)
+  if (namespaceNote !== null) console.info(`dsh-reasoning-effort: ${namespaceNote}`)
 
-  const store = settingsService.register?.(STORE_NS, StoreSchema)
+  const store = typeof settingsService.register === 'function'
+    ? settingsService.register(STORE_NS, StoreSchema)
+    : undefined
 
+  /* The namespace is read through the scope `register` returned, not through
+     `settings.get`: a host can offer one without the other, and the row's own
+     `config` is the documented source when either is absent. */
   const readStore = (): StoreShape => {
-    const value = store?.get() ?? config
+    const scoped = scopeReadable(store) ? store?.get?.() : undefined
+    const value = scoped ?? config
     return isRecord(value) ? (value as unknown as StoreShape) : {}
+  }
+  if (store !== undefined && !scopeReadable(store)) {
+    console.info('dsh-reasoning-effort: settings.register returned a scope without get(); user knowledge-base entries are read from this row\'s own config instead')
   }
 
   /** The active configuration document path, memoized. */
@@ -459,6 +496,15 @@ export function apply(ctx: Context, config?: StoreShape): void {
     const connection = routeCtx.get('connection') as HostConnection | undefined
     const webServer = routeCtx.get('webServer') as HostWebServer | undefined
     if (connection === undefined || webServer === undefined) return
+    /* Both services are active here, so a remaining gap is a real interface
+       gap on this build rather than an early read. Report it and leave the
+       route unmounted: the slider, model selection and guidance layout do not
+       depend on this channel. */
+    const channelNote = channelMessage({ connection, webServer })
+    if (channelNote !== null) {
+      console.info(`dsh-reasoning-effort: ${channelNote}`)
+      return
+    }
     routeCtx.effect(() => webServer.register({
       kind: 'prefix',
       path: RPC_CHANNEL,

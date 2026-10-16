@@ -1,9 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Current Git delivery: **0.7.5-local.16**. See [validation and installation limits](./PUBLICATION.md). Git sync does not update installed devices.
-
-
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; current formal release: `0.7.5-local.16`.
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; version: `0.7.6`.
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -11,36 +8,45 @@ Model selection, a thinking-depth slider mapped to declared model capabilities, 
 
 - Choose a model and adjust thinking depth from the conversation model control. Displayed steps map to the model's declared levels; failed selections roll back. The slider requires at least two available levels.
 - Preserve the selected single-card design, white thumb, eight-row particle field at the highest level, colour gradient, light/dark themes and Chinese/English UI. Colours live in General Settings. Reduced-motion mode shows a stable frame; hidden pages pause particles.
-- For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The heading stays fully visible while the body scrolls independently of the actions; very short menus scroll the body and actions together below the heading.
+- For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The heading stays fully visible, copy buttons have equal dimensions, and the body scrolls independently of the actions; very short menus scroll the body and actions together below the heading. Open menus follow the Host layout during window resizing to stay within the viewport.
 - **Inline model settings require a Host extension:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside text/image controls and share the model card's save action. This plugin does not add text/image capabilities or maintain another model catalog.
 
 ## Host requirements and verification scope
 
-Requires DSH's model directory, session model selection, settings, Slots, Web client and Host `settings` / `llm` services. Maintenance targets a reasonable Host range and continued adaptation to the latest release, using interface capabilities rather than a tested version as the sole admission rule. DSH peers are `*`; this package retains historical exact Cordis / Schemastery peer declarations in `package.json`. Permissive DSH peers alone do not prove every combination works. Official modules are supplied by the Host.
+Compatibility follows the interfaces available at runtime. The client needs the model directory, session selection, Slots, Locale and settings services. The Host requires `settings.describe`, `settings.prepareDocument` and `llm.resolveModelInfo`; missing members produce specific diagnostics. The settings namespace and guidance channel are optional capabilities. The channel needs both route registration and request validation.
 
-| Host/platform | Evidence and limits |
+DSH peers remain `*`; Cordis accepts `^4.0.4 || ^4.0.5-alpha.1`, Schemastery `^3.18.4 || ^3.18.5-alpha.1`, and React `^18.2.0`. The development SDK remains `0.2.0-rc.2`. These ranges allow installation; verified coverage is narrower:
+
+| Host | 0.7.6 evidence |
 | --- | --- |
-| Intel macOS / customized Missher Desktop rc.2 | `.14` has daily installation, Loader and served-client byte checks. `.15` changes packaging and documentation only, preserving runtime code. See [VERIFICATION.md](VERIFICATION.md) for this delivery. |
-| Official DSH `0.2.0-rc.2` Web | Prior isolated loading and controlled UI evidence exists. Official Models lacks the inline extension above; the slider and guidance do not provide that missing model-row control. |
-| Ubuntu / Missher Desktop `0.2.1-alpha.2.20261014.1` | `.16` is installed; installed files match the public archive and the plugin entry is active. Full drag interaction and real-provider parameter acceptance require separate validation. |
-| Other Hosts or platforms | Full native feature acceptance is unverified. Check the required interfaces; a tested version is not the only intended compatible version. |
+| Official npm DSH `0.2.1-alpha.5` / Cordis `4.0.5` | Isolated Web profile, actual Loader, request validation, read-only guidance, served client and unloading; real-browser slider, clipboard, palette and viewport checks with synthetic models. |
+| Missher community extensions `0.2.0-rc.2` / `0.2.1-alpha.2` | Actual isolated Host boot, Loader, guidance, request validation, client-byte and unload checks. These are not pristine official distributions. |
+| Native macOS/Windows Desktop and other Host versions | No new native acceptance in this delivery. Historical evidence and detailed limits are in [VERIFICATION.md](VERIFICATION.md). |
 
-Without the model-row extension, registration waits while the existing slider remains available. No extra compatibility plugin is needed, and this Bundle does not embed Host modules. Endpoint acceptance of individual reasoning parameters must be verified separately.
+The model-row extension is optional. Registration follows its declaration and removal while the slider remains available. This Bundle embeds no Host modules. These checks made no inference calls to real model endpoints.
 
-## Installation and updates
+## Screenshots
 
-Download the plugin `.tgz` and its SHA256 checksum from the [latest formal Release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/latest). This scoped package is not published to npm. The current `.16` package includes the heading-clipping fix. The fixed URLs below identify the current delivery; use Latest to select future updates.
+Actual UI from an isolated official DSH `0.2.1-alpha.5` Web profile with synthetic models and settings. See [screenshot provenance](docs/images/README.md).
+
+![Thinking-depth slider](docs/images/reasoning-slider-alpha5.png)
+
+![Thinking-slider palette in General Settings](docs/images/reasoning-settings-alpha5.png)
+
+## Install a fixed version
+
+Distribution uses built tarballs in [GitHub Releases](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases); **this scoped package is not published to npm**. Select the target version and its accompanying SHA256 checksum. The example below pins `0.7.6`.
 
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
 dsh --profile web --dump-config
 ```
 

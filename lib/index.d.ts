@@ -20,8 +20,11 @@ export declare const name = "dsh-reasoning-effort";
 /**
  * Hard dependencies: the loader waits for these services before calling
  * `apply`, so the row never races the boot order of the base bundle rows.
- * `connection` is deliberately absent — only Web profiles provide it, so the
- * RPC channel is mounted through `ctx.inject` instead of blocking this row.
+ *
+ * `connection` and `webServer` are deliberately absent — they carry only the
+ * optional browser-facing RPC channel, and a host that lacks either must keep
+ * the row mounted rather than block it here. They are reached through
+ * `ctx.inject` below, which mounts the channel exactly when both exist.
  */
 export declare const inject: string[];
 export declare const Config: z<Schemastery.ObjectS<NoInfer<{

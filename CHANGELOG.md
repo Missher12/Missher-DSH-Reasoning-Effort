@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.6 — 2026-10-17
+
+- Keep the missing-level heading outside the guidance scroller, align copy actions, and keep controls reachable in short viewports.
+- Follow delayed Host layout movement during resizing so an open popover stays inside the viewport.
+- Detect required Host/client interfaces, use profile configuration when the settings namespace is unavailable, and enable guidance only with a validated request channel.
+- Treat the Models row extension as optional; support late declaration, removal and cleanup without duplicating controls.
+- Preserve the particle design, palette preferences and model-declared reasoning mappings.
+- Validate official npm DSH alpha.5 Web and two Missher community Host runtimes; include actual UI screenshots and explicit verification limits.
+
 ## 0.7.5-local.16 — 2026-10-12 (candidate)
 
 - Keep the missing/mismatched reasoning-level heading outside the scrolling guidance body so scrolling cannot cut the notice in half.

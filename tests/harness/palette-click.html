@@ -64,14 +64,18 @@
 
   const locale = { register: () => () => {}, getLocale: () => ({ active: 'zh' }) }
   const captured = []
+  /* The real ctx answers `ctx.get('slots')` from the same service store as the
+     `ctx.slots` property; the harness must model that, or it would be testing a
+     ctx the plugin is never loaded into. */
+  const slots = {
+    inject: (_slot, fn) => { try { fn() } catch (e) { out.push('  ! inject 抛错: ' + e.message) } },
+    register: (meta, component) => { captured.push({ meta, component }); return () => {} },
+  }
   const ctx = {
-    get: (name) => (name === 'modelDirectories' ? directories : name === 'locale' ? locale : undefined),
+    get: (name) => (name === 'modelDirectories' ? directories : name === 'locale' ? locale : name === 'slots' ? slots : undefined),
     effect: (fn) => { window.__REG__.effects++; const d = fn(); return () => { if (typeof d === 'function') d() } },
     locale,
-    slots: {
-      inject: (_slot, fn) => { try { fn() } catch (e) { out.push('  ! inject 抛错: ' + e.message) } },
-      register: (meta, component) => { captured.push({ meta, component }); return () => {} },
-    },
+    slots,
   }
 
   let exports

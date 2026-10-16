@@ -38,6 +38,12 @@ import { displayLevelName, effortStops, levelIds, levelsText, stopIndex, accepte
 import { positionModelMenu } from './menu-position.js'
 import { requireAcceptedSelection, unsupportedEffort } from './selection.js'
 import {
+  clientCapabilities,
+  LOG_PREFIX,
+  unsupportedMessage,
+  type ClientSlotsLike,
+} from './compat.js'
+import {
   DEFAULT_PALETTE_ID,
   PALETTES,
   paletteOrDefault,
@@ -243,6 +249,24 @@ const ENABLED_STORAGE_KEY = 'dsh-reasoning-effort.enabled'
 const LEGACY_ENABLED_STORAGE_KEY = '@dsh-external/dsh-reasoning-effort.enabled'
 /** LOCAL ADDITION: particle palette id. */
 const PALETTE_STORAGE_KEY = 'dsh-reasoning-effort.palette'
+/**
+ * Services this half must hold before the seat can register.
+ *
+ * `slots`, `modelDirectories`, `connection` and `locale` are called directly.
+ * `remote` and `remote.session` are required *indirectly* and cannot be dropped
+ * just because no line here names them: `modelDirectories.directoryFor(sessionId)`
+ * returns the model-selection service, whose own methods run through a Cordis
+ * service proxy that borrows the **caller's** ctx. The official
+ * `dsh-client-ui-model-selection/lib/client.js` reads `this.ctx.remote.session`
+ * inside that call, so a row without these two inject entries fails at
+ * `directoryFor` with `cannot get property "remote.session" without inject` —
+ * the seat never registers and the composer silently falls back to the shipped
+ * model selector.
+ *
+ * The `@deepseek-ai/dsh-api-remotes/client` import above stays type-only: it
+ * contributes no runtime require, so these entries declare the caller's service
+ * permission, not a value dependency of this bundle.
+ */
 export const inject = ['slots', 'modelDirectories', 'connection', 'locale', 'remote', 'remote.session']
 
 function readEnabledPreference(): boolean {
@@ -1170,13 +1194,36 @@ function PaletteSetting({ t }: PropsLocale<typeof NS>) {
   )
 }
 
-export function apply(ctx: ClientContext) {
-  const modelDirectories = ctx.get('modelDirectories') as ModelDirectoryResolver | undefined
-  if (modelDirectories === undefined) return
+/**
+ * Diagnostics already printed in this page. `apply` runs once per boot, but an
+ * HMR reload re-runs it, and a capability gap is a fact about the build rather
+ * than something to repeat per reload.
+ */
+const reportedCapabilities = new Set<string>()
 
+function reportOnce(message: string, method: 'info' | 'error'): void {
+  if (reportedCapabilities.has(message)) return
+  reportedCapabilities.add(message)
+  console[method](`${LOG_PREFIX} ${message}`)
+}
+
+export function apply(ctx: ClientContext) {
+  const slots = ctx.get('slots') as ClientSlotsLike | undefined
+  const modelDirectories = ctx.get('modelDirectories') as ModelDirectoryResolver | undefined
   const connection = ctx.get('connection') as { rpc?: HostRpc } | undefined
-  const adapt = makeAdaptationService(connection?.rpc)
   const locale = ctx.get('locale') as LocaleRuntimeLike | undefined
+
+  /* Measure the services this build actually provided before registering
+     anything: a missing member must read as an incomplete interface, never as a
+     model that advertises no reasoning levels. */
+  const capabilities = clientCapabilities({ slots, modelDirectories, locale, connection })
+  if (!capabilities.seat || modelDirectories === undefined) {
+    reportOnce(unsupportedMessage(capabilities), 'error')
+    return
+  }
+  for (const note of capabilities.degraded) reportOnce(note, 'info')
+
+  const adapt = makeAdaptationService(connection?.rpc)
 
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'reasoning-effort: dictionaries')
 

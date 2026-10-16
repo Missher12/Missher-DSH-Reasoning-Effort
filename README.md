@@ -1,9 +1,6 @@
 # Missher DSH Reasoning Effort
 
-当前 Git 交付：**0.7.5-local.16**，包含匹配的源码与运行文件。[验证范围与安装说明](./PUBLICATION.md)。Git 同步不会自动更新已安装设备。
-
-
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前正式交付版本：`0.7.5-local.16`。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；版本：`0.7.6`。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -11,36 +8,45 @@
 
 - 在对话模型入口选择模型、调整思考深度；显示阶梯映射到模型实际声明的档位，选择失败会回退。至少两个可用档位才显示滑块。
 - 单层卡片、白色滑块和最高档点阵；保持已选定的八行粒子设计、渐变配色、深浅主题与中英文。颜色仅在“设置 → 通用设置 → 思考滑块配色”调整。减少动态效果时显示稳定帧，页面隐藏时暂停粒子。
-- 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。标题保持完整，正文独立滚动，操作区保持可见；极矮窗口将正文与操作一起滚动，标题不参与滚动。
+- 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。标题保持完整，复制按钮同宽同高，正文独立滚动，操作区保持可见；极矮窗口将正文与操作一起滚动，标题不参与滚动。窗口缩放时跟随宿主布局重新定位，避免弹窗越出屏幕。
 - **模型行内设置需要宿主扩展**：配套 Missher Desktop 的 Models 模块声明 `settings.models.model-fields` 后，思考模式和最高档位显示在文本/图片右侧，共用该模型卡片的保存操作。插件本身不增加文本/图片能力，也不另存模型目录。
 
 ## 宿主要求与验证范围
 
-需要 DSH 的模型目录、会话选模、设置、Slots、Web 客户端和 Host 的 `settings` / `llm` 服务。兼容维护以支持合理的宿主范围、持续适配最新版为目标，按接口能力判断；已测版本只是验证基线。DSH peer 声明为 `*`，当前包对 Cordis / Schemastery 仍有历史精确 peer 声明，详见 `package.json`；宽松 DSH 声明本身不证明所有组合已通过。官方模块由宿主提供。
+按实际接口判断兼容性：需要模型目录、会话选模、Slots、Locale 和设置服务。Host 必须提供 `settings.describe`、`settings.prepareDocument`、`llm.resolveModelInfo`；缺失时给出具体诊断。设置命名空间和指引通道按能力启用；通道必须同时具备路由注册和请求校验能力。
 
-| 宿主/平台 | 已有证据与限制 |
+DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支持 `^3.18.4 || ^3.18.5-alpha.1`，React 为 `^18.2.0`。开发 SDK 保持 `0.2.0-rc.2`。版本范围表示安装准入，实际验证范围如下。
+
+| 宿主 | 0.7.6 验证范围 |
 | --- | --- |
-| macOS Intel / Missher Desktop 定制 rc.2 | `.14` 已有日常安装、Loader 与客户端字节核验；`.15` 只修订包装及文档，运行代码保持一致。本轮验证见 [VERIFICATION.md](VERIFICATION.md)。 |
-| 官方 DSH `0.2.0-rc.2` Web | 已有隔离加载与受控 UI 证据。官方 Models 模块不提供上述模型行扩展；滑块与指引不因此变成模型行控件。 |
-| Ubuntu / Missher Desktop `0.2.1-alpha.2.20261014.1` | `.16` 已安装，公开包文件与安装目录匹配，插件入口 active；完整拖动交互与真实模型参数仍需单独验收。 |
-| 其他宿主或平台 | 未完成完整原生功能验收；按实际接口检查，不以测试版本号作为唯一准入条件。 |
+| 官方 npm DSH `0.2.1-alpha.5` / Cordis `4.0.5` | 隔离 Web profile、实际 Loader、请求校验、只读指引、客户端加载与卸载；真实浏览器检查滑块、复制、配色和宽窄窗口。使用合成模型数据。 |
+| Missher 社区扩展 `0.2.0-rc.2` / `0.2.1-alpha.2` | 实际隔离 Host 启动、Loader、指引、请求校验、客户端字节与卸载检查；不等同于原版官方发行包认证。 |
+| macOS、Windows 原生桌面及其他宿主版本 | 本次未新增原生验收。历史安装记录及详细边界见 [VERIFICATION.md](VERIFICATION.md)。 |
 
-没有模型行扩展时，插件等待扩展注册，原滑块仍可用。不需要额外兼容插件，本包不含宿主模块副本。真实模型是否接受具体参数需按所用端点另行验证。
+模型行扩展是可选能力，缺失时等待声明，声明到达或撤销时同步注册和清理，滑块仍可用。本包不包含宿主模块副本。上述验证未向真实模型端点发起推理请求。
 
-## 安装与更新
+## 界面
 
-从[最新正式 Release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/latest)下载插件 `.tgz` 和同次发布的 SHA256 校验文件。本插件未发布同名 npm 包。当前正式包为 `.16`，已包含标题裁切修复；以下固定地址便于复现当前交付，后续更新从 Latest 选择新包。
+下图来自官方 DSH `0.2.1-alpha.5` 隔离 Web profile，使用合成模型和设置；截图为实际界面。来源与范围见 [截图说明](docs/images/README.md)。
+
+![思考深度滑块](docs/images/reasoning-slider-alpha5.png)
+
+![通用设置中的思考滑块配色](docs/images/reasoning-settings-alpha5.png)
+
+## 固定版本安装
+
+本插件通过 [GitHub Releases](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases) 的构建后 tarball 分发，**未发布同名 npm 包**。选择目标版本的资产及同次发布的 SHA256 校验文件；以下示例固定为 `0.7.6`。
 
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.5-local.16/missher-dsh-reasoning-effort-0.7.5-local.16.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
 dsh --profile web --dump-config
 ```
 
