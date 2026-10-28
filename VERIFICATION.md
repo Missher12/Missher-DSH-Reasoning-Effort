@@ -1,6 +1,30 @@
 # Verification scope / 验证范围
 
-## 0.7.7 — 2026-10-28 (official rc.4 Web acceptance)
+## 0.7.8 — 2026-10-29 (source correction; NOT dynamically verified)
+
+### What this entry covers
+
+The plugin stops contributing any per-model reasoning editor. The official Host edits each model's `reasoningEfforts` inside its own model card under Settings → Models (the official rc.4 `dsh-client-ui-settings-models` bundles `ModelReasoningEfforts`, which edits levels, effort ids and API parameter values beside the text/image capabilities). The 0.7.7 premise — that a Host without `settings.models.model-fields` has no native per-model editor — was wrong and is withdrawn.
+
+Source changes: `src/client/index.tsx` drops `registerModelSettings` and `registerModelsSection`, the two editor stylesheets, and the optional `configForms` / `settingsSchema` / `remote.llm` / `remote.session` seats; `src/client/compat.ts` retires the inline-row diagnostic and removes it from the degraded list; `guidance.howto` and both agent briefs point at the Host model card first. The slider, model selection, colours/particles, enable toggle, guidance panel, core `inject` list and all user configuration are unchanged. The 0.7.7 modules and their tests stay in the tree for history but are unreachable from the client entry.
+
+### Not executed in this round
+
+No type checking, i18n check, client or Host build, bundle test, browser run, Host boot, package archive, install, Git write or release was performed for `0.7.8`.
+
+### Required before this version can be delivered
+
+1. `pnpm run typecheck`, `pnpm run check:i18n`, `pnpm run build` and `pnpm test` (the existing suites stay valid; the retained per-model suites cover only the archived modules).
+2. `node scripts/check-client-load.mjs` against the rebuilt bundle: the factory must still require only `react` / `react/jsx-runtime`, and the built file must contain no per-model editor registration or editor CSS.
+3. Isolated official DSH `0.2.1-rc.4` profile: the model card's native reasoning-level editor remains the only per-model entry; the plugin adds no settings page and no inline row; the slider, model selection, palette rows and read-only guidance still behave as in 0.7.6.
+4. Guidance copy renders in both languages with the Host-card-first wording, and no path claims a plugin-owned page.
+5. Pack, install and native acceptance remain the coordinator's steps; this entry certifies none of them.
+
+### Corrected claim
+
+The 0.7.7 entries below describe the archived page design and its accepted rc.4 Web evidence. They remain historical fact for that build, but the product conclusion drawn from them — that the official Host lacks a native per-model reasoning editor — is superseded by this entry.
+
+## 0.7.7 — 2026-10-28 (candidate; official rc.4 Web acceptance)
 
 ### What this entry covers
 
@@ -19,7 +43,7 @@ Changed surfaces: `model-reasoning.ts` (new shared logic), `model-settings-secti
 
 ### Retained failures and limits
 
-The original npm update-notifier/network failure, missing `configForms` prop type error, 95/96 array-path failure and actual width-390 clipping failure were preserved. The palette fixture was corrected to the already accepted pixel-slider selectors and gradient contract, retaining all 29 behavior checks; input EOF/terminal job-control setup failures were also retained and resolved using a private FIFO. Chrome local-network checks blocked the lifecycle fixture's intercepted bootstrap navigation in one attempt; that error was retained, and the fixture then granted local-network access only to its disposable browser context's exact loopback origin. The notifier correction reused one completed official runtime; the reported product defects were corrected by the original author, and only affected checks were rerun. This acceptance run did not perform native Electron/macOS/Windows validation, real-provider inference or daily installation. The checked package was subsequently published as the formal [v0.7.7 release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7); this section records its pre-publication validation. Release assets preserve the original package and its build-time documentation.
+The original npm update-notifier/network failure, missing `configForms` prop type error, 95/96 array-path failure and actual width-390 clipping failure were preserved. The palette fixture was corrected to the already accepted pixel-slider selectors and gradient contract, retaining all 29 behavior checks; input EOF/terminal job-control setup failures were also retained and resolved using a private FIFO. Chrome local-network checks blocked the lifecycle fixture's intercepted bootstrap navigation in one attempt; that error was retained, and the fixture then granted local-network access only to its disposable browser context's exact loopback origin. The notifier correction reused one completed official runtime; the reported product defects were corrected by the original author, and only affected checks were rerun. No native Electron/macOS/Windows validation, real-provider inference, daily installation, Git publication or release is claimed. This remains an unpublished 0.7.7 candidate; archive completion is reported separately by the packaging receipt.
 
 ### Known limits recorded by the implementation
 

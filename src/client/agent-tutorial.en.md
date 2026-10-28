@@ -9,6 +9,8 @@ A custom route (a provider the user declared under `llm-pi-ai`) carries no such 
 
 Conclusion: **a custom model must declare its own levels.** The plugin cannot invent them — submitting an undeclared level is refused by DSH with `UNSUPPORTED_REASONING_EFFORT`.
 
+> Prefer the model card under Settings → Models: it edits that model's `reasoningEfforts` directly, saving the levels together with the API parameter values. Fall back to the configuration file below only when this host genuinely has no such native editor; never treat a missing slot as proof that the capability is absent, and never build another page or guess endpoint values.
+
 # What to write
 
 In `{{CONFIG_FILE}}`, find that model's entry under `{{ENTRY_PATH}}` and add `reasoningEfforts`. The current DSH Host supplies this location; older builds may use `settings.yaml`, while newer ones may use the profile's `cordis.patch.yml`:

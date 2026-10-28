@@ -9,6 +9,8 @@ DSH 的模型目录只报告**适配器声明过的能力**。pi-ai 适配器在
 
 结论：**自定义模型必须自己声明档位。** 插件不会也不能替用户发明档位——提交未声明的档位会被 DSH 以 `UNSUPPORTED_REASONING_EFFORT` 拒绝。
 
+> 优先用官方「设置 → 模型」里该模型卡片的推理等级编辑完成这件事：它直接写该模型的 `reasoningEfforts`，档位与 API 参数值一起保存。只有宿主确实没有该原生编辑项时，才按下面的配置文件路径手工修改；不要因为缺少某个 slot 就断定宿主没有这个能力，也不要自造页面或猜端点取值。
+
 # 要写什么
 
 在 `{{CONFIG_FILE}}` 的 `{{ENTRY_PATH}}` 列表里找到该模型的条目，加一个 `reasoningEfforts`。该路径由当前 DSH Host 返回，旧版可能使用 `settings.yaml`，新版可能使用 Profile 的 `cordis.patch.yml`：

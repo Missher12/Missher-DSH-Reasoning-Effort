@@ -107,19 +107,19 @@ export function guidanceAvailable(connection: unknown): boolean {
 }
 
 /**
- * The optional-row diagnostic, worded for the lifecycle it describes.
+ * The optional-row diagnostic is retired, not reworded.
  *
- * `apply` runs once, while client plugin rows arrive asynchronously — an
- * undeclared slot here is a normal boot state, and `ctx.slots.inject` keeps
- * waiting for it. Nothing is claimed about the build that the measurement does
- * not support.
+ * The official Models settings module already edits every model's
+ * `reasoningEfforts` — levels, effort ids and API parameter values — inside its
+ * own model card. A host that does not declare `settings.models.model-fields`
+ * is therefore not missing a capability this plugin contributes, and a missing
+ * slot is not evidence that the Host has no native editor. Reporting anything
+ * here would either claim a plugin-owned page that no longer exists or infer a
+ * Host limitation the measurement cannot support, so every declaration state
+ * stays silent. The export is kept so existing callers keep compiling.
  */
-export function modelRowMessage(state: SlotDeclaration): string | null {
-  if (state === 'declared') return null
-  if (state === 'undeclared') {
-    return `${MODEL_FIELDS_SLOT} is not declared, so the inline per-model row cannot be contributed to. The plugin's own "Per-model reasoning levels" settings page provides the same editor while the slot stays undeclared, and the controls move inline as soon as it is declared. The slider, model selection and guidance panels are unaffected`
-  }
-  return `this host exposes no slot-declaration lookup, so ${MODEL_FIELDS_SLOT} cannot be confirmed: the inline row registers only if the slot is declared, and the settings-page fallback is offered while it cannot be confirmed. The slider, model selection and guidance panels are unaffected`
+export function modelRowMessage(_state: SlotDeclaration): string | null {
+  return null
 }
 
 /**
@@ -150,7 +150,10 @@ export function clientCapabilities(surface: ClientSurface): ClientCapabilityRepo
   ]
   const modelRow = slotDeclaration(surface.slots, MODEL_FIELDS_SLOT)
   const guidance = guidanceAvailable(surface.connection)
-  const degraded = [modelRowMessage(modelRow), guidanceMessage(guidance)]
+  /* The inline-row slot is still measured, but its absence is no longer a
+     degraded capability: the Host's own model card owns per-model reasoning
+     editing, so only the guidance channel can report a gap here. */
+  const degraded = [guidanceMessage(guidance)]
     .filter((message): message is string => message !== null)
 
   return { seat: missing.length === 0, guidance, modelRow, missing, degraded }

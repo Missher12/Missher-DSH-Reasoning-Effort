@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.8 — 2026-10-29 (source candidate; not built, tested or published)
+
+- Remove the plugin's independent “Per-model reasoning levels” settings page and the separate inline `settings.models.model-fields` editor. Per-model reasoning levels are set in the Host's own model card under Settings → Models, which already edits that model's `reasoningEfforts` (levels, effort ids and API parameter values) alongside its text/image capabilities. The earlier inference that a missing `settings.models.model-fields` slot meant the Host had no native editor was wrong and is withdrawn.
+- Drop the two editor stylesheets and the optional `configForms` / `settingsSchema` / `remote.llm` / `remote.session` service seats that existed only for that page. The core `inject` list, the effort slider, model selection, colours and particles, the enable toggle, the read-only guidance panel and every existing user configuration are unchanged.
+- Stop reporting the inline row's absence as a degraded capability: `modelRowMessage` no longer claims a plugin-owned page, and the capability report no longer lists it. Other capability checks and exports are unchanged.
+- Guidance copy (`guidance.howto`) and both agent briefs now point at the Host model card first; when a host genuinely has no native editor they say so and use the existing configuration path or an upgrade, instead of inferring a missing feature, creating another page, or guessing endpoint values.
+- Retained for history and reference: the 0.7.7 implementation modules (`model-settings.tsx`, `model-settings-section.tsx`, `model-reasoning.ts`) and their behaviour tests stay in the tree but are no longer reachable from the client entry, so the build does not ship them.
+- **Status:** source only. `0.7.8` has not been type-checked, built, tested, accepted on a native Host, published or installed; `0.7.7` remains the published release in daily use.
+
 ## 0.7.7 — 2026-10-28 (candidate; Web verified, unpublished)
 
 - Add a per-model reasoning page for hosts that do not declare `settings.models.model-fields` (official DSH `0.2.1-rc.4` among them). It uses the public `settings.section` slot and writes the same Host `reasoningEfforts` leaf through `configForms`; there is no plugin-private model configuration.
@@ -12,7 +21,7 @@
 - Resolve the write address by provider plus a unique model id from the user layer, never by catalog order. Duplicate ids, a read-only document, an unreadable namespace or an unproven leaf stay read-only with a specific reason.
 - Capture the revision when a clean draft first becomes dirty, so another row's save never makes this row instantly stale. A dirty row keeps its draft when the Host changes the target and reports the conflict; only an accepted write moves the baseline; refusals and transport failures keep the draft and its revision. A conflict stays until an explicit reset — typing the old baseline back does not clear it — and the reset action remains available while the conflict is pending.
 - Add `model-reasoning` behaviour tests (service member contracts, layer/leaf resolution, override eligibility, schema proof over a real Schemastery serialization, mapping validity, draft lifecycle, fallback lifecycle) to the existing `scripts/test.mjs` suites.
-- **Validation:** affected client types/build, all 103 model-reasoning checks, client-load, palette and isolated official `0.2.1-rc.4` Web settings acceptance passed. Unchanged backend/i18n/first-five-suite results were reused; retained first failures and exact UI/lifecycle limits are described in `VERIFICATION.md`. Published as `v0.7.7`; native desktop validation is tracked separately.
+- **Validation:** affected client types/build, all 103 model-reasoning checks, client-load, palette and isolated official `0.2.1-rc.4` Web settings acceptance passed. Unchanged backend/i18n/first-five-suite results were reused; retained first failures and exact UI/lifecycle limits are described in `VERIFICATION.md`. Candidate only: no release or daily installation.
 
 ## 0.7.6 — 2026-10-17
 
