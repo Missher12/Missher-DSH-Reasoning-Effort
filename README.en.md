@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; version: `0.7.6`.
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; current source is the `0.7.7` candidate (**not yet published**); the latest published release is `0.7.6`.
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -9,7 +9,7 @@ Model selection, a thinking-depth slider mapped to declared model capabilities, 
 - Choose a model and adjust thinking depth from the conversation model control. Displayed steps map to the model's declared levels; failed selections roll back. The slider requires at least two available levels.
 - Preserve the selected single-card design, white thumb, eight-row particle field at the highest level, colour gradient, light/dark themes and Chinese/English UI. Colours live in General Settings. Reduced-motion mode shows a stable frame; hidden pages pause particles.
 - For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The heading stays fully visible, copy buttons have equal dimensions, and the body scrolls independently of the actions; very short menus scroll the body and actions together below the heading. Open menus follow the Host layout during window resizing to stay within the viewport.
-- **Inline model settings require a Host extension:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside text/image controls and share the model card's save action. This plugin does not add text/image capabilities or maintain another model catalog.
+- **Per-model reasoning levels have two entry points over one configuration:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside the model card and share its save action. When the Host does not declare that slot (official DSH `0.2.1-rc.4` does not), the same controls appear on the plugin's own "Per-model reasoning levels" settings page and write the same Host `reasoningEfforts` leaf through the public `configForms` queue. A later declaration moves them back inline, so the two entries never coexist. Advanced mode takes the endpoint's wire values explicitly; the plugin never derives a wire value from a level name. This plugin does not add text/image capabilities or maintain another model catalog.
 
 ## Host requirements and verification scope
 
@@ -25,9 +25,21 @@ DSH peers remain `*`; Cordis accepts `^4.0.4 || ^4.0.5-alpha.1`, Schemastery `^3
 
 The model-row extension is optional. Registration follows its declaration and removal while the slider remains available. This Bundle embeds no Host modules. These checks made no inference calls to real model endpoints.
 
+`0.7.7` adds only the settings-page entry point for hosts that do not declare `settings.models.model-fields`. It writes the same Host `reasoningEfforts` configuration: one exact leaf, other fields preserved; the Host's public `settingsSchema` resolves that leaf and validates the value before anything is sent; a duplicated user model id, an unconfirmed address or a read-only document stays read-only. A built-in model uses `modelOverrides` only when the route declares no models list and the id belongs to the installed catalog, and its inherited value is read from the base layer.
+
+`0.7.7` has passed type checks, builds, 103 model-reasoning behaviour checks and 29 palette browser checks. An isolated official npm DSH `0.2.1-rc.4` Web profile exercised the settings page, explicit mappings, invalid-save blocking, persistence after reopening and refresh, preservation of neighboring models, and draft conflicts across two Host changes. Normal-width and 390-pixel layouts were measured and their actual screenshots inspected after the corrections.
+
+This is combined coverage across stages. The final CSS changes received affected client type, build, load and layout checks; the 103 logic checks, 29 palette checks, save/conflict behaviour, unchanged backend, bilingual copy and first five logic suites reuse earlier passing results from this candidate. They were not all rerun in one window. Another 50 lifecycle checks used the actual rc.4 Cordis/module system/SlotRegistry and candidate factory, with controlled declaration changes and non-slot services; they do not establish end-to-end inline saving on a community Host.
+
+**0.7.7 remains an unpublished candidate, not installed in the daily profile.** These Web checks used synthetic models and do not certify native Electron, macOS, Windows or real model endpoints. The table above retains the separate historical 0.7.6 scope. See [VERIFICATION.md](VERIFICATION.md) for retained failures, reused evidence and limits.
+
 ## Screenshots
 
-Actual UI from an isolated official DSH `0.2.1-alpha.5` Web profile with synthetic models and settings. See [screenshot provenance](docs/images/README.md).
+The `0.7.7` per-model settings page below is an actual capture from an isolated official DSH `0.2.1-rc.4` Web profile with synthetic models and settings. It is not a native Electron screenshot.
+
+![Per-model reasoning settings (official rc.4 Web, synthetic models)](docs/images/reasoning-model-settings-rc4.png)
+
+The two historical 0.7.6 captures below show an isolated official DSH `0.2.1-alpha.5` Web profile, also using synthetic models and settings. See [provenance for all three images](docs/images/README.md).
 
 ![Thinking-depth slider](docs/images/reasoning-slider-alpha5.png)
 

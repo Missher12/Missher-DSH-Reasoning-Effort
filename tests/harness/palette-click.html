@@ -99,7 +99,7 @@
   const seat = captured.find((c) => c.meta.name === 'conversation.input.model')
   check('设置行已注册', !!paletteRow, true)
   check('座位已注册', !!seat, true)
-  check('注入的样式表已写进 head', document.querySelectorAll('style[data-plugin^="dsh-reasoning-effort"]').length >= 1, true)
+  check('注入的样式表已写进 head', document.querySelectorAll('style[data-plugin="@missher/dsh-reasoning-effort"]').length >= 1, true)
 
   // ---- 渲染 ----
   const zh = {}
@@ -152,12 +152,27 @@
       check('初始 data-palette = upstream（逐字上游）',
         effortRoot && effortRoot.getAttribute('data-palette'), 'upstream')
       check('默认色一条覆盖规则都不生成', !/data-palette="upstream"/.test(
-        [...document.querySelectorAll('style[data-plugin^="dsh-reasoning-effort"]')].map((s) => s.textContent).join('')), true)
+        [...document.querySelectorAll('style[data-plugin="@missher/dsh-reasoning-effort"]')].map((s) => s.textContent).join('')), true)
 
       const trackOf = () => {
-        const el = document.querySelector('.re-effort-track')
-        const cs = el && getComputedStyle(el)
-        return cs ? (cs.backgroundColor + ' | ' + cs.backgroundImage) : ''
+        const el = document.querySelector('.re-effort.re-depth .re-depth-track')
+        const background = el && getComputedStyle(el).backgroundImage
+        if (!el || !background || background === 'none' || !background.startsWith('linear-gradient(')) {
+          throw new Error('实际像素轨道不存在或没有有效渐变')
+        }
+        return background
+      }
+      // Fixed accepted pixel-slider colours, independent of the product's
+      // data attribute, CSS variable and stylesheet text. Let this browser
+      // serialize the same light-to-dark visual contract before comparing it.
+      const expectedTrack = (accent) => {
+        const probe = document.createElement('div')
+        probe.style.backgroundImage = 'linear-gradient(90deg, color-mix(in srgb, ' + accent + ' 30%, white), color-mix(in srgb, ' + accent + ' 85%, black))'
+        document.body.appendChild(probe)
+        const expected = getComputedStyle(probe).backgroundImage
+        probe.remove()
+        if (!expected || expected === 'none') throw new Error('浏览器不支持既定像素渐变')
+        return expected
       }
       const before = trackOf()
       out.push('  轨道(violet): ' + before.slice(0, 110))
@@ -171,7 +186,7 @@
         const now = trackOf()
         check('轨道样式跟着变了', now !== before, true)
         out.push('  轨道(green) : ' + now.slice(0, 110))
-        check('轨道变成绿色系', /228, 251, 234|#e4fbea/.test(now), true)
+        check('轨道变成绿色系', now === expectedTrack('#1fa055'), true)
         check('翠绿色块 aria-checked=true', green.getAttribute('aria-checked'), 'true')
 
         // 面板关掉时也能看见：触发器上的档位文字跟着配色走
@@ -190,8 +205,8 @@
           check('data-palette 变成 violet', r3 && r3.getAttribute('data-palette'), 'violet')
           const purple = trackOf()
           out.push('  轨道(violet): ' + purple.slice(0, 110))
-          check('紫色确实生效（不是蓝的 #e5f0ff）', !/229, 240, 255/.test(purple), true)
-          check('紫色轨道 = rgb(243, 232, 255)', /243, 232, 255/.test(purple), true)
+          check('紫色确实生效（不同于初始轨道）', purple !== before, true)
+          check('紫色像素轨道符合选中颜色的浅到深渐变', purple === expectedTrack('#7a2ec4'), true)
           const textColor2 = getComputedStyle(document.querySelector('.re-model-effort')).color
           out.push('  档位文字色: ' + textColor2)
           check('触发器文字变紫 (#7a2ec4 = 122,46,196)', textColor2, 'rgb(122, 46, 196)')
@@ -204,7 +219,7 @@
             check('data-palette 回到 upstream', r4 && r4.getAttribute('data-palette'), 'upstream')
             const back = trackOf()
             out.push('  轨道(upstream): ' + back.slice(0, 110))
-            check('回到逐字上游的浅蓝 rgb(229, 240, 255)', /229, 240, 255/.test(back), true)
+            check('回到初始像素轨道及默认蓝色渐变', back === before && back === expectedTrack('#4d70ff'), true)
             check('触发器文字回到上游蓝 rgb(77, 112, 255)',
               getComputedStyle(document.querySelector('.re-model-effort')).color, 'rgb(77, 112, 255)')
           } catch (e) { out.push('  ! 抛错: ' + e.message) } finally { finish() } }, 150)

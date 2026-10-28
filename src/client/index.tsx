@@ -33,6 +33,21 @@ import {
 import { CSS } from './styles.js'
 import { PIXEL_CSS } from './pixel-styles.js'
 import { registerModelSettings, MODEL_SETTINGS_CSS } from './model-settings.js'
+import {
+  configFormsOf,
+  llmDirectoryOf,
+  modelCatalogOf,
+  settingsSchemaOf,
+  type ConfigFormsLike,
+  type LlmDirectoryLike,
+  type ModelCatalogLike,
+  type SettingsSchemaLike,
+} from './model-reasoning.js'
+import {
+  createServiceStore,
+  MODELS_SECTION_CSS,
+  registerModelsSection,
+} from './model-settings-section.js'
 import { PixelField } from './pixel-field.js'
 import { displayLevelName, effortStops, levelIds, levelsText, stopIndex, acceptedStopIndex, type EffortStop } from './levels.js'
 import { positionModelMenu } from './menu-position.js'
@@ -1230,7 +1245,7 @@ export function apply(ctx: ClientContext) {
   ctx.effect(() => {
     const style = document.createElement('style')
     style.dataset.plugin = '@missher/dsh-reasoning-effort'
-    style.textContent = CSS + PIXEL_CSS + MODEL_SETTINGS_CSS
+    style.textContent = CSS + PIXEL_CSS + MODEL_SETTINGS_CSS + MODELS_SECTION_CSS
     document.head.appendChild(style)
     return () => style.remove()
   }, 'reasoning-effort: styles')
@@ -1249,6 +1264,41 @@ export function apply(ctx: ClientContext) {
   }, 'reasoning-effort: preference sync')
 
   registerModelSettings(ctx)
+
+  /* Every service the fallback page needs is an OPTIONAL seat: a host that
+     never provides one keeps the slider, model selection and guidance
+     untouched, and the page reports the gap instead of failing here. Never add
+     them to `inject` — that would block the whole row on such a host.
+     `ctx.inject` is Cordis's own optional-service hook; the type check only
+     keeps a minimal synthetic harness (which models the services under test,
+     not the whole runtime) loadable.
+     `remote.llm` is a namespace service: reading it without injecting it throws
+     before any promise exists, so it gets a seat of its own rather than being
+     read through the root remote. */
+  const configForms = createServiceStore<ConfigFormsLike>()
+  const settingsSchema = createServiceStore<SettingsSchemaLike>()
+  const llmDirectory = createServiceStore<LlmDirectoryLike>()
+  const modelCatalog = createServiceStore<ModelCatalogLike>()
+  if (typeof ctx.inject === 'function') {
+    ctx.inject(['configForms'], (seat) => {
+      configForms.set(configFormsOf(seat.get('configForms')))
+      seat.effect(() => () => configForms.set(undefined), 'reasoning-effort: settings forms seat')
+    })
+    ctx.inject(['settingsSchema'], (seat) => {
+      settingsSchema.set(settingsSchemaOf(seat.get('settingsSchema')))
+      seat.effect(() => () => settingsSchema.set(undefined), 'reasoning-effort: settings schema seat')
+    })
+    ctx.inject(['remote.llm'], (seat) => {
+      llmDirectory.set(llmDirectoryOf(seat.get('remote.llm')))
+      seat.effect(() => () => llmDirectory.set(undefined), 'reasoning-effort: llm directory seat')
+    })
+    ctx.inject(['remote.session'], (seat) => {
+      modelCatalog.set(modelCatalogOf(seat.get('remote.session')))
+      seat.effect(() => () => modelCatalog.set(undefined), 'reasoning-effort: model catalog seat')
+    })
+  }
+
+  registerModelsSection(ctx, { configForms, settingsSchema, llmDirectory, modelCatalog, locale })
 
   ctx.slots.inject(SETTINGS_SLOT, () =>
     ctx.slots.register(

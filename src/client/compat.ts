@@ -117,9 +117,9 @@ export function guidanceAvailable(connection: unknown): boolean {
 export function modelRowMessage(state: SlotDeclaration): string | null {
   if (state === 'declared') return null
   if (state === 'undeclared') {
-    return `${MODEL_FIELDS_SLOT} is not declared yet: the per-model reasoning row registers as soon as the Models settings module declares it (the slot wait stays active). The slider, model selection and guidance panels are unaffected`
+    return `${MODEL_FIELDS_SLOT} is not declared, so the inline per-model row cannot be contributed to. The plugin's own "Per-model reasoning levels" settings page provides the same editor while the slot stays undeclared, and the controls move inline as soon as it is declared. The slider, model selection and guidance panels are unaffected`
   }
-  return `this host exposes no slot-declaration lookup, so ${MODEL_FIELDS_SLOT} cannot be confirmed: the per-model row registers only if the slot is declared. The slider, model selection and guidance panels are unaffected`
+  return `this host exposes no slot-declaration lookup, so ${MODEL_FIELDS_SLOT} cannot be confirmed: the inline row registers only if the slot is declared, and the settings-page fallback is offered while it cannot be confirmed. The slider, model selection and guidance panels are unaffected`
 }
 
 /**
