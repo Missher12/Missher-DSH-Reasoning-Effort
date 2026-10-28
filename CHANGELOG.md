@@ -12,7 +12,7 @@
 - Resolve the write address by provider plus a unique model id from the user layer, never by catalog order. Duplicate ids, a read-only document, an unreadable namespace or an unproven leaf stay read-only with a specific reason.
 - Capture the revision when a clean draft first becomes dirty, so another row's save never makes this row instantly stale. A dirty row keeps its draft when the Host changes the target and reports the conflict; only an accepted write moves the baseline; refusals and transport failures keep the draft and its revision. A conflict stays until an explicit reset — typing the old baseline back does not clear it — and the reset action remains available while the conflict is pending.
 - Add `model-reasoning` behaviour tests (service member contracts, layer/leaf resolution, override eligibility, schema proof over a real Schemastery serialization, mapping validity, draft lifecycle, fallback lifecycle) to the existing `scripts/test.mjs` suites.
-- **Validation:** affected client types/build, all 103 model-reasoning checks, client-load, palette and isolated official `0.2.1-rc.4` Web settings acceptance passed. Unchanged backend/i18n/first-five-suite results were reused; retained first failures and exact UI/lifecycle limits are described in `VERIFICATION.md`. Candidate only: no release or daily installation.
+- **Validation:** affected client types/build, all 103 model-reasoning checks, client-load, palette and isolated official `0.2.1-rc.4` Web settings acceptance passed. Unchanged backend/i18n/first-five-suite results were reused; retained first failures and exact UI/lifecycle limits are described in `VERIFICATION.md`. Published as `v0.7.7`; native desktop validation is tracked separately.
 
 ## 0.7.6 — 2026-10-17
 

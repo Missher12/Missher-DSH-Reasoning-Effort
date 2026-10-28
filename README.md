@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前源码为 `0.7.7` 候选（**尚未发布**），最近一次已发布版本为 `0.7.6`。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前正式发布版本为 [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -31,7 +31,7 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 这是分阶段合并覆盖：最终 CSS 调整后重验受影响的客户端类型、构建、加载与页面布局；103 项逻辑、29 项配色、保存与冲突处理，以及未变的后端、双语文案和前五组逻辑套件复用本候选此前通过的结果，不代表同一轮全量重跑。另有 50 项生命周期检查使用实际 rc.4 Cordis/模块系统/SlotRegistry 和候选插件工厂，但声明变化与非 slot 服务为受控夹具，不等于社区宿主行内保存的端到端验收。
 
-**0.7.7 仍是未发布、未安装到日常 profile 的候选。**上述使用合成模型的 Web 验证不等于原生 Electron、macOS、Windows 或真实模型端点验收；上表保留独立的 0.7.6 历史范围。失败记录、复用来源与限制见 [VERIFICATION.md](VERIFICATION.md)。
+**0.7.7 已正式发布。**上述使用合成模型的 Web 验证不等于原生 Electron、macOS、Windows 或真实模型端点验收；上表保留独立的 0.7.6 历史范围。失败记录、复用来源与限制见 [VERIFICATION.md](VERIFICATION.md)。
 
 ## 界面
 
@@ -52,13 +52,13 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
 dsh --profile web --dump-config
 ```
 

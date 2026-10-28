@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; current source is the `0.7.7` candidate (**not yet published**); the latest published release is `0.7.6`.
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; the current formal release is [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -31,7 +31,7 @@ The model-row extension is optional. Registration follows its declaration and re
 
 This is combined coverage across stages. The final CSS changes received affected client type, build, load and layout checks; the 103 logic checks, 29 palette checks, save/conflict behaviour, unchanged backend, bilingual copy and first five logic suites reuse earlier passing results from this candidate. They were not all rerun in one window. Another 50 lifecycle checks used the actual rc.4 Cordis/module system/SlotRegistry and candidate factory, with controlled declaration changes and non-slot services; they do not establish end-to-end inline saving on a community Host.
 
-**0.7.7 remains an unpublished candidate, not installed in the daily profile.** These Web checks used synthetic models and do not certify native Electron, macOS, Windows or real model endpoints. The table above retains the separate historical 0.7.6 scope. See [VERIFICATION.md](VERIFICATION.md) for retained failures, reused evidence and limits.
+**0.7.7 is now a formal release.** These Web checks used synthetic models and do not certify native Electron, macOS, Windows or real model endpoints. The table above retains the separate historical 0.7.6 scope. See [VERIFICATION.md](VERIFICATION.md) for retained failures, reused evidence and limits.
 
 ## Screenshots
 
@@ -52,13 +52,13 @@ Distribution uses built tarballs in [GitHub Releases](https://github.com/Missher
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.6/missher-dsh-reasoning-effort-0.7.6.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
 dsh --profile web --dump-config
 ```
 

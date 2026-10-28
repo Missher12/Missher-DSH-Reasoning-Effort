@@ -1,6 +1,6 @@
 # Verification scope / 验证范围
 
-## 0.7.7 — 2026-10-28 (candidate; official rc.4 Web acceptance)
+## 0.7.7 — 2026-10-28 (official rc.4 Web acceptance)
 
 ### What this entry covers
 
@@ -19,7 +19,7 @@ Changed surfaces: `model-reasoning.ts` (new shared logic), `model-settings-secti
 
 ### Retained failures and limits
 
-The original npm update-notifier/network failure, missing `configForms` prop type error, 95/96 array-path failure and actual width-390 clipping failure were preserved. The palette fixture was corrected to the already accepted pixel-slider selectors and gradient contract, retaining all 29 behavior checks; input EOF/terminal job-control setup failures were also retained and resolved using a private FIFO. Chrome local-network checks blocked the lifecycle fixture's intercepted bootstrap navigation in one attempt; that error was retained, and the fixture then granted local-network access only to its disposable browser context's exact loopback origin. The notifier correction reused one completed official runtime; the reported product defects were corrected by the original author, and only affected checks were rerun. No native Electron/macOS/Windows validation, real-provider inference, daily installation, Git publication or release is claimed. This remains an unpublished 0.7.7 candidate; archive completion is reported separately by the packaging receipt.
+The original npm update-notifier/network failure, missing `configForms` prop type error, 95/96 array-path failure and actual width-390 clipping failure were preserved. The palette fixture was corrected to the already accepted pixel-slider selectors and gradient contract, retaining all 29 behavior checks; input EOF/terminal job-control setup failures were also retained and resolved using a private FIFO. Chrome local-network checks blocked the lifecycle fixture's intercepted bootstrap navigation in one attempt; that error was retained, and the fixture then granted local-network access only to its disposable browser context's exact loopback origin. The notifier correction reused one completed official runtime; the reported product defects were corrected by the original author, and only affected checks were rerun. This acceptance run did not perform native Electron/macOS/Windows validation, real-provider inference or daily installation. The checked package was subsequently published as the formal [v0.7.7 release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7); this section records its pre-publication validation. Release assets preserve the original package and its build-time documentation.
 
 ### Known limits recorded by the implementation
 
