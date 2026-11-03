@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前正式发布版本为 [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7)。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前源码版本为 `0.7.8`（移除 0.7.7 的设置页回退），最近正式发布为 [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -9,7 +9,7 @@
 - 在对话模型入口选择模型、调整思考深度；显示阶梯映射到模型实际声明的档位，选择失败会回退。至少两个可用档位才显示滑块。
 - 单层卡片、白色滑块和最高档点阵；保持已选定的八行粒子设计、渐变配色、深浅主题与中英文。颜色仅在“设置 → 通用设置 → 思考滑块配色”调整。减少动态效果时显示稳定帧，页面隐藏时暂停粒子。
 - 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。标题保持完整，复制按钮同宽同高，正文独立滚动，操作区保持可见；极矮窗口将正文与操作一起滚动，标题不参与滚动。窗口缩放时跟随宿主布局重新定位，避免弹窗越出屏幕。
-- **每模型推理档位有两个入口，同一份配置**：配套 Missher Desktop 的 Models 模块声明 `settings.models.model-fields` 时，思考模式和最高档位显示在模型卡片右侧，共用该卡片的保存操作。宿主不声明该 slot 时（官方 DSH `0.2.1-rc.4` 即如此），同一套控件改为出现在插件自己的设置页“每模型推理档位”，通过宿主公开的 `configForms` 写回同一份 `reasoningEfforts` 叶节点；slot 之后出现会自动移回行内，不会出现两个入口。高级模式可显式填写端点取值，插件不会按档位名猜取值。插件本身不增加文本/图片能力，也不另存模型目录。
+- **每模型推理档位只走宿主声明的行内入口**：配套 Missher Desktop 的 Models 模块声明 `settings.models.model-fields` 时，思考模式和最高档位显示在模型卡片右侧，共用该卡片的保存操作。宿主不声明该 slot 时（官方 DSH `0.2.1-rc.4` 即如此），保持原生模型选择、滑块与指引，**不再提供插件私有设置页**（0.7.8 移除 0.7.7 的设置页回退）。高级模式可显式填写端点取值，插件不会按档位名猜取值。插件本身不增加文本/图片能力，也不另存模型目录。
 
 ## 宿主要求与验证范围
 
@@ -33,9 +33,11 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 **0.7.7 已正式发布。**上述使用合成模型的 Web 验证不等于原生 Electron、macOS、Windows 或真实模型端点验收；上表保留独立的 0.7.6 历史范围。失败记录、复用来源与限制见 [VERIFICATION.md](VERIFICATION.md)。
 
+`0.7.8` 移除了 0.7.7 的设置页回退：宿主不声明 `settings.models.model-fields` 时不再注入独立设置页，行内入口与既有滑块、指引保持不变；类型检查、构建和 103 项模型档位行为检查已在本机复跑通过。界面章节中的设置页截图属于 0.7.7 历史记录。
+
 ## 界面
 
-`0.7.7` 每模型设置页：下图为官方 DSH `0.2.1-rc.4` 隔离 Web profile 的实际页面，使用合成模型和设置；不是原生 Electron 截图。
+`0.7.7` 历史每模型设置页（0.7.8 已移除）：下图为官方 DSH `0.2.1-rc.4` 隔离 Web profile 的实际页面，使用合成模型和设置；不是原生 Electron 截图。
 
 ![每模型推理档位设置页（官方 rc.4 Web，合成模型）](docs/images/reasoning-model-settings-rc4.png)
 

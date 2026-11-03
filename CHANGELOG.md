@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.8 — 2026-11-03
+
+- Remove the fallback "per-model reasoning levels" settings page introduced in 0.7.7. Per-model levels are now contributed only through the Host-declared `settings.models.model-fields` slot; a Host without that slot keeps the native model selection, slider and guidance untouched.
+- Keep the shared inline control, Host capability checks and public-schema write path unchanged. No plugin-private model configuration is introduced.
+- Validation: client type check, build, 103 model-reasoning behaviour checks and client-load checks passed against the DSH `0.2.1-rc.4` host line.
+
 ## 0.7.7 — 2026-10-28 (candidate; Web verified, unpublished)
 
 - Add a per-model reasoning page for hosts that do not declare `settings.models.model-fields` (official DSH `0.2.1-rc.4` among them). It uses the public `settings.section` slot and writes the same Host `reasoningEfforts` leaf through `configForms`; there is no plugin-private model configuration.

@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; the current formal release is [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7).
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; the current source version is `0.7.8` (the 0.7.7 settings-page fallback has been removed), with [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7) as the most recent formal release.
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -9,7 +9,7 @@ Model selection, a thinking-depth slider mapped to declared model capabilities, 
 - Choose a model and adjust thinking depth from the conversation model control. Displayed steps map to the model's declared levels; failed selections roll back. The slider requires at least two available levels.
 - Preserve the selected single-card design, white thumb, eight-row particle field at the highest level, colour gradient, light/dark themes and Chinese/English UI. Colours live in General Settings. Reduced-motion mode shows a stable frame; hidden pages pause particles.
 - For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The heading stays fully visible, copy buttons have equal dimensions, and the body scrolls independently of the actions; very short menus scroll the body and actions together below the heading. Open menus follow the Host layout during window resizing to stay within the viewport.
-- **Per-model reasoning levels have two entry points over one configuration:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside the model card and share its save action. When the Host does not declare that slot (official DSH `0.2.1-rc.4` does not), the same controls appear on the plugin's own "Per-model reasoning levels" settings page and write the same Host `reasoningEfforts` leaf through the public `configForms` queue. A later declaration moves them back inline, so the two entries never coexist. Advanced mode takes the endpoint's wire values explicitly; the plugin never derives a wire value from a level name. This plugin does not add text/image capabilities or maintain another model catalog.
+- **Per-model reasoning levels use only the Host-declared inline entry:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside the model card and share its save action. When the Host does not declare that slot (official DSH `0.2.1-rc.4` does not), the native model selection, slider and guidance remain untouched and **no plugin-private settings page is offered** (0.7.8 removes the 0.7.7 fallback). Advanced mode takes the endpoint's wire values explicitly; the plugin never derives a wire value from a level name. This plugin does not add text/image capabilities or maintain another model catalog.
 
 ## Host requirements and verification scope
 
@@ -33,9 +33,11 @@ This is combined coverage across stages. The final CSS changes received affected
 
 **0.7.7 is now a formal release.** These Web checks used synthetic models and do not certify native Electron, macOS, Windows or real model endpoints. The table above retains the separate historical 0.7.6 scope. See [VERIFICATION.md](VERIFICATION.md) for retained failures, reused evidence and limits.
 
+`0.7.8` removes the 0.7.7 settings-page fallback: when the Host does not declare `settings.models.model-fields`, the plugin no longer injects a standalone settings page, while the inline entry, slider and guidance are unchanged. Type check, build and the 103 model-reasoning behaviour checks were rerun locally for this change. The settings-page screenshot in the Screenshots section is retained as historical 0.7.7 evidence.
+
 ## Screenshots
 
-The `0.7.7` per-model settings page below is an actual capture from an isolated official DSH `0.2.1-rc.4` Web profile with synthetic models and settings. It is not a native Electron screenshot.
+The `0.7.7` historical per-model settings page below (removed in 0.7.8) is an actual capture from an isolated official DSH `0.2.1-rc.4` Web profile with synthetic models and settings. It is not a native Electron screenshot.
 
 ![Per-model reasoning settings (official rc.4 Web, synthetic models)](docs/images/reasoning-model-settings-rc4.png)
 
