@@ -96,11 +96,8 @@ interface AdaptationService {
 /**
  * Localized field-block template for a model the knowledge base does not know.
  *
- * `compat` stays a commented example rather than a written block: a guessed
- * `thinkingFormat` is worse than none, because the endpoint then receives a
- * switch it does not read, while an absent `compat` lets the adapter apply its
- * own base-URL detection (which is what an unrecognized OpenAI-compatible
- * endpoint wants anyway, and the correct vendor format for a recognized one).
+ * Keep the template focused on the declaration; endpoint-specific compatibility
+ * fields belong in the guidance, not in a generic copy-ready block.
  */
 function templateSnippet(t: ReasoningEffortTranslate, modelIndent: number): string {
   const fieldPrefix = ' '.repeat(modelIndent + 2)
@@ -109,11 +106,6 @@ function templateSnippet(t: ReasoningEffortTranslate, modelIndent: number): stri
     `${fieldPrefix}reasoningEfforts:`,
     `${valuePrefix}low: "low"        # ${t('yaml.keyComment')}`,
     `${valuePrefix}high: "high"      # ${t('yaml.valueComment')}`,
-    `${fieldPrefix}# ${t('yaml.compatComment')}`,
-    `${fieldPrefix}# compat:`,
-    `${fieldPrefix}#   thinkingFormat: "qwen"`,
-    `${fieldPrefix}#   supportsReasoningEffort: false`,
-    `${fieldPrefix}#   supportsDeveloperRole: false`,
   ].join('\n')
 }
 
@@ -168,14 +160,7 @@ function agentBrief(
     t('agent.factsHeading'),
     facts,
     '',
-    t('agent.task'),
-    '',
-    '---',
-    '',
-    tutorial.replace(/\r\n/gu, '\n')
-      .replaceAll('{{CONFIG_FILE}}', configDocumentName(guidance.settingsPath))
-      .replaceAll('{{ENTRY_PATH}}', guidance.entryPath)
-      .trim(),
+    tutorial.trim(),
     '',
     `## ${t('agent.snippetHeading')}`,
     '',

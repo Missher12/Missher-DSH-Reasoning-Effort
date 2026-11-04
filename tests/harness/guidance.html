@@ -1,0 +1,96 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reasoning guidance acceptance</title>
+<style>
+  body { margin: 0; font-family: system-ui, sans-serif; }
+  #mount { position: fixed; right: 24px; bottom: 24px; }
+  #out { margin: 12px; max-width: 45%; white-space: pre-wrap; font-size: 11px; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+</style>
+<div id="mount"></div><pre id="out">Running…</pre>
+<script src="./react-globals.js"></script>
+<script>window.__ModuleLoader__ = { load: module => { window.clientModule = module } }</script>
+<script src="./plugin.js"></script>
+<script>
+;(async () => {
+  const results = []
+  const check = (name, value) => results.push({ name, ok: Boolean(value) })
+  const wait = () => new Promise(resolve => setTimeout(resolve, 100))
+  const english = new URLSearchParams(location.search).get('lang') === 'en'
+  const labels = english ? window.labelsEn : window.labels
+  const t = (key, params = {}) => Object.entries(params).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, value), labels[key] ?? key)
+  const guidance = { provider: 'test-provider', model: 'test-model', userDeclared: true, needsGuide: true,
+    reason: 'missing', current: [], expected: [], matched: false, mode: 'insert', noteKey: null, note: 'Endpoint documentation required.',
+    warning: null, entryHead: null, fieldBlock: null, entryLine: '- id: test-model',
+    entryPath: 'providers.test-provider.models', modelIndent: 10, settingsPath: '/test/profile/cordis.patch.yml' }
+  let state = { current: { provider: guidance.provider, model: guidance.model }, routable: true, status: 'ready', error: null, failures: [],
+    groups: [{ id: guidance.provider, name: 'Test provider', models: [{ id: guidance.model, name: 'Test model' }] }] }
+  const listeners = new Set()
+  const publish = () => { state = { ...state }; for (const listener of listeners) listener() }
+  const directory = { store: { subscribe: fn => { listeners.add(fn); return () => listeners.delete(fn) }, getSnapshot: () => state },
+    load: async () => state, select: async () => ({ ok: true }) }
+  const captured = []
+  const slots = { spec: name => name === 'settings.models.model-fields' ? undefined : {},
+    inject: (name, fn) => name === 'settings.models.model-fields' ? () => {} : fn(),
+    register: (meta, component) => { captured.push({ meta, component }); return () => {} } }
+  const locale = { register: () => () => {}, getLocale: () => ({ active: english ? 'en' : 'zh' }) }
+  const services = { slots, locale, modelDirectories: { directoryFor: () => directory },
+    connection: { rpc: { call: async () => ({ ok: true, value: guidance }) } } }
+  let copiedText = ''
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText: async text => { copiedText = text } }, configurable: true })
+  try {
+    const plugin = window.clientModule.factory(name => name === 'react' ? window.React : window.jsxRuntime)
+    plugin.apply({ ...services, get: name => services[name], effect: fn => fn() })
+    check('A host without the inline slot receives no standalone settings page', !captured.some(row => row.meta.name === 'settings.section'))
+    const seat = captured.find(row => row.meta.name === 'conversation.input.model')
+    window.createRoot(document.getElementById('mount')).render(window.React.createElement(seat.component, { ...seat.meta.inject('test-session'), t }))
+    await wait()
+    document.querySelector('.re-model-trigger').click()
+    await wait()
+    const menu = document.querySelector('.re-model-menu')
+    const bounds = () => {
+      const { x, y, width, height } = menu.getBoundingClientRect()
+      return { x, y, width, height }
+    }
+    const original = bounds()
+    const stable = () => Object.entries(original).every(([key, value]) => Math.abs(bounds()[key] - value) < 1)
+    document.querySelector('.re-adapt-open').click()
+    await wait()
+    const expanded = bounds()
+    check('Expanding guidance keeps the same frame', stable())
+    guidance.note = 'Long diagnostic text and endpoint details. '.repeat(80)
+    state.error = 'A long rejected configuration message. '.repeat(30)
+    publish()
+    await wait()
+    check('Long diagnostics and errors stay inside the frame', stable())
+    const body = document.querySelector('.re-model-body')
+    const scroll = menu.hasAttribute('data-short-menu') ? document.querySelector('.re-model-content') : body
+    check('Long content can scroll without horizontal overflow', scroll.scrollHeight > scroll.clientHeight && menu.scrollWidth <= menu.clientWidth + 1)
+    document.querySelector('.re-adapt-agent').click()
+    await wait()
+    check('Copy feedback keeps the same frame', stable())
+    check('Agent brief remains concise', copiedText.length > 0 && copiedText.length <= (english ? 2100 : 1400))
+    check('Agent brief retains the exact target and declaration rules', [guidance.provider, guidance.model, guidance.settingsPath, guidance.entryPath,
+      'reasoningEfforts', 'minimal', 'xhigh', 'compat'].every(value => copiedText.includes(value)) && !copiedText.includes('{{'))
+    document.querySelector('.re-adapt-cancel').click()
+    await wait()
+    check('Collapsing guidance keeps the same frame', stable())
+    check('The frame remains inside the viewport', original.x >= 0 && original.y >= 0 && original.x + original.width <= innerWidth && original.y + original.height <= innerHeight)
+    guidance.note = 'Endpoint documentation required.'
+    state.error = null
+    publish()
+    document.querySelector('.re-adapt-open').click()
+    await wait()
+    const action = document.querySelector('.re-adapt-agent')
+    if (menu.hasAttribute('data-short-menu')) action.scrollIntoView({ block: 'center' })
+    const rect = action.getBoundingClientRect()
+    check('Copy action remains reachable in a short viewport', action.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)))
+    window.__MEASUREMENTS__ = { original, expanded, final: bounds(), briefCharacters: copiedText.length }
+  } catch (error) { check(error.stack ?? String(error), false) }
+  const failed = results.filter(result => !result.ok).length
+  window.__RESULT__ = { pass: results.length - failed, fail: failed, results }
+  document.getElementById('out').textContent = `${results.length - failed}/${results.length} passed\n` + results.map(result => `${result.ok ? 'PASS' : 'FAIL'} ${result.name}`).join('\n')
+  document.title = failed === 0 ? 'PASS — Reasoning guidance' : 'FAIL — Reasoning guidance'
+})()
+</script>

@@ -256,6 +256,7 @@ export const CSS = `
 .re-model-content,
 .re-model-body { display: contents; }
 .re-model-menu[data-guidance-card] {
+  height: min(360px, var(--re-menu-height, calc(100dvh - 24px)));
   white-space: normal;
   overflow-wrap: anywhere;
   display: flex;
@@ -267,6 +268,7 @@ export const CSS = `
 .re-model-menu[data-guidance-card] .re-model-content {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
 }
 .re-adapt-heading {
@@ -276,6 +278,7 @@ export const CSS = `
 }
 .re-model-menu[data-guidance-card] .re-model-body {
   display: block;
+  flex: 1;
   min-height: 0;
   margin: 0 0 8px;
   overflow-x: hidden;

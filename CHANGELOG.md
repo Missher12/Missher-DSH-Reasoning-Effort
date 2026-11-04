@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0 — 2026-11-05
+
+- Keep the guidance frame at a stable 312 × 360 px, constrained by the available viewport; long content scrolls internally without resizing the frame.
+- Shorten both agent briefs and generic YAML templates while retaining exact model/configuration locations, endpoint-verification requirements and existing-field preservation.
+- Remove the deleted settings page's unused logic, mapping editor, locale keys, declarations and tests. Inline model controls still share the Host draft and save action.
+
 ## 0.7.8 — 2026-11-03
 
 - Remove the fallback "per-model reasoning levels" settings page introduced in 0.7.7. Per-model levels are now contributed only through the Host-declared `settings.models.model-fields` slot; a Host without that slot keeps the native model selection, slider and guidance untouched.

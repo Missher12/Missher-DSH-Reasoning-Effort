@@ -13,14 +13,14 @@ await writeFile(entry, [
   "import * as React from 'react'",
   "import * as jsxRuntime from 'react/jsx-runtime'",
   "import { createRoot } from 'react-dom/client'",
-  "import { zh } from '../../src/client/locales.js'",
-  'Object.assign(window, { React, jsxRuntime, createRoot, labels: zh })',
+  "import { zh, en } from '../../src/client/locales.js'",
+  'Object.assign(window, { React, jsxRuntime, createRoot, labels: zh, labelsEn: en })',
 ].join('\n'))
 await build({ entryPoints: [entry], outfile: resolve(out, 'react-globals.js'), bundle: true,
   platform: 'browser', format: 'iife', nodePaths: [reactFrom],
   alias: { react: resolve(reactFrom, 'react'), 'react-dom': resolve(reactFrom, 'react-dom') },
   define: { 'process.env.NODE_ENV': '"production"' } })
-for (const name of ['selection.html', 'palette-click.html', 'drag.html']) {
+for (const name of ['selection.html', 'palette-click.html', 'drag.html', 'guidance.html']) {
   await copyFile(resolve(root, 'tests', 'harness', name), resolve(out, name))
 }
 await copyFile(resolve(root, 'lib', 'client', 'index.js'), resolve(out, 'plugin.js'))
