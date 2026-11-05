@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名：`@missher/dsh-reasoning-effort`；当前源码版本为 `1.0.0`（精简指引、稳定指引框尺寸并清理旧设置页残留），最近正式发布为 [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7)。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.0 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -33,17 +33,13 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 **0.7.7 已正式发布。**上述使用合成模型的 Web 验证不等于原生 Electron、macOS、Windows 或真实模型端点验收；上表保留独立的 0.7.6 历史范围。失败记录、复用来源与限制见 [VERIFICATION.md](VERIFICATION.md)。
 
-`0.7.8` 移除了 0.7.7 的设置页回退：宿主不声明 `settings.models.model-fields` 时不再注入独立设置页，行内入口与既有滑块、指引保持不变；类型检查、构建和 103 项模型档位行为检查已在本机复跑通过。界面章节中的设置页截图属于 0.7.7 历史记录。
+`0.7.8` 移除了 0.7.7 的独立设置页。支持 `settings.models.model-fields` 的宿主在模型卡片内显示档位设置。类型检查、构建和 103 项模型档位行为检查已在本机复跑通过。[0.7.7 旧版页面截图](docs/images/reasoning-model-settings-rc4.png)。
 
 `1.0.0` 将指引框固定为常规 312 × 360 像素，展开、长文本和复制反馈不再撑大外框；小窗口按可用空间缩小并在内部滚动。复制给 Agent 的内容保留配置位置、端点核实规则和建议片段，删除重复背景与教程。旧独立设置页专用逻辑、文案和测试已移除。
 
 ## 界面
 
-`0.7.7` 历史每模型设置页（0.7.8 已移除）：下图为官方 DSH `0.2.1-rc.4` 隔离 Web profile 的实际页面，使用合成模型和设置；不是原生 Electron 截图。
-
-![每模型推理档位设置页（官方 rc.4 Web，合成模型）](docs/images/reasoning-model-settings-rc4.png)
-
-下方两张 0.7.6 历史截图来自官方 DSH `0.2.1-alpha.5` 隔离 Web profile，同样使用合成模型和设置。三张图的来源与范围见 [截图说明](docs/images/README.md)。
+下方两张滑块和配色截图来自插件 0.7.6，使用官方 DSH `0.2.1-alpha.5` 的隔离 Web profile 和合成模型。[截图说明](docs/images/README.md)。
 
 ![思考深度滑块](docs/images/reasoning-slider-alpha5.png)
 
@@ -51,18 +47,18 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 ## 固定版本安装
 
-本插件通过 [GitHub Releases](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases) 的构建后 tarball 分发，**未发布同名 npm 包**。选择目标版本的资产及同次发布的 SHA256 校验文件；以下示例固定为 `0.7.6`。
+以下桌面端和 CLI 安装地址均固定为 `1.0.0`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.0)。
 
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
 dsh --profile web --dump-config
 ```
 

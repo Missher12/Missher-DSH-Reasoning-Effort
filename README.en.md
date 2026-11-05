@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. Package: `@missher/dsh-reasoning-effort`; the current source version is `1.0.0` (shorter guidance, a stable guidance frame and removal of fallback-page remnants), with [`0.7.7`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v0.7.7) as the most recent formal release.
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.0 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -33,17 +33,13 @@ This is combined coverage across stages. The final CSS changes received affected
 
 **0.7.7 is now a formal release.** These Web checks used synthetic models and do not certify native Electron, macOS, Windows or real model endpoints. The table above retains the separate historical 0.7.6 scope. See [VERIFICATION.md](VERIFICATION.md) for retained failures, reused evidence and limits.
 
-`0.7.8` removes the 0.7.7 settings-page fallback: when the Host does not declare `settings.models.model-fields`, the plugin no longer injects a standalone settings page, while the inline entry, slider and guidance are unchanged. Type check, build and the 103 model-reasoning behaviour checks were rerun locally for this change. The settings-page screenshot in the Screenshots section is retained as historical 0.7.7 evidence.
+`0.7.8` removed the standalone settings page introduced in 0.7.7. Hosts that declare `settings.models.model-fields` show the controls on the model card. Type checks, the build and 103 model-reasoning behaviour checks passed locally for this change. [Historical 0.7.7 settings page](docs/images/reasoning-model-settings-rc4.png).
 
 `1.0.0` keeps the guidance frame at 312 × 360 pixels under normal conditions. Expanding guidance, long text and clipboard feedback do not resize it; small windows constrain it to the available area with internal scrolling. Agent briefs retain the target, endpoint-verification rules and suggested snippet without the repeated tutorial. Fallback-only logic, copy and tests have been removed.
 
 ## Screenshots
 
-The `0.7.7` historical per-model settings page below (removed in 0.7.8) is an actual capture from an isolated official DSH `0.2.1-rc.4` Web profile with synthetic models and settings. It is not a native Electron screenshot.
-
-![Per-model reasoning settings (official rc.4 Web, synthetic models)](docs/images/reasoning-model-settings-rc4.png)
-
-The two historical 0.7.6 captures below show an isolated official DSH `0.2.1-alpha.5` Web profile, also using synthetic models and settings. See [provenance for all three images](docs/images/README.md).
+These slider and palette screenshots show plugin 0.7.6 in an isolated official DSH `0.2.1-alpha.5` Web profile with synthetic models. [Screenshot details](docs/images/README.md).
 
 ![Thinking-depth slider](docs/images/reasoning-slider-alpha5.png)
 
@@ -51,18 +47,18 @@ The two historical 0.7.6 captures below show an isolated official DSH `0.2.1-alp
 
 ## Install a fixed version
 
-Distribution uses built tarballs in [GitHub Releases](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases); **this scoped package is not published to npm**. Select the target version and its accompanying SHA256 checksum. The example below pins `0.7.6`.
+The Desktop and CLI URLs below both install `1.0.0`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.0).
 
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v0.7.7/missher-dsh-reasoning-effort-0.7.7.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
 dsh --profile web --dump-config
 ```
 
