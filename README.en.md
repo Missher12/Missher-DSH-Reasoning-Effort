@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.0 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz).
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.0 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -47,18 +47,18 @@ These slider and palette screenshots show plugin 0.7.6 in an isolated official D
 
 ## Install a fixed version
 
-The Desktop and CLI URLs below both install `1.0.0`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.0).
+The Desktop and CLI URLs below both install `1.0.0`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.1).
 
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
 dsh --profile web --dump-config
 ```
 

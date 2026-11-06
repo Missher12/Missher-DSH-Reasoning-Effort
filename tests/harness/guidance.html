@@ -73,6 +73,23 @@
     check('Agent brief remains concise', copiedText.length > 0 && copiedText.length <= (english ? 2100 : 1400))
     check('Agent brief retains the exact target and declaration rules', [guidance.provider, guidance.model, guidance.settingsPath, guidance.entryPath,
       'reasoningEfforts', 'minimal', 'xhigh', 'compat'].every(value => copiedText.includes(value)) && !copiedText.includes('{{'))
+    const clipboardWrite = navigator.clipboard.writeText
+    const previousCopy = document.execCommand
+    navigator.clipboard.writeText = async () => { throw new Error('Clipboard unavailable') }
+    document.execCommand = () => false
+    for (const selector of ['.re-adapt-agent', '.re-adapt-apply']) {
+      const button = menu.querySelector(selector)
+      button.focus()
+      button.click()
+      await wait()
+      check('Failed copy offers retry in the same frame: ' + selector,
+        button.textContent.includes(labels['guidance.copyFailed']) && stable() && document.activeElement === button)
+    }
+    navigator.clipboard.writeText = clipboardWrite
+    document.execCommand = previousCopy
+    menu.querySelector('.re-adapt-agent').click()
+    await wait()
+    check('Retry reports successful copy', menu.querySelector('.re-adapt-agent').textContent.includes(labels['guidance.copied']))
     document.querySelector('.re-adapt-cancel').click()
     await wait()
     check('Collapsing guidance keeps the same frame', stable())

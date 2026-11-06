@@ -11,7 +11,7 @@
  * @module dsh-reasoning-effort/client
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
+import type { ButtonHTMLAttributes, ComponentType, CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
@@ -52,6 +52,21 @@ import {
 // the active locale.
 import agentTutorialEn from './agent-tutorial.en.md'
 import agentTutorialZh from './agent-tutorial.zh.md'
+
+// rc.4 provides these controls. Older hosts can still use the plugin without them.
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant: 'primary' | 'outline' | 'ghost' }
+type SwitchProps = { checked: boolean; label: string; onChange: (value: boolean) => void }
+type HostControls = { Button?: ComponentType<ButtonProps>; Switch?: ComponentType<SwitchProps> }
+declare const require: (id: '@deepseek-ai/dsh-client-ui-primitives') => HostControls
+function loadHostControls(): HostControls {
+  try { return require('@deepseek-ai/dsh-client-ui-primitives') ?? {} } catch { return {} }
+}
+const { Button: HostButton, Switch: HostSwitch } = loadHostControls()
+
+function GuidanceButton({ variant, ...props }: ButtonProps) {
+  return HostButton ? <HostButton type="button" variant={variant} {...props} />
+    : <button type="button" data-re-variant={variant} {...props} />
+}
 
 /** One selectable effort exactly as the owning adapter advertised it. */
 /** Host RPC result envelope (matches `@deepseek-ai/dsh-host-apiproxy`). */
@@ -193,18 +208,21 @@ async function copyText(text: string): Promise<boolean> {
     await navigator.clipboard.writeText(text)
     return true
   } catch {
+    const previous = document.activeElement
+    const textarea = document.createElement('textarea')
     try {
-      const textarea = document.createElement('textarea')
       textarea.value = text
       textarea.style.position = 'fixed'
       textarea.style.opacity = '0'
       document.body.appendChild(textarea)
       textarea.select()
-      const ok = document.execCommand('copy')
-      textarea.remove()
-      return ok
+      return document.execCommand('copy')
     } catch {
       return false
+    } finally {
+      const restore = document.activeElement === textarea
+      textarea.remove()
+      if (restore && previous instanceof HTMLElement && previous.isConnected) previous.focus({ preventScroll: true })
     }
   }
 }
@@ -753,8 +771,8 @@ function AdvancedModelSelect({
   const [guidanceBusy, setGuidanceBusy] = useState(false)
   const [guidanceFailed, setGuidanceFailed] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const [agentCopied, setAgentCopied] = useState(false)
+  const busy = state.status === 'loading' || state.status === 'selecting'
+  const listWasOpen = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -762,6 +780,24 @@ function AdvancedModelSelect({
     if (!open || rootRef.current === null || menuRef.current === null) return
     return positionModelMenu(rootRef.current, menuRef.current)
   }, [open])
+  useLayoutEffect(() => {
+    const menu = menuRef.current
+    if (open && menu) {
+      const active = document.activeElement
+      const lostFocus = active === document.body || (menu.contains(active) && active?.matches(':disabled'))
+      if (modelsOpen && (!listWasOpen.current || lostFocus)) {
+        const selected = menu.querySelector<HTMLButtonElement>('[role="menuitemradio"][aria-checked="true"]:enabled')
+        const first = menu.querySelector<HTMLButtonElement>('[role="menuitemradio"]:enabled')
+        const target = selected ?? first ?? menu.querySelector<HTMLButtonElement>('.re-model-back')
+        target?.focus()
+      } else if (!modelsOpen && listWasOpen.current) {
+        const row = menu.querySelector<HTMLButtonElement>('.re-model-row:enabled')
+        const target = row ?? triggerRef.current
+        target?.focus()
+      }
+    }
+    listWasOpen.current = open && modelsOpen
+  }, [open, modelsOpen, busy])
   const choice = currentModel(state)
   const levels = sliderLevels(state)
   /* LOCAL CHANGE: upstream reads `.name` straight off the adapter entry. */
@@ -771,7 +807,6 @@ function AdvancedModelSelect({
     ? t('model.defaultEffort')
     : displayLevelName(currentLevel.id, levelIds(levels), t)
   const modelLabel = choice?.name ?? state.current?.model ?? t('model.select')
-  const busy = state.status === 'loading' || state.status === 'selecting'
   const provider = state.current?.provider
   const modelId = state.current?.model
   // Hide a previous model's result during the render before the effect clears it.
@@ -802,8 +837,6 @@ function AdvancedModelSelect({
   useEffect(() => {
     // A brief belongs to the model it describes; never let a stale one be copied.
     setGuidanceResult(null)
-    setCopied(false)
-    setAgentCopied(false)
     setPanelOpen(false)
     if (provider === undefined || modelId === undefined) {
       setGuidanceBusy(false)
@@ -848,6 +881,7 @@ function AdvancedModelSelect({
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Escape' || !open) return
     event.preventDefault()
+    event.stopPropagation()
     if (modelsOpen) setModelsOpen(false)
     else close(true)
   }
@@ -1035,47 +1069,21 @@ function AdvancedModelSelect({
                 </div>
                 {guidance?.needsGuide ? (panelOpen ? (
                   <div className="re-adapt-actions">
-                    <button
-                      type="button"
-                      className="re-adapt-apply"
-                      disabled={busy || guidanceBusy}
-                      onClick={() => {
-                        void copyText(localizedSnippet).then((ok) => setCopied(ok))
-                      }}
-                    >
-                      <CopyButtonLabel copied={copied} label={t('guidance.copy')} feedback={t('guidance.copied')} />
-                    </button>
-                    <button
-                      type="button"
-                      className="re-adapt-agent"
-                      disabled={busy || guidanceBusy}
-                      onClick={() => {
-                        void copyText(agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t))
-                          .then((ok) => setAgentCopied(ok))
-                      }}
-                    >
-                      <CopyButtonLabel copied={agentCopied} label={t('agent.copy')} feedback={t('guidance.copied')} />
-                    </button>
-                    <button type="button" className="re-adapt-cancel" onClick={() => setPanelOpen(false)}>
+                    <CopyButton className="re-adapt-apply" variant="primary" label={t('guidance.copy')}
+                      disabled={busy || guidanceBusy} text={() => localizedSnippet} t={t} />
+                    <CopyButton className="re-adapt-agent" variant="outline" label={t('agent.copy')}
+                      disabled={busy || guidanceBusy} text={() => agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t)} t={t} />
+                    <GuidanceButton variant="ghost" className="re-adapt-cancel" onClick={() => setPanelOpen(false)}>
                       {t('guidance.collapse')}
-                    </button>
+                    </GuidanceButton>
                   </div>
                 ) : (
                   <div className="re-adapt-open-row">
-                    <button type="button" className="re-adapt-open" onClick={() => { setCopied(false); setPanelOpen(true) }}>
+                    <GuidanceButton variant="primary" className="re-adapt-open" onClick={() => setPanelOpen(true)}>
                       {guidanceBusy ? t('guidance.checking') : t('guidance.open')}
-                    </button>
-                    <button
-                      type="button"
-                      className="re-adapt-agent"
-                      disabled={busy || guidanceBusy}
-                      onClick={() => {
-                        void copyText(agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t))
-                          .then((ok) => setAgentCopied(ok))
-                      }}
-                    >
-                      <CopyButtonLabel copied={agentCopied} label={t('agent.copy')} feedback={t('guidance.copied')} />
-                    </button>
+                    </GuidanceButton>
+                    <CopyButton className="re-adapt-agent" variant="outline" label={t('agent.copy')}
+                      disabled={busy || guidanceBusy} text={() => agentBrief(guidance, localizedSnippet, agentTutorial(), localizedWarning, t)} t={t} />
                   </div>
                 )) : null}
                 <div className="re-menu-separator" />
@@ -1101,12 +1109,26 @@ function AdvancedModelSelect({
   )
 }
 
-/** Reserve the original label's size while showing clipboard feedback. */
-function CopyButtonLabel({ copied, label, feedback }: { copied: boolean; label: string; feedback: string }) {
-  return <>
-    <span className="re-adapt-button-size" aria-hidden="true">{label}</span>
-    <span>{copied ? feedback : label}</span>
-  </>
+function CopyButton({ text, label, t, ...button }: ButtonProps & {
+  text: () => string; label: string; t: ReasoningEffortTranslate
+}) {
+  const [feedback, setFeedback] = useState<{ ok: boolean } | null>(null)
+  const attempt = useRef(0)
+  useEffect(() => {
+    if (!feedback) return
+    const timer = window.setTimeout(() => setFeedback(null), 2400)
+    return () => window.clearTimeout(timer)
+  }, [feedback])
+  const copy = async () => {
+    const current = ++attempt.current
+    const ok = await copyText(text())
+    if (current === attempt.current) setFeedback({ ok })
+  }
+  return <GuidanceButton {...button} aria-label={label} onClick={() => void copy()}>
+    <span aria-live="polite" aria-atomic="true">
+      {feedback === null ? label : t(feedback.ok ? 'guidance.copied' : 'guidance.copyFailed')}
+    </span>
+  </GuidanceButton>
 }
 
 function ReasoningEffortSetting({ t }: PropsLocale<typeof NS>) {
@@ -1120,7 +1142,7 @@ function ReasoningEffortSetting({ t }: PropsLocale<typeof NS>) {
       </div>
       <div className="re-setting-control">
         <span className="re-setting-state">{enabled ? t('settings.enabled') : t('settings.disabled')}</span>
-        <button
+        {HostSwitch ? <HostSwitch checked={enabled} label={t('settings.effort.aria')} onChange={value => enabledStore.set(value)} /> : <button
           type="button"
           role="switch"
           aria-label={t('settings.effort.aria')}
@@ -1129,7 +1151,7 @@ function ReasoningEffortSetting({ t }: PropsLocale<typeof NS>) {
           onClick={() => enabledStore.set(!enabled)}
         >
           <span className="re-setting-switch-knob" aria-hidden="true" />
-        </button>
+        </button>}
       </div>
     </div>
   )
@@ -1238,14 +1260,7 @@ export function apply(ctx: ClientContext) {
   ctx.slots.inject(SETTINGS_SLOT, () =>
     ctx.slots.register(
       { name: SETTINGS_SLOT, id: 'reasoning-effort-enabled', order: 15, locale: NS },
-      ReasoningEffortSetting,
-    ),
-  )
-
-  ctx.slots.inject(SETTINGS_SLOT, () =>
-    ctx.slots.register(
-      { name: SETTINGS_SLOT, id: 'reasoning-effort-palette', order: 17, locale: NS },
-      PaletteSetting,
+      (props: PropsLocale<typeof NS>) => <><ReasoningEffortSetting {...props} /><PaletteSetting {...props} /></>,
     ),
   )
 

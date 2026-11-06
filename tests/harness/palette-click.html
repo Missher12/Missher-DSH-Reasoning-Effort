@@ -95,7 +95,7 @@
 
   exports.apply(ctx)
   out.push('—— apply 之后 ——')
-  const paletteRow = captured.find((c) => c.meta.id === 'reasoning-effort-palette')
+  const paletteRow = captured.find((c) => c.meta.id === 'reasoning-effort-enabled')
   const seat = captured.find((c) => c.meta.name === 'conversation.input.model')
   check('设置行已注册', !!paletteRow, true)
   check('座位已注册', !!seat, true)

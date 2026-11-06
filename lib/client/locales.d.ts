@@ -50,6 +50,7 @@ export declare const zh: {
     'guidance.step2.insertSuffix': string;
     'guidance.step3': string;
     'guidance.copied': string;
+    'guidance.copyFailed': string;
     'guidance.copy': string;
     'guidance.collapse': string;
     'guidance.checking': string;
@@ -74,6 +75,7 @@ export declare const zh: {
     'yaml.keyComment': string;
     'yaml.valueComment': string;
     'models.automatic': string;
+    'models.title': string;
     'models.mode': string;
     'models.inherit': string;
     'models.disabled': string;
@@ -140,6 +142,7 @@ export declare const en: {
     'guidance.step2.insertSuffix': string;
     'guidance.step3': string;
     'guidance.copied': string;
+    'guidance.copyFailed': string;
     'guidance.copy': string;
     'guidance.collapse': string;
     'guidance.checking': string;
@@ -164,6 +167,7 @@ export declare const en: {
     'yaml.keyComment': string;
     'yaml.valueComment': string;
     'models.automatic': string;
+    'models.title': string;
     'models.mode': string;
     'models.inherit': string;
     'models.disabled': string;

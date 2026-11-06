@@ -43,7 +43,10 @@ export const PIXEL_CSS = `
 .re-model-root .re-model-effort, .re-model-root .re-model-row-effort { color: var(--re-accent); }
 .re-palette-picker { flex-wrap: wrap; }
 .re-custom-palette { display: inline-flex; align-items: center; gap: 6px; color: var(--dsw-alias-label-secondary); font-size: 12px; }
-.re-custom-palette input { width: 26px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.re-custom-palette input { appearance: none; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; corner-shape: round; background: transparent; cursor: pointer; }
+.re-custom-palette input::-webkit-color-swatch-wrapper { padding: 0; }
+.re-custom-palette input::-webkit-color-swatch { border: 1px solid var(--dsw-alias-border-l3); border-radius: 50%; corner-shape: round; }
+.re-custom-palette input::-moz-color-swatch { border: 1px solid var(--dsw-alias-border-l3); border-radius: 50%; }
 @keyframes re-depth-flow { to { background-position: 250% center; } }
 @keyframes re-depth-enter { from { opacity: .3; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {

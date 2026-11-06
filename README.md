@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.0 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz)。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.0 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -47,18 +47,18 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 ## 固定版本安装
 
-以下桌面端和 CLI 安装地址均固定为 `1.0.0`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.0)。
+以下桌面端和 CLI 安装地址均固定为 `1.0.0`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.1)。
 
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.0/missher-dsh-reasoning-effort-1.0.0.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
 dsh --profile web --dump-config
 ```
 
