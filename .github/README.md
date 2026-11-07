@@ -2,6 +2,8 @@
 
 <h1>DSH Reasoning Effort · 思考深度</h1>
 
+<p><img src="../docs/images/overview.svg" alt="Reasoning Effort 功能示意" width="100%"></p>
+
 <p>根据模型真实支持的档位，直观调整思考深度。</p>
 
 <p>
@@ -16,6 +18,10 @@
 
 ---
 
+<!-- current-source -->
+当前开发源码：**1.0.1** · [分支 `main`](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/tree/main)。安装包以实际 Release 为准。
+<!-- /current-source -->
+
 ## 功能一览
 
 | 能做什么 | 说明 |
@@ -24,6 +30,14 @@
 | **模型选择** | 在对话入口切换模型，选择失败时保留可用状态。 |
 | **自定义模型指引** | 查看缺失配置的说明与片段，复制给 Agent 继续配置。 |
 | **原生主题** | 支持深浅主题、中英文与滑块配色，遵循减少动态效果设置。 |
+
+<!-- existing-screenshots -->
+## 界面示例
+
+<table><tr><td><a href="../docs/images/reasoning-slider-alpha5.png"><img src="../docs/images/reasoning-slider-alpha5.png" alt="思考深度滑块" width="100%"></a></td><td><a href="../docs/images/reasoning-settings-alpha5.png"><img src="../docs/images/reasoning-settings-alpha5.png" alt="通用设置中的思考滑块配色" width="100%"></a></td></tr></table>
+
+<sub>来自项目已有文档；截图版本与验证范围见<a href="../README.md">原始说明</a>，点击可放大。</sub>
+<!-- /existing-screenshots -->
 
 ## 快速开始
 
