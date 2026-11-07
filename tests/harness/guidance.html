@@ -54,11 +54,15 @@
       return { x, y, width, height }
     }
     const original = bounds()
-    const stable = () => Object.entries(original).every(([key, value]) => Math.abs(bounds()[key] - value) < 1)
+    let expected = original
+    const stable = () => Object.entries(expected).every(([key, value]) => Math.abs(bounds()[key] - value) < 1)
+    check('Collapsed guidance is compact', original.width <= 216 && original.height <= 128)
+    check('Guide actions keep their text inside the button', [...menu.querySelectorAll('.re-adapt-open-row button')].every(button => button.scrollHeight <= button.clientHeight + 1))
     document.querySelector('.re-adapt-open').click()
     await wait()
     const expanded = bounds()
-    check('Expanding guidance keeps the same frame', stable())
+    check('Opening the guide retains width and bounds its reading area', expanded.width === original.width && expanded.height >= original.height && expanded.height <= 280)
+    expected = expanded
     guidance.note = 'Long diagnostic text and endpoint details. '.repeat(80)
     state.error = 'A long rejected configuration message. '.repeat(30)
     publish()
@@ -92,7 +96,8 @@
     check('Retry reports successful copy', menu.querySelector('.re-adapt-agent').textContent.includes(labels['guidance.copied']))
     document.querySelector('.re-adapt-cancel').click()
     await wait()
-    check('Collapsing guidance keeps the same frame', stable())
+    expected = original
+    check('Collapsing guidance restores the compact frame', stable())
     check('The frame remains inside the viewport', original.x >= 0 && original.y >= 0 && original.x + original.width <= innerWidth && original.y + original.height <= innerHeight)
     guidance.note = 'Endpoint documentation required.'
     state.error = null

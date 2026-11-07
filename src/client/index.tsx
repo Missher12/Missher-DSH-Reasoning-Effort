@@ -940,7 +940,7 @@ function AdvancedModelSelect({
       </button>
 
       {open ? (
-        <div ref={menuRef} className="re-model-menu" data-guidance-card={!modelsOpen && guidance?.needsGuide ? 'true' : undefined} data-depth-card={!modelsOpen && levels.length >= 2 && !guidance?.needsGuide ? 'true' : undefined} role="menu" aria-label={t('model.menuAria')} aria-busy={busy}>
+        <div ref={menuRef} className="re-model-menu" data-guidance-card={!modelsOpen && guidance?.needsGuide ? 'true' : undefined} data-guidance-expanded={!modelsOpen && guidance?.needsGuide && panelOpen ? 'true' : undefined} data-depth-card={!modelsOpen && levels.length >= 2 && !guidance?.needsGuide ? 'true' : undefined} role="menu" aria-label={t('model.menuAria')} aria-busy={busy}>
           {modelsOpen ? (
             <div className="re-model-pane">
               <button type="button" className="re-model-back" onClick={() => setModelsOpen(false)}>
@@ -962,14 +962,12 @@ function AdvancedModelSelect({
                         role="menuitemradio"
                         aria-checked={selected}
                         className="re-model-option"
+                        title={model.description ? `${model.name}\n${model.description}` : model.name}
                         disabled={busy}
                         onClick={() => void chooseModel(group.id, model.id, model.reasoning?.defaultEffort)}
                       >
                         <span className="re-model-option-copy">
                           <span className="re-model-option-name">{model.name}</span>
-                          {model.description === undefined ? null : (
-                            <span className="re-model-option-desc">{model.description}</span>
-                          )}
                         </span>
                         <span className="re-model-check" aria-hidden="true">{selected ? '✓' : ''}</span>
                       </button>

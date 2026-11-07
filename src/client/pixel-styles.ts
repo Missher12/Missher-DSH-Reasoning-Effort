@@ -14,14 +14,6 @@ export const PIXEL_CSS = `
   background: transparent;
   color: var(--dsw-alias-label-secondary);
 }
-.re-model-menu[data-depth-card] {
-  width: min(216px, var(--re-menu-width, calc(100vw - 24px)));
-  border: .5px solid var(--dsw-alias-border-l2);
-  border-radius: 9px;
-  background: var(--dsw-alias-bg-layer-2);
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--dsw-alias-label-primary) 12%, transparent);
-}
-.re-model-menu[data-depth-card] .re-model-row { min-height: 34px; padding: 0 8px; gap: 6px; }
 .re-depth-header { display: flex; align-items: center; gap: 6px; height: 20px; font-size: 13px; line-height: 20px; }
 .re-depth-label { flex: none; color: var(--dsw-alias-label-tertiary); }
 .re-depth-value { min-width: 0; height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; color: var(--re-accent); }

@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.0 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz).
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.2 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.2/missher-dsh-reasoning-effort-1.0.2.tgz).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -35,7 +35,7 @@ This is combined coverage across stages. The final CSS changes received affected
 
 `0.7.8` removed the standalone settings page introduced in 0.7.7. Hosts that declare `settings.models.model-fields` show the controls on the model card. Type checks, the build and 103 model-reasoning behaviour checks passed locally for this change. [Historical 0.7.7 settings page](docs/images/reasoning-model-settings-rc4.png).
 
-`1.0.0` keeps the guidance frame at 312 × 360 pixels under normal conditions. Expanding guidance, long text and clipboard feedback do not resize it; small windows constrain it to the available area with internal scrolling. Agent briefs retain the target, endpoint-verification rules and suggested snippet without the repeated tutorial. Fallback-only logic, copy and tests have been removed.
+The compact menu is about 216 pixels wide. Guidance is at most 128 pixels tall when collapsed and 280 pixels when expanded; small windows constrain it to the available area with internal scrolling. Model descriptions appear in hover hints. Agent briefs retain the target, endpoint-verification rules and suggested snippet without the repeated tutorial. Fallback-only logic, copy and tests have been removed.
 
 ## Screenshots
 
@@ -47,18 +47,18 @@ These slider and palette screenshots show plugin 0.7.6 in an isolated official D
 
 ## Install a fixed version
 
-The Desktop and CLI URLs below both install `1.0.0`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.1).
+The Desktop and CLI URLs below both install `1.0.2`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.2).
 
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.2/missher-dsh-reasoning-effort-1.0.2.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.2/missher-dsh-reasoning-effort-1.0.2.tgz
 dsh --profile web --dump-config
 ```
 

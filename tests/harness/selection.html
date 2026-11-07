@@ -35,7 +35,8 @@
   /* The real ctx answers `ctx.get('slots')` from the same service store as the
      `ctx.slots` property; the harness must model that. */
   const slots = { inject: (_name, fn) => { const dispose = fn(); disposers.push(dispose) }, register: (meta, component) => { captured.push({ meta, component }); return () => {} } }
-  const ctx = { locale, get: name => name === 'modelDirectories' ? directories : name === 'locale' ? locale : name === 'slots' ? slots : undefined,
+  const connection = { rpc: { call: async () => ({ ok: true, value: { needsGuide: false, current: [], expected: [], matched: false, note: null, noteKey: null } }) } }
+  const ctx = { locale, get: name => name === 'modelDirectories' ? directories : name === 'locale' ? locale : name === 'slots' ? slots : name === 'connection' ? connection : undefined,
     effect: fn => { const dispose = fn(); disposers.push(dispose); return dispose },
     slots,
   }
@@ -56,8 +57,12 @@
     await wait()
     document.querySelector('.re-model-trigger').click()
     await wait()
+    const depthFrame = document.querySelector('.re-model-menu').getBoundingClientRect()
     document.querySelector('.re-model-row').click()
     await wait()
+    const modelFrame = document.querySelector('.re-model-menu').getBoundingClientRect()
+    check('Model list matches the depth panel width', modelFrame.width === depthFrame.width)
+    check('Model list matches the depth panel height', modelFrame.height === depthFrame.height)
     check('Opening the list focuses the selected model', document.activeElement.matches('[role="menuitemradio"][aria-checked="true"]'))
     publish({ ...state, status: 'selecting' })
     await wait()

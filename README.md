@@ -1,6 +1,6 @@
 # Missher DSH Reasoning Effort
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.0 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz)。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.2 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.2/missher-dsh-reasoning-effort-1.0.2.tgz)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
@@ -35,7 +35,7 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 `0.7.8` 移除了 0.7.7 的独立设置页。支持 `settings.models.model-fields` 的宿主在模型卡片内显示档位设置。类型检查、构建和 103 项模型档位行为检查已在本机复跑通过。[0.7.7 旧版页面截图](docs/images/reasoning-model-settings-rc4.png)。
 
-`1.0.0` 将指引框固定为常规 312 × 360 像素，展开、长文本和复制反馈不再撑大外框；小窗口按可用空间缩小并在内部滚动。复制给 Agent 的内容保留配置位置、端点核实规则和建议片段，删除重复背景与教程。旧独立设置页专用逻辑、文案和测试已移除。
+当前菜单采用约 216 像素的紧凑宽度；指引收起时最高 128 像素，展开后最高 280 像素，小窗口按可用空间缩小并在内部滚动。模型说明放在悬停提示中。复制给 Agent 的内容保留配置位置、端点核实规则和建议片段，删除重复背景与教程。旧独立设置页专用逻辑、文案和测试已移除。
 
 ## 界面
 
@@ -47,18 +47,18 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 ## 固定版本安装
 
-以下桌面端和 CLI 安装地址均固定为 `1.0.0`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.1)。
+以下桌面端和 CLI 安装地址均固定为 `1.0.2`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.2)。
 
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.2/missher-dsh-reasoning-effort-1.0.2.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.1/missher-dsh-reasoning-effort-1.0.1.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.2/missher-dsh-reasoning-effort-1.0.2.tgz
 dsh --profile web --dump-config
 ```
 
