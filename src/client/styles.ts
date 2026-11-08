@@ -316,11 +316,10 @@ export const CSS = `
 .re-model-row-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
 .re-model-row-effort { color: var(--dsw-static-deepseek-500, #4d70ff); font-size: 12px; }
 .re-row-chevron { font-size: 20px; line-height: 1; opacity: .42; }
-.re-model-pane { box-sizing: border-box; height: 127px; max-height: calc(var(--re-menu-height, calc(100dvh - 24px)) - 2px); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 4px; }
+.re-model-pane { display: flex; flex-direction: column; box-sizing: border-box; max-height: calc(var(--re-menu-height, calc(100dvh - 24px)) - 2px); overflow: hidden; padding: 4px; }
+.re-model-list { min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .re-model-back {
-  position: sticky;
-  top: -4px;
-  z-index: 1;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -334,7 +333,6 @@ export const CSS = `
 }
 .re-model-group-title { padding: 8px 4px 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-tertiary, #9296a0); font-size: 11px; line-height: 16px; }
 .re-model-option {
-  scroll-margin-top: 28px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 16px;
   align-items: center;

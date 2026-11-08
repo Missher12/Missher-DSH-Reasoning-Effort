@@ -779,7 +779,7 @@ function AdvancedModelSelect({
   useLayoutEffect(() => {
     if (!open || rootRef.current === null || menuRef.current === null) return
     return positionModelMenu(rootRef.current, menuRef.current)
-  }, [open])
+  }, [open, modelsOpen])
   useLayoutEffect(() => {
     const menu = menuRef.current
     if (open && menu) {
@@ -947,39 +947,41 @@ function AdvancedModelSelect({
                 <span aria-hidden="true">‹</span>
                 <span>{t('model.select')}</span>
               </button>
-              {state.status === 'loading' && state.groups.length === 0 ? (
-                <div className="re-model-status">{t('model.loading')}</div>
-              ) : null}
-              {state.groups.map((group) => (
-                <section key={group.id}>
-                  <div className="re-model-group-title">{group.name}</div>
-                  {group.models.map((model) => {
-                    const selected = state.current?.provider === group.id && state.current.model === model.id
-                    return (
-                      <button
-                        key={model.id}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={selected}
-                        className="re-model-option"
-                        title={model.description ? `${model.name}\n${model.description}` : model.name}
-                        disabled={busy}
-                        onClick={() => void chooseModel(group.id, model.id, model.reasoning?.defaultEffort)}
-                      >
-                        <span className="re-model-option-copy">
-                          <span className="re-model-option-name">{model.name}</span>
-                        </span>
-                        <span className="re-model-check" aria-hidden="true">{selected ? '✓' : ''}</span>
-                      </button>
-                    )
-                  })}
-                </section>
-              ))}
-              {state.status === 'ready' && state.groups.every((group) => group.models.length === 0) ? (
-                <div className="re-model-status">{t('model.none')}</div>
-              ) : null}
-              {invalidEffortNotice}
-              {state.error === null ? null : <div className="re-model-error">{state.error}</div>}
+              <div className="re-model-list">
+                {state.status === 'loading' && state.groups.length === 0 ? (
+                  <div className="re-model-status">{t('model.loading')}</div>
+                ) : null}
+                {state.groups.map((group) => (
+                  <section key={group.id}>
+                    <div className="re-model-group-title">{group.name}</div>
+                    {group.models.map((model) => {
+                      const selected = state.current?.provider === group.id && state.current.model === model.id
+                      return (
+                        <button
+                          key={model.id}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={selected}
+                          className="re-model-option"
+                          title={model.description ? `${model.name}\n${model.description}` : model.name}
+                          disabled={busy}
+                          onClick={() => void chooseModel(group.id, model.id, model.reasoning?.defaultEffort)}
+                        >
+                          <span className="re-model-option-copy">
+                            <span className="re-model-option-name">{model.name}</span>
+                          </span>
+                          <span className="re-model-check" aria-hidden="true">{selected ? '✓' : ''}</span>
+                        </button>
+                      )
+                    })}
+                  </section>
+                ))}
+                {state.status === 'ready' && state.groups.every((group) => group.models.length === 0) ? (
+                  <div className="re-model-status">{t('model.none')}</div>
+                ) : null}
+                {invalidEffortNotice}
+                {state.error === null ? null : <div className="re-model-error">{state.error}</div>}
+              </div>
             </div>
           ) : (
             <>

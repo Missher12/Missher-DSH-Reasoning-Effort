@@ -14,7 +14,11 @@
   const t = (key, params = {}) => Object.entries(params).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, value), window.labels[key] ?? key)
   const listeners = new Set()
   let state = { current: { provider: 'p', model: 'm', reasoningEffort: 'high' }, routable: true, status: 'ready', error: null, failures: [],
-    groups: [{ id: 'p', name: 'Provider', models: [{ id: 'm', name: 'Model', reasoning: { defaultEffort: 'high', efforts: [{ id: 'off', name: 'Off' }, { id: 'high', name: 'High' }, { id: 'max', name: 'Max' }] } }] }] }
+    groups: [
+      { id: 'before', name: 'Earlier provider', models: Array.from({ length: 16 }, (_, i) => ({ id: 'before-' + i, name: 'Earlier model ' + i })) },
+      { id: 'p', name: 'Provider', models: [{ id: 'm', name: 'Model', reasoning: { defaultEffort: 'high', efforts: [{ id: 'off', name: 'Off' }, { id: 'high', name: 'High' }, { id: 'max', name: 'Max' }] } }] },
+      { id: 'after', name: 'Later provider', models: Array.from({ length: 4 }, (_, i) => ({ id: 'after-' + i, name: 'Later model ' + i })) },
+    ] }
   const publish = next => { state = next; for (const listener of listeners) listener() }
   let accepted = false
   const selections = []
@@ -57,13 +61,30 @@
     await wait()
     document.querySelector('.re-model-trigger').click()
     await wait()
-    const depthFrame = document.querySelector('.re-model-menu').getBoundingClientRect()
+    const depthMenu = document.querySelector('.re-model-menu')
+    const depthFrame = { width: depthMenu.offsetWidth, height: depthMenu.offsetHeight }
     document.querySelector('.re-model-row').click()
     await wait()
-    const modelFrame = document.querySelector('.re-model-menu').getBoundingClientRect()
+    const modelMenu = document.querySelector('.re-model-menu')
+    const modelFrame = { width: modelMenu.offsetWidth, height: modelMenu.offsetHeight }
     check('Model list matches the depth panel width', modelFrame.width === depthFrame.width)
-    check('Model list matches the depth panel height', modelFrame.height === depthFrame.height)
+    check('Model list can grow taller than the depth panel', modelFrame.height > depthFrame.height)
     check('Opening the list focuses the selected model', document.activeElement.matches('[role="menuitemradio"][aria-checked="true"]'))
+    const list = document.querySelector('.re-model-list')
+    const back = document.querySelector('.re-model-back')
+    const headerFrame = back.getBoundingClientRect()
+    check('A selected model deep in the list scrolls into view', list.scrollTop > 0)
+    const headerIsClear = () => {
+      const header = back.getBoundingClientRect()
+      return list.getBoundingClientRect().top >= header.bottom
+        && back.contains(document.elementFromPoint(header.x + header.width / 2, header.y + header.height / 2))
+    }
+    check('Scrolled models cannot paint over the return header', headerIsClear())
+    list.scrollTop = list.scrollHeight
+    check('Scrolling to the end keeps the header in place', headerIsClear() && back.getBoundingClientRect().top === headerFrame.top)
+    const last = list.querySelector('section:last-of-type button:last-of-type')
+    const lastFrame = last.getBoundingClientRect()
+    check('The last model remains reachable', last.contains(document.elementFromPoint(lastFrame.x + lastFrame.width / 2, lastFrame.y + lastFrame.height / 2)))
     publish({ ...state, status: 'selecting' })
     await wait()
     check('The list keeps a focusable return path while model choices are disabled', document.activeElement.matches('.re-model-back'))
