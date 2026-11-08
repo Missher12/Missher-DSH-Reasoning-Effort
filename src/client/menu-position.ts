@@ -87,12 +87,26 @@ function collectClipAncestors(menu: HTMLElement): ClipAncestor[] {
   return ancestors
 }
 
+/** Include provider headings in the space for five models around the selection. */
+function modelWindow(list: HTMLElement): { top: number; height: number } | undefined {
+  const options = [...list.querySelectorAll<HTMLElement>('.re-model-option')]
+  if (!options.length) return
+  const selected = Math.max(0, options.findIndex(option => option.getAttribute('aria-checked') === 'true'))
+  const start = Math.min(Math.max(0, selected - 2), Math.max(0, options.length - 5))
+  const first = options[start]
+  const last = options[Math.min(start + 4, options.length - 1)]
+  const group = first.closest('section') as HTMLElement | null
+  const top = group?.querySelector('.re-model-option') === first ? group.offsetTop : first.offsetTop
+  return { top, height: last.offsetTop + last.offsetHeight - top }
+}
+
 export function positionModelMenu(root: HTMLElement, menu: HTMLElement): () => void {
   const viewport = window.visualViewport
 
   let frame = 0
   let chaseFrames = 0
   let stableFrames = 0
+  let modelScrollInitialized = false
   /** Geometry key the last applied clamp was derived from; the chase compares against it. */
   let appliedKey = ''
   /** Clipping ancestors resolved by the last layout trigger. */
@@ -149,7 +163,17 @@ export function positionModelMenu(root: HTMLElement, menu: HTMLElement): () => v
     const bottom = anchor.top - 8
     const above = bottom - top
     menu.style.setProperty('--re-menu-width', `${usableWidth}px`)
-    const maxHeight = Math.min(480, above >= 120 ? Math.min(above, usableHeight) : usableHeight)
+    const list = menu.querySelector<HTMLElement>('.re-model-list')
+    const modelSlice = list && modelWindow(list)
+    let placeBelow = false
+    let maxHeight = Math.min(480, above >= 120 ? Math.min(above, usableHeight) : usableHeight)
+    if (list && modelSlice) {
+      const preferredHeight = modelSlice.height + menu.offsetHeight - list.offsetHeight
+      const below = Math.max(0, top + usableHeight - anchor.bottom - 8)
+      placeBelow = preferredHeight > above && (below >= preferredHeight || below > above)
+      maxHeight = Math.min(480, usableHeight, Math.max(0, placeBelow ? below : above))
+      list.style.height = `${modelSlice.height}px`
+    }
     menu.style.setProperty('--re-menu-height', `${maxHeight}px`)
     // In a short popover, scroll the body and actions together below the heading.
     menu.toggleAttribute('data-short-menu', maxHeight < 240)
@@ -159,9 +183,14 @@ export function positionModelMenu(root: HTMLElement, menu: HTMLElement): () => v
     const baseLeft = anchor.right - menu.offsetWidth
     const baseTop = bottom - menu.offsetHeight
     const x = Math.max(left, Math.min(baseLeft, left + usableWidth - menu.offsetWidth))
-    const y = Math.max(top, Math.min(baseTop, top + usableHeight - menu.offsetHeight))
+    const desiredTop = placeBelow ? anchor.bottom + 8 : baseTop
+    const y = Math.max(top, Math.min(desiredTop, top + usableHeight - menu.offsetHeight))
     menu.style.setProperty('--re-menu-x', `${x - baseLeft}px`)
     menu.style.setProperty('--re-menu-y', `${y - baseTop}px`)
+    if (list && modelSlice && !modelScrollInitialized) {
+      list.scrollTop = modelSlice.top
+      modelScrollInitialized = true
+    }
     appliedKey = key
   }
 

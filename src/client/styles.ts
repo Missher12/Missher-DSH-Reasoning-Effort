@@ -317,7 +317,7 @@ export const CSS = `
 .re-model-row-effort { color: var(--dsw-static-deepseek-500, #4d70ff); font-size: 12px; }
 .re-row-chevron { font-size: 20px; line-height: 1; opacity: .42; }
 .re-model-pane { display: flex; flex-direction: column; box-sizing: border-box; max-height: calc(var(--re-menu-height, calc(100dvh - 24px)) - 2px); overflow: hidden; padding: 4px; }
-.re-model-list { min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.re-model-list { position: relative; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .re-model-back {
   flex-shrink: 0;
   display: flex;

@@ -1,6 +1,10 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Reasoning selection acceptance</title>
+<style>
+  #mount { position: fixed; top: min(170px, calc(100vh - 60px)); right: 24px; }
+  #out { max-width: 45%; white-space: pre-wrap; font-size: 11px; }
+</style>
 <body>
 <div id="mount"></div><pre id="out">Running…</pre>
 <script src="./react-globals.js"></script>
@@ -74,6 +78,17 @@
     const back = document.querySelector('.re-model-back')
     const headerFrame = back.getBoundingClientRect()
     check('A selected model deep in the list scrolls into view', list.scrollTop > 0)
+    if (innerHeight >= 500) {
+      const listFrame = list.getBoundingClientRect()
+      const visible = [...list.querySelectorAll('.re-model-option')].filter(option => {
+        const frame = option.getBoundingClientRect()
+        return frame.top >= listFrame.top - .5 && frame.bottom <= listFrame.bottom + .5
+      })
+      check('Five complete model rows are visible', visible.length === 5)
+      check('The list opens below when the upper space is too short', modelMenu.getBoundingClientRect().top >= document.querySelector('.re-model-root').getBoundingClientRect().bottom)
+    }
+    const placedFrame = modelMenu.getBoundingClientRect()
+    check('The list remains inside the viewport', placedFrame.top >= 0 && placedFrame.bottom <= innerHeight)
     const headerIsClear = () => {
       const header = back.getBoundingClientRect()
       return list.getBoundingClientRect().top >= header.bottom
