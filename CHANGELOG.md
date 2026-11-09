@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3 — 2026-11-09
+
+- Show five model choices around the current selection, with additional room for provider headings; scroll to reach the remaining models.
+- Keep the model selector at the same 216 px width as the thinking-depth popup while letting its height fit the model list.
+- Separate the return header from the scrolling list so model rows cannot overlap it, including when the selected model is deep in the list.
+- Open below the trigger when there is insufficient room above, and constrain the list to the available space in short windows.
+
 ## 1.0.0 — 2026-11-05
 
 - Keep the guidance frame at a stable 312 × 360 px, constrained by the available viewport; long content scrolls internally without resizing the frame.
