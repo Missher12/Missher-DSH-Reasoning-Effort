@@ -1,5 +1,7 @@
 # Missher DSH Reasoning Effort
 
+![Reasoning Effort · 思考强度（品牌插画）](docs/images/cover-v2.png)
+
 模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.3 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.3/missher-dsh-reasoning-effort-1.0.3.tgz)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)

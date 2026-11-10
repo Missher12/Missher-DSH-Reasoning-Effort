@@ -1,5 +1,7 @@
 # Missher DSH Reasoning Effort
 
+![Reasoning Effort · 思考强度（品牌插画）](docs/images/cover-v2.png)
+
 Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.3 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.3/missher-dsh-reasoning-effort-1.0.3.tgz).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)

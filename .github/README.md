@@ -2,7 +2,7 @@
 
 <h1>DSH Reasoning Effort · 思考深度</h1>
 
-<p><img src="../docs/images/overview.svg" alt="Reasoning Effort 功能示意" width="100%"></p>
+<p><img src="../docs/images/cover-v2.png" alt="Reasoning Effort · 思考强度（品牌插画）" width="100%"></p>
 
 <p>根据模型真实支持的档位，直观调整思考深度。</p>
 
