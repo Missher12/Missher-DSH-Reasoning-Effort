@@ -2,13 +2,13 @@
 
 ![Reasoning Effort · 思考强度（品牌插画）](docs/images/cover-v2.png)
 
-Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.3 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.3/missher-dsh-reasoning-effort-1.0.3.tgz).
+Model selection, a thinking-depth slider mapped to declared model capabilities, and configuration guidance for custom models. The package name is `@missher/dsh-reasoning-effort`. [Download the 1.0.4 plugin](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.4/missher-dsh-reasoning-effort-1.0.4.tgz).
 
 [中文](README.md) · [Desktop downloads](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [Source](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [Issues](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
 ## Features
 
-- Choose a model and adjust thinking depth from the conversation model control. Displayed steps map to the model's declared levels; failed selections roll back. The slider requires at least two available levels.
+- Choose a model and adjust thinking depth from the conversation model control. Each stop selects the exact declared effort. High displays as High even at the top of the slider. Only max is labelled Ultra. Failed selections roll back. The slider requires at least two available levels.
 - Preserve the selected single-card design, white thumb, eight-row particle field at the highest level, colour gradient, light/dark themes and Chinese/English UI. Colours live in General Settings. Reduced-motion mode shows a stable frame; hidden pages pause particles.
 - For custom models with missing or mismatched declarations, show configuration guidance and Copy for your agent. The heading stays fully visible, copy buttons have equal dimensions, and the body scrolls independently of the actions; very short menus scroll the body and actions together below the heading. Open menus follow the Host layout during window resizing to stay within the viewport.
 - **Per-model reasoning levels use only the Host-declared inline entry:** when the companion Missher Desktop Models module declares `settings.models.model-fields`, reasoning mode and maximum level appear beside the model card and share its save action. When the Host does not declare that slot (official DSH `0.2.1-rc.4` does not), the native model selection, slider and guidance remain untouched and **no plugin-private settings page is offered** (0.7.8 removes the 0.7.7 fallback). Inline controls retain the model's declared endpoint mappings; the plugin never derives a wire value from a level name. This plugin does not add text/image capabilities or maintain another model catalog.
@@ -49,18 +49,18 @@ These slider and palette screenshots show plugin 0.7.6 in an isolated official D
 
 ## Install a fixed version
 
-The Desktop and CLI URLs below both install `1.0.3`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.3).
+The Desktop and CLI URLs below both install `1.0.4`. The release includes a `SHA256SUMS` file for verifying the tarball. [GitHub release](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.4).
 
 **Desktop:** paste this fixed URL into Plugins → Add plugin. Check the version, enabled state and loading errors, then reload or restart as requested by the Host. Desktop owns its profile; a standalone CLI `web` profile does not update Desktop.
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.3/missher-dsh-reasoning-effort-1.0.3.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.4/missher-dsh-reasoning-effort-1.0.4.tgz
 ```
 
 **Standalone Web/CLI profiles:** with DSH CLI installed:
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.3/missher-dsh-reasoning-effort-1.0.3.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.4/missher-dsh-reasoning-effort-1.0.4.tgz
 dsh --profile web --dump-config
 ```
 

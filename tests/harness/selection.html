@@ -25,14 +25,23 @@
     ] }
   const publish = next => { state = next; for (const listener of listeners) listener() }
   let accepted = false
+  let deferProjection = false
+  let refreshOnLoad = null
   const selections = []
   const directory = {
     store: { subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener) }, getSnapshot: () => state },
-    load: async () => state,
+    load: async () => {
+      if (refreshOnLoad) {
+        const next = refreshOnLoad
+        refreshOnLoad = null
+        publish(next)
+      }
+      return state
+    },
     select: async selection => {
       selections.push(selection)
       if (!accepted) return { ok: false, error: { message: 'Controlled refusal' } }
-      publish({ ...state, current: selection })
+      publish({ ...state, current: deferProjection ? state.current : selection })
       return { ok: true, value: undefined }
     },
   }
@@ -109,7 +118,7 @@
     await wait()
     check('Escape returns focus to the model row', document.activeElement.matches('.re-model-row'))
     const slider = document.querySelector('input[type=range]')
-    check('Existing seven-rung slider preserved', slider?.max === '6')
+    check('Each of this model’s three declared efforts has one slider position', slider?.max === '2')
     slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
     await wait()
     check('Slider sends declared max, never its Ultra label', selections[0]?.reasoningEffort === 'max')
@@ -130,6 +139,45 @@
     await wait()
     check('Only explicit recovery removes the stale effort', !Object.hasOwn(state.current, 'reasoningEffort') && selections.length === before + 1)
     check('Cleared selection no longer shows invalid status', document.querySelector('[role=alert]') === null)
+    const withEfforts = ids => ({ ...state, groups: [{ id: 'p', name: 'Provider', models: [{
+      id: 'm', name: 'Model', reasoning: { defaultEffort: 'low', efforts: ids.map(id => ({ id, name: id })) },
+    }] }] })
+    const key = async key => {
+      document.querySelector('.re-depth-input').dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+      await wait()
+    }
+    const shows = name => ['.re-depth-value', '.re-model-effort', '.re-model-row-effort']
+      .every(selector => document.querySelector(selector)?.textContent === name)
+    publish({ ...withEfforts(['low', 'high']), current: { ...state.current, reasoningEffort: 'low' } })
+    await wait()
+    deferProjection = true
+    await key('End')
+    check('Choosing High submits high and keeps both controls on High before the host projection arrives',
+      selections.at(-1).reasoningEffort === 'high' && shows('High'))
+    document.querySelector('.re-model-trigger').click()
+    await wait()
+    document.querySelector('.re-model-trigger').click()
+    await wait()
+    check('Reopening preserves an accepted High while the directory still reports Low', shows('High'))
+    const awaitingHigh = selections.length
+    await key('Home')
+    check('A late High confirmation cannot overwrite a second selection', document.querySelector('.re-depth-input').disabled
+      && selections.length === awaitingHigh && shows('High'))
+    publish({ ...state, current: selections.at(-1) })
+    await wait()
+    check('The confirmed top High is still named High and can be changed again',
+      shows('High') && !document.querySelector('.re-depth-input').disabled)
+    deferProjection = false
+    publish({ ...state, current: { ...state.current, reasoningEffort: 'low' } })
+    await wait()
+    check('Subsequent external effort changes are respected', shows('Low'))
+    refreshOnLoad = withEfforts(['low', 'medium', 'high', 'max'])
+    await key('ArrowRight')
+    check('Inserting a level during selection still sends the chosen ID', selections.at(-1).reasoningEffort === 'high' && shows('High'))
+    const sent = selections.length
+    refreshOnLoad = withEfforts(['low', 'high', 'max'])
+    await key('ArrowLeft')
+    check('Removing the chosen level during selection sends no substitute', selections.length === sent && shows('High'))
   } catch (error) { results.push({ name: error.stack ?? String(error), ok: false }) }
   const failed = results.filter(result => !result.ok).length
   window.__RESULT__ = { pass: results.length - failed, fail: failed, results }

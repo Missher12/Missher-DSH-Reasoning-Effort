@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 — 2026-11-13
+
+- Offer exactly the model's declared reasoning efforts. Selecting High submits high and keeps the High label on the slider and model button, including after reopening. The Ultra label represents max.
+- Keep an accepted choice visible while the session update arrives. Check the chosen ID and model again before submitting after a catalog refresh.
+
 ## 1.0.3 — 2026-11-09
 
 - Show five model choices around the current selection, with additional room for provider headings; scroll to reach the remaining models.

@@ -9,7 +9,6 @@ export declare const zh: {
     'level.medium': string;
     'level.high': string;
     'level.xhigh': string;
-    'level.max': string;
     'level.ultra': string;
     'level.none': string;
     'palette.upstream': string;
@@ -26,6 +25,7 @@ export declare const zh: {
     'effort.faster': string;
     'effort.smarter': string;
     'settings.palette.custom': string;
+    'effort.choicesChanged': string;
     'effort.title': string;
     'effort.failed': string;
     'effort.unavailable': string;
@@ -104,7 +104,6 @@ export declare const en: {
     'level.medium': string;
     'level.high': string;
     'level.xhigh': string;
-    'level.max': string;
     'level.ultra': string;
     'level.none': string;
     'palette.upstream': string;
@@ -118,6 +117,7 @@ export declare const en: {
     'effort.faster': string;
     'effort.smarter': string;
     'settings.palette.custom': string;
+    'effort.choicesChanged': string;
     'effort.title': string;
     'effort.failed': string;
     'effort.unavailable': string;

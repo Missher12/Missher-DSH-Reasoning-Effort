@@ -5,19 +5,12 @@ export const NS = 'reasoning-effort'
 
 /** Simplified Chinese dictionary and key-set source of truth. */
 export const zh = {
-  /* 本地改动（相对上游 0.7.3）：档位名照参考图（Codex 的档位表）的写法，首字母大写 ——
-     Off / Minimal / Low / Medium / High / XHigh / Max。
-     顶档一律显示 level.ultra（= Ultra），而它**实际发出去的是该模型公开的最高档 id**
-     （DeepSeek 上就是 max）—— 显示名与实际发送值刻意解耦，改显示不影响行为。
-     界面其余文案仍是中文，只有档位名一律英文。
-     这些名字同时供诊断面板和 displayLevelName() 使用。 */
   'level.off': 'Off',
   'level.minimal': 'Minimal',
   'level.low': 'Low',
   'level.medium': 'Medium',
   'level.high': 'High',
   'level.xhigh': 'XHigh',
-  'level.max': 'Max',
   'level.ultra': 'Ultra',
   'level.none': 'None',
   'palette.upstream': '上游原样（蓝紫）',
@@ -34,6 +27,7 @@ export const zh = {
   'effort.faster': 'Faster',
   'effort.smarter': 'Smarter',
   'settings.palette.custom': '自定义颜色',
+  'effort.choicesChanged': '模型或可用档位已变化，请重新选择。',
   'effort.title': '推理强度 · {effort}',
   'effort.failed': '推理强度设置失败：{error}',
   'effort.unavailable': '当前模型未提供推理强度档位',
@@ -115,7 +109,6 @@ export const en = {
   'level.medium': 'Medium',
   'level.high': 'High',
   'level.xhigh': 'XHigh',
-  'level.max': 'Max',
   'level.ultra': 'Ultra',
   'level.none': 'None',
   'palette.upstream': 'Upstream (blue-violet)',
@@ -129,6 +122,7 @@ export const en = {
   'effort.faster': 'Faster',
   'effort.smarter': 'Smarter',
   'settings.palette.custom': 'Custom colour',
+  'effort.choicesChanged': 'The model or its available levels changed. Choose a level again.',
   'effort.title': 'Reasoning effort · {effort}',
   'effort.failed': 'Failed to set reasoning effort: {error}',
   'effort.unavailable': 'The current model does not provide reasoning-effort levels',
