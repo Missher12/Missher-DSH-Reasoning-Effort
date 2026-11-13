@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert'
-import { displayLevelName, levelsText } from '../src/client/levels.js'
+import { displayLevelName, effortStops, levelsText } from '../src/client/levels.js'
 import { en, zh, type ReasoningEffortTranslate } from '../src/client/locales.js'
 
 for (const dictionary of [zh, en]) {
@@ -13,4 +13,8 @@ for (const dictionary of [zh, en]) {
   assert.equal(levelsText([], t), dictionary['level.none'])
   assert.equal(displayLevelName('custom-effort', t), 'custom-effort')
 }
-console.log('✓ Effort labels match declared IDs for sparse and full models in both locales')
+assert.deepEqual(effortStops(['off', 'low', 'high', 'max']).map(stop => stop.send),
+  ['off', 'low', 'low', 'high', 'high', 'max', 'max'])
+assert.deepEqual(effortStops(['high', 'high']), [])
+assert.deepEqual(effortStops(['fast', 'quality']), [{ rung: 'fast', send: 'fast' }, { rung: 'quality', send: 'quality' }])
+console.log('✓ Display labels and model effort mappings match in both locales')

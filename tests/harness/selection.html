@@ -67,10 +67,13 @@
     check('Every Cordis effect supplies a disposer, including empty palette CSS', disposers.every(fn => typeof fn === 'function'))
     const seat = captured.find(row => row.meta.name === 'conversation.input.model')
     check('Actual plugin model seat registered', seat !== undefined)
-    const props = { ...seat.meta.inject('controlled-session'), t }
+    const sessionId = 'rung-test-' + crypto.randomUUID()
+    const props = { ...seat.meta.inject(sessionId), t }
     check('Resolved RemoteResult refusal is reported as false', await props.select({ ...state.current }) === false)
     selections.length = 0
-    window.createRoot(document.getElementById('mount')).render(window.React.createElement(seat.component, props))
+    const root = window.createRoot(document.getElementById('mount'))
+    const mountSeat = id => root.render(window.React.createElement(seat.component, { ...seat.meta.inject(id), t, key: id }))
+    mountSeat(sessionId)
     await wait()
     document.querySelector('.re-model-trigger').click()
     await wait()
@@ -118,7 +121,7 @@
     await wait()
     check('Escape returns focus to the model row', document.activeElement.matches('.re-model-row'))
     const slider = document.querySelector('input[type=range]')
-    check('Each of this model’s three declared efforts has one slider position', slider?.max === '2')
+    check('A sparse model still offers all seven display positions', slider?.max === '6')
     slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
     await wait()
     check('Slider sends declared max, never its Ultra label', selections[0]?.reasoningEffort === 'max')
@@ -146,38 +149,70 @@
       document.querySelector('.re-depth-input').dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
       await wait()
     }
-    const shows = name => ['.re-depth-value', '.re-model-effort', '.re-model-row-effort']
+    const shows = (name, index) => ['.re-depth-value', '.re-model-effort', '.re-model-row-effort']
       .every(selector => document.querySelector(selector)?.textContent === name)
+      && Number(document.querySelector('.re-depth-input').value) === index
     publish({ ...withEfforts(['low', 'high']), current: { ...state.current, reasoningEffort: 'low' } })
     await wait()
     deferProjection = true
-    await key('End')
-    check('Choosing High submits high and keeps both controls on High before the host projection arrives',
-      selections.at(-1).reasoningEffort === 'high' && shows('High'))
-    document.querySelector('.re-model-trigger').click()
-    await wait()
-    document.querySelector('.re-model-trigger').click()
-    await wait()
-    check('Reopening preserves an accepted High while the directory still reports Low', shows('High'))
+    await key('ArrowRight')
+    check('Medium stays at position 3 while the submitted high awaits confirmation',
+      selections.at(-1).reasoningEffort === 'high' && shows('Medium', 3))
     const awaitingHigh = selections.length
     await key('Home')
-    check('A late High confirmation cannot overwrite a second selection', document.querySelector('.re-depth-input').disabled
-      && selections.length === awaitingHigh && shows('High'))
+    check('A pending host confirmation cannot replace the chosen rung', selections.length === awaitingHigh && shows('Medium', 3))
+    const reopen = async () => {
+      document.querySelector('.re-model-trigger').click()
+      await wait()
+      document.querySelector('.re-model-trigger').click()
+      await wait()
+    }
+    await reopen()
+    check('Reopening before the host confirms preserves Medium', shows('Medium', 3))
     publish({ ...state, current: selections.at(-1) })
     await wait()
-    check('The confirmed top High is still named High and can be changed again',
-      shows('High') && !document.querySelector('.re-depth-input').disabled)
+    check('The high confirmation keeps Medium selected', shows('Medium', 3) && !document.querySelector('.re-depth-input').disabled)
     deferProjection = false
+    accepted = false
+    await key('ArrowRight')
+    check('A refused change restores the previous visual position even for the same wire effort', shows('Medium', 3))
+    accepted = true
+    await key('ArrowRight')
+    await reopen()
+    check('Choosing High stays at High instead of flying to Ultra', selections.at(-1).reasoningEffort === 'high' && shows('High', 4))
+    await key('End')
+    await reopen()
+    check('Choosing Ultra stays at Ultra although it also submits high', selections.at(-1).reasoningEffort === 'high' && shows('Ultra', 6))
+    const openSeat = async id => {
+      mountSeat(id)
+      await wait()
+      document.querySelector('.re-model-trigger').click()
+      await wait()
+    }
+    await openSeat(sessionId + '-other')
+    check('Another session has its own display position', shows('High', 4))
+    await openSeat(sessionId)
+    check('Recreating the model control restores this session’s chosen Ultra', shows('Ultra', 6))
+    const original = state
+    publish({ ...state, current: { ...state.current, model: 'other' }, groups: [{
+      ...state.groups[0], models: [{ ...state.groups[0].models[0], id: 'other' }],
+    }] })
+    await wait()
+    check('Another model has its own display position', shows('High', 4))
+    publish(original)
+    await wait()
+    check('Returning to the original model restores its visual choice', shows('Ultra', 6))
     publish({ ...state, current: { ...state.current, reasoningEffort: 'low' } })
     await wait()
-    check('Subsequent external effort changes are respected', shows('Low'))
+    check('A different effort selected outside the slider takes effect', shows('Low', 2))
+    await key('ArrowRight')
     refreshOnLoad = withEfforts(['low', 'medium', 'high', 'max'])
     await key('ArrowRight')
-    check('Inserting a level during selection still sends the chosen ID', selections.at(-1).reasoningEffort === 'high' && shows('High'))
+    check('A directory refresh preserves a still valid choice', selections.at(-1).reasoningEffort === 'high' && shows('High', 4))
     const sent = selections.length
     refreshOnLoad = withEfforts(['low', 'high', 'max'])
     await key('ArrowLeft')
-    check('Removing the chosen level during selection sends no substitute', selections.length === sent && shows('High'))
+    check('A mapping changed during selection sends no substitute', selections.length === sent && shows('High', 4))
   } catch (error) { results.push({ name: error.stack ?? String(error), ok: false }) }
   const failed = results.filter(result => !result.ok).length
   window.__RESULT__ = { pass: results.length - failed, fail: failed, results }

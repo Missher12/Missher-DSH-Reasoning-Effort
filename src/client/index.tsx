@@ -34,7 +34,7 @@ import { CSS } from './styles.js'
 import { PIXEL_CSS } from './pixel-styles.js'
 import { registerModelSettings, MODEL_SETTINGS_CSS } from './model-settings.js'
 import { PixelField } from './pixel-field.js'
-import { displayLevelName, levelsText } from './levels.js'
+import { displayLevelName, effortStops, levelsText, type EffortStop } from './levels.js'
 import { positionModelMenu } from './menu-position.js'
 import { requireAcceptedSelection, unsupportedEffort } from './selection.js'
 import {
@@ -233,6 +233,7 @@ interface LocaleRuntimeLike {
 }
 
 interface ModelSeatInjectedProps {
+  readonly sessionId: SessionId
   readonly locked: boolean
   readonly available: boolean
   readonly controller: ModelDirectory
@@ -362,13 +363,13 @@ function clampIndex(value: number, count: number): number {
 }
 
 interface EffortSliderProps {
-  readonly levels: readonly string[]
+  readonly levels: readonly EffortStop[]
   readonly selectedIndex: number
   readonly selectedName: string
   readonly invalidEffort?: string
   readonly busy: boolean
   readonly error: string | null
-  readonly onSelect: (id: string) => void
+  readonly onSelect: (stop: EffortStop) => void
   readonly t: ReasoningEffortTranslate
 }
 
@@ -420,8 +421,8 @@ function EffortSlider({ levels, selectedIndex, selectedName, invalidEffort, busy
   useEffect(() => { pixelsRef.current?.setActive(isTop) }, [isTop])
 
   const commit = (raw: number) => {
-    const id = levels[clampIndex(raw, count)]
-    if (!busy && id !== undefined) onSelect(id)
+    const stop = levels[clampIndex(raw, count)]
+    if (!busy && stop !== undefined) onSelect(stop)
   }
 
   const rawFromPointer = (input: HTMLInputElement, clientX: number) => {
@@ -531,10 +532,12 @@ function EffortSlider({ levels, selectedIndex, selectedName, invalidEffort, busy
   const progress = preview / (count - 1) * 100
   const style = { '--re-progress': `${progress}%`, '--re-strength': `${25 + progress * .75}%` } as CSSProperties
 
-  const previewName = dragging ? displayLevelName(levels[clampIndex(preview, count)], t) : selectedName
+  const previewStop = levels[clampIndex(preview, count)]
+  const previewName = dragging ? displayLevelName(previewStop.rung, t) : selectedName
+  const mappingLabel = previewStop.rung === previewStop.send ? previewName : `${previewName} → ${previewStop.send}`
   const title = error !== null ? t('effort.failed', { error })
     : invalidEffort !== undefined && !dragging ? t('effort.reselect', { effort: invalidEffort })
-    : t('effort.title', { effort: previewName })
+    : t('effort.title', { effort: mappingLabel })
 
   return (
     <div
@@ -593,13 +596,14 @@ interface EffortRequest {
   readonly directory: ModelDirectory
   readonly provider: string
   readonly model: string
-  readonly id: string
+  readonly stop: EffortStop
   readonly previous: string | undefined
   readonly saving: boolean
   readonly error?: string
 }
 
 function AdvancedModelSelect({
+  sessionId,
   locked,
   available,
   controller,
@@ -653,12 +657,20 @@ function AdvancedModelSelect({
     listWasOpen.current = open && modelsOpen
   }, [open, modelsOpen, busy])
   const choice = currentModel(state)
-  const levels = choice?.reasoning?.efforts.map(level => level.id) ?? []
+  const offered = choice?.reasoning?.efforts.map(level => level.id) ?? []
+  const levels = effortStops(offered)
+  const preferenceKey = 'dsh-reasoning-effort.rung.' + JSON.stringify([sessionId, state.current?.provider, state.current?.model])
+  const visualPreference = useRef<{ key: string; rung: string | null } | null>(null)
+  if (visualPreference.current?.key !== preferenceKey) {
+    let rung: string | null = null
+    try { rung = window.localStorage.getItem(preferenceKey) } catch { /* Storage is optional. */ }
+    visualPreference.current = { key: preferenceKey, rung }
+  }
   const projected = state.current?.reasoningEffort ?? choice?.reasoning?.defaultEffort
   // A successful select RPC can precede the session event that updates current.
   const awaitingProjection = activeRequest !== null && activeRequest.error === undefined && state.status !== 'error'
-    && projected === activeRequest.previous && projected !== activeRequest.id && levels.includes(activeRequest.id)
-  const selectedEffort = awaitingProjection ? activeRequest.id : state.current?.reasoningEffort
+    && projected === activeRequest.previous && projected !== activeRequest.stop.send && offered.includes(activeRequest.stop.send)
+  const selectedEffort = awaitingProjection ? activeRequest.stop.send : state.current?.reasoningEffort
   useEffect(() => {
     if (effortRequest && (!activeRequest || (!effortRequest.saving && !awaitingProjection
       && (effortRequest.error === undefined || projected !== effortRequest.previous)))) {
@@ -667,9 +679,13 @@ function AdvancedModelSelect({
   }, [effortRequest, activeRequest, awaitingProjection, projected])
   const invalidEffort = choice === undefined ? undefined : unsupportedEffort(selectedEffort, choice.reasoning?.efforts)
   const effective = selectedEffort ?? choice?.reasoning?.defaultEffort
-  const selectedIndex = Math.max(0, levels.indexOf(effective ?? ''))
+  const preferredRung = activeRequest && activeRequest.error === undefined
+    ? activeRequest.stop.rung : visualPreference.current.rung
+  const preferred = levels.findIndex(stop => stop.rung === preferredRung && stop.send === effective)
+  const selectedIndex = preferred >= 0 ? preferred : Math.max(0, levels.findIndex(stop => stop.rung === effective))
+  const visualId = preferred >= 0 ? preferredRung : effective
   const effortName = invalidEffort !== undefined ? t('effort.invalid', { effort: invalidEffort })
-    : effective === undefined ? t('model.defaultEffort') : displayLevelName(effective, t)
+    : visualId == null ? t('model.defaultEffort') : displayLevelName(visualId, t)
   const modelLabel = choice?.name ?? state.current?.model ?? t('model.select')
   const provider = state.current?.provider
   const modelId = state.current?.model
@@ -750,23 +766,26 @@ function AdvancedModelSelect({
     else close(true)
   }
 
-  const chooseEffort = async (id: string) => {
+  const chooseEffort = async (stop: EffortStop) => {
     const current = state.current
     if (!current || busy || awaitingProjection) return
     const request: EffortRequest = {
-      directory: controller, provider: current.provider, model: current.model, id,
+      directory: controller, provider: current.provider, model: current.model, stop,
       previous: projected, saving: true,
     }
     setEffortRequest(request)
     try {
       const fresh = await controller.load()
+      const freshStops = effortStops(currentModel(fresh)?.reasoning?.efforts.map(level => level.id) ?? [])
       if (fresh.current?.provider !== request.provider || fresh.current.model !== request.model
-        || !currentModel(fresh)?.reasoning?.efforts.some(level => level.id === id)) {
+        || !freshStops.some(candidate => candidate.rung === stop.rung && candidate.send === stop.send)) {
         throw new Error(t('effort.choicesChanged'))
       }
       requireAcceptedSelection(await controller.select({
-        provider: request.provider, model: request.model, reasoningEffort: id,
+        provider: request.provider, model: request.model, reasoningEffort: stop.send,
       }))
+      if (visualPreference.current?.key === preferenceKey) visualPreference.current.rung = stop.rung
+      try { window.localStorage.setItem(preferenceKey, stop.rung) } catch { /* Keep the in-memory position. */ }
       setEffortRequest(latest => latest === request ? { ...request, saving: false } : latest)
     } catch (cause) {
       const error = cause instanceof Error ? cause.message : String(cause)
@@ -883,7 +902,7 @@ function AdvancedModelSelect({
               <div className="re-model-content">
                 <div className="re-model-body" tabIndex={guidance?.needsGuide ? 0 : undefined}>
                   {levels.length >= 2 ? (
-                    <EffortSlider key={JSON.stringify([provider, modelId, ...levels])}
+                    <EffortSlider key={JSON.stringify([provider, modelId, ...offered])}
                       levels={levels} selectedIndex={selectedIndex} selectedName={effortName}
                       invalidEffort={invalidEffort} busy={busy || awaitingProjection} error={activeRequest?.error ?? state.error}
                       onSelect={chooseEffort} t={t} />
@@ -1172,6 +1191,7 @@ export function apply(ctx: ClientContext) {
           inject: (sessionId: SessionId) => {
             const controller = modelDirectories.directoryFor(sessionId)
             return {
+              sessionId,
               available: true,
               controller,
               directory: controller.store,

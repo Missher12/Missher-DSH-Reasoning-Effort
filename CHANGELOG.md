@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 — 2026-11-13
+
+- Restore the seven standard slider positions and their existing mapping to supported model efforts.
+- Remember the accepted display position for each session, provider and model. The slider and composer keep the same label when multiple positions map to the same effort, including after a refresh or reopening. Failed changes restore the last accepted position.
+
 ## 1.0.4 — 2026-11-13
 
 - Offer exactly the model's declared reasoning efforts. Selecting High submits high and keeps the High label on the slider and model button, including after reopening. The Ultra label represents max.
