@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.7 — 2026-11-13
+
+- Give the selected level and actual model effort separate, aligned readouts in the compact popover. The selected level takes visual priority and the slider’s endpoint labels sit below the track.
+- Keep the last drag position if the composer shifts under a stationary pointer before release.
+
 ## 1.0.6 — 2026-11-13
 
 - Show the model’s actual reasoning effort beside the slider level during dragging and after selection, including `max` when the display level is XHigh or Ultra.

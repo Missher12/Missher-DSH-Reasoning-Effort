@@ -383,6 +383,7 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
   const inputRef = useRef<HTMLInputElement>(null)
   const previewFrameRef = useRef<number | null>(null)
   const previewRef = useRef(selectedPosition)
+  const lastPointerXRef = useRef(0)
   const pointerActiveRef = useRef(false)
   const activePointerIdRef = useRef<number | null>(null)
   const globalPointerMoveRef = useRef<((event: PointerEvent) => void) | null>(null)
@@ -434,11 +435,6 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
     )
   }
 
-  const showPointerPreview = (raw: number) => {
-    previewRef.current = raw
-    setPreview(raw)
-  }
-
   const queuePointerPreview = (raw: number) => {
     previewRef.current = raw
     if (previewFrameRef.current !== null) return
@@ -452,7 +448,9 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
     pointerActiveRef.current = true
     activePointerIdRef.current = pointerId
     setDragging(true)
-    showPointerPreview(rawFromPointer(input, clientX))
+    lastPointerXRef.current = clientX
+    previewRef.current = rawFromPointer(input, clientX)
+    setPreview(previewRef.current)
     try {
       if (!input.hasPointerCapture(pointerId)) input.setPointerCapture(pointerId)
     } catch {
@@ -462,6 +460,7 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
 
   const moveDragging = (input: HTMLInputElement, pointerId: number, clientX: number) => {
     if (!pointerActiveRef.current || activePointerIdRef.current !== pointerId) return
+    lastPointerXRef.current = clientX
     queuePointerPreview(rawFromPointer(input, clientX))
   }
 
@@ -480,7 +479,8 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
   const stopDragging = (input: HTMLInputElement, pointerId?: number, clientX?: number) => {
     if (!pointerActiveRef.current) return
     if (pointerId !== undefined && activePointerIdRef.current !== pointerId) return
-    const raw = clientX === undefined ? previewRef.current : rawFromPointer(input, clientX)
+    // The anchor may reflow between the last pointer move and release.
+    const raw = clientX === undefined || clientX === lastPointerXRef.current ? previewRef.current : rawFromPointer(input, clientX)
     endDrag(input, pointerId)
     commit(raw)
   }
@@ -552,11 +552,17 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
       {/* Visual duplicate of the range input's aria-valuetext, so it is hidden
           from assistive tech rather than announced twice. */}
       <div className="re-depth-header" aria-hidden="true">
-        <span className="re-depth-label">{t('effort.label')}</span>
-        <span className="re-depth-value">{previewName}</span>
-        {actualLabel && <span className="re-depth-mapping" title={actualLabel}>{actualLabel}</span>}
+        <div className="re-depth-choice">
+          <span className="re-depth-label">{t('effort.label')}</span>
+          <span className="re-depth-value" title={previewName}>{previewName}</span>
+        </div>
+        {mapped !== undefined && (
+          <div className="re-depth-actual" title={actualLabel}>
+            <span className="re-depth-label">{t('effort.actualLevel')}</span>
+            <span className="re-depth-mapping">{mapped}</span>
+          </div>
+        )}
       </div>
-      <div className="re-depth-speed" aria-hidden="true"><span>{t('effort.faster')}</span><span>{t('effort.smarter')}</span></div>
       <div
         className="re-depth-slider"
         data-top={isTop ? 'true' : undefined}
@@ -590,6 +596,7 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
         />
         <span className="re-depth-thumb" aria-hidden="true" />
       </div>
+      <div className="re-depth-speed" aria-hidden="true"><span>{t('effort.faster')}</span><span>{t('effort.smarter')}</span></div>
       {error === null ? null : <span className="re-effort-sr" role="status">{error}</span>}
     </div>
   )

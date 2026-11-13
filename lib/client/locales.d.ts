@@ -23,6 +23,7 @@ export declare const zh: {
     'effort.use': string;
     'effort.label': string;
     'effort.actual': string;
+    'effort.actualLevel': string;
     'effort.faster': string;
     'effort.smarter': string;
     'settings.palette.custom': string;
@@ -116,6 +117,7 @@ export declare const en: {
     'palette.rose': string;
     'effort.label': string;
     'effort.actual': string;
+    'effort.actualLevel': string;
     'effort.faster': string;
     'effort.smarter': string;
     'settings.palette.custom': string;

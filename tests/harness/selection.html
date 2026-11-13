@@ -158,7 +158,7 @@
     deferProjection = true
     await key('ArrowRight')
     check('Medium stays at position 3 while the submitted high awaits confirmation',
-      selections.at(-1).reasoningEffort === 'high' && shows('Medium', 3) && document.querySelector('.re-depth-mapping')?.textContent === '实际 high')
+      selections.at(-1).reasoningEffort === 'high' && shows('Medium', 3) && document.querySelector('.re-depth-mapping')?.textContent === 'high')
     const awaitingHigh = selections.length
     await key('Home')
     check('A pending host confirmation cannot replace the chosen rung', selections.length === awaitingHigh && shows('Medium', 3))
@@ -226,20 +226,23 @@
     await wait()
     const releasedAt = Number(input.value)
     check('Dragging previews XHigh and its actual max tier before submitting', releasedAt > 5.2 && releasedAt < 5.3
-      && document.querySelector('.re-depth-value').textContent === 'XHigh' && actual() === '实际 max' && state.current.reasoningEffort === 'low')
+      && document.querySelector('.re-depth-value').textContent === 'XHigh' && actual() === 'max' && state.current.reasoningEffort === 'low')
+    // The composer can settle by a few pixels while the pointer stays still.
+    document.getElementById('mount').style.translate = '2px 0'
     pointer('pointerup')
+    document.getElementById('mount').style.translate = ''
     await wait()
     check('Submitting max leaves the thumb where it was released', selections.at(-1).reasoningEffort === 'max'
-      && shows('XHigh', releasedAt) && actual() === '实际 max' && input.getAttribute('aria-valuetext').includes('实际 max'))
+      && shows('XHigh', releasedAt) && actual() === 'max' && input.getAttribute('aria-valuetext').includes('实际 max'))
     await openSeat(sessionId + '-other')
     await openSeat(sessionId)
-    check('Recreating the control restores the fractional position and its mapping', shows('XHigh', releasedAt) && actual() === '实际 max')
+    check('Recreating the control restores the fractional position and its mapping', shows('XHigh', releasedAt) && actual() === 'max')
     await key('End')
-    check('The Ultra endpoint also shows the raw model tier max', shows('Ultra', 6) && actual() === '实际 max')
+    check('The Ultra endpoint also shows the raw model tier max', shows('Ultra', 6) && actual() === 'max')
     const legacySession = sessionId + '-legacy'
     localStorage.setItem('dsh-reasoning-effort.rung.' + JSON.stringify([legacySession, 'p', 'm']), 'xhigh')
     await openSeat(legacySession)
-    check('An existing rung-only preference keeps its original display tier', shows('XHigh', 5) && actual() === '实际 max')
+    check('An existing rung-only preference keeps its original display tier', shows('XHigh', 5) && actual() === 'max')
   } catch (error) { results.push({ name: error.stack ?? String(error), ok: false }) }
   const failed = results.filter(result => !result.ok).length
   window.__RESULT__ = { pass: results.length - failed, fail: failed, results }
