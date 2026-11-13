@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9 — 2026-11-13
+
+- Show the selected reasoning level and the model’s actual effort side by side with a mapping arrow, for example XHigh → max. Smaller text and tighter vertical spacing reduce the height of the popover.
+
 ## 1.0.8 — 2026-11-13
 
 - Restore the single-line depth readout and place the speed and depth hints above the track. The selected level is larger, with the actual model effort in small text on the right.

@@ -552,13 +552,20 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
       {/* Visual duplicate of the range input's aria-valuetext, so it is hidden
           from assistive tech rather than announced twice. */}
       <div className="re-depth-header" aria-hidden="true">
-        <span className="re-depth-label">{t('effort.shortLabel')}</span>
-        <span className="re-depth-value" title={previewName}>{previewName}</span>
-        {actualLabel !== undefined && (
-          <span className="re-depth-mapping" title={actualLabel}>{actualLabel}</span>
+        <div className="re-depth-choice">
+          <span className="re-depth-label">{t('effort.label')}</span>
+          <span className="re-depth-value" title={previewName}>{previewName}</span>
+        </div>
+        {mapped !== undefined && (
+          <>
+            <span className="re-depth-arrow">→</span>
+            <div className="re-depth-actual" title={actualLabel}>
+              <span className="re-depth-label">{t('effort.actualLevel')}</span>
+              <span className="re-depth-mapping">{mapped}</span>
+            </div>
+          </>
         )}
       </div>
-      <div className="re-depth-speed" aria-hidden="true"><span>{t('effort.faster')}</span><span>{t('effort.smarter')}</span></div>
       <div
         className="re-depth-slider"
         data-top={isTop ? 'true' : undefined}
@@ -592,6 +599,7 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
         />
         <span className="re-depth-thumb" aria-hidden="true" />
       </div>
+      <div className="re-depth-speed" aria-hidden="true"><span>{t('effort.faster')}</span><span>{t('effort.smarter')}</span></div>
       {error === null ? null : <span className="re-effort-sr" role="status">{error}</span>}
     </div>
   )
