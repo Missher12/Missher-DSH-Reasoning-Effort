@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6 — 2026-11-13
+
+- Show the model’s actual reasoning effort beside the slider level during dragging and after selection, including `max` when the display level is XHigh or Ultra.
+- Keep the thumb at the release position, including between level marks. Reopening the same session and model restores it. Existing saved levels still work.
+
 ## 1.0.5 — 2026-11-13
 
 - Restore the seven standard slider positions and their existing mapping to supported model efforts.
