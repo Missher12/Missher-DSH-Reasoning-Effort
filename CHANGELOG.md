@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8 — 2026-11-13
+
+- Restore the single-line depth readout and place the speed and depth hints above the track. The selected level is larger, with the actual model effort in small text on the right.
+
 ## 1.0.7 — 2026-11-13
 
 - Give the selected level and actual model effort separate, aligned readouts in the compact popover. The selected level takes visual priority and the slider’s endpoint labels sit below the track.
