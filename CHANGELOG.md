@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.10 — 2026-11-13
+
+- Restore the original slider layout with the selected level and its mapped effort together on one line (Medium → high), and Faster / Smarter above the track. The selected level and thumb stay where the user left them.
+
 ## 1.0.9 — 2026-11-13
 
 - Show the selected reasoning level and the model’s actual effort side by side with a mapping arrow, for example XHigh → max. Smaller text and tighter vertical spacing reduce the height of the popover.

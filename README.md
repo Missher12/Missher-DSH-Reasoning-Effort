@@ -2,13 +2,13 @@
 
 ![Reasoning Effort · 思考强度（品牌插画）](docs/images/cover-v2.png)
 
-模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.9 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.9/missher-dsh-reasoning-effort-1.0.9.tgz)。
+模型选择、按模型已声明能力映射的思考深度滑块，以及自定义模型的档位配置指引。包名为 `@missher/dsh-reasoning-effort`。[下载 1.0.10 安装包](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.10/missher-dsh-reasoning-effort-1.0.10.tgz)。
 
 [English](README.en.md) · [桌面端与安装包](https://github.com/Missher12/Missher-DeepseekHarness-Desktop) · [源码](https://github.com/Missher12/Missher-DSH-Reasoning-Effort) · [反馈](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/issues)
 
 ## 功能
 
-- 在对话模型入口选择模型、调整思考深度；标准滑块有七个显示档位。左侧显示你选的档位，右侧实时显示模型实际使用的档位，例如 `XHigh → max`。松手后，同一会话和模型会记住滑块停下的具体位置。选择失败会回到上次的位置。至少两个可用档位才显示滑块。
+- 在对话模型入口选择模型、调整思考深度；标准滑块有七个显示档位。所选档位和模型实际使用的档位在同一行显示，例如 `Medium → high`。松手后，同一会话和模型会记住滑块停下的具体位置。选择失败会回到上次的位置。至少两个可用档位才显示滑块。
 - 单层卡片、白色滑块和最高档点阵；保持已选定的八行粒子设计、渐变配色、深浅主题与中英文。颜色仅在“设置 → 通用设置 → 思考滑块配色”调整。减少动态效果时显示稳定帧，页面隐藏时暂停粒子。
 - 自定义模型缺失档位或声明与内置参考不符时，显示配置片段及“复制给 Agent”。标题保持完整，复制按钮同宽同高，正文独立滚动，操作区保持可见；极矮窗口将正文与操作一起滚动，标题不参与滚动。窗口缩放时跟随宿主布局重新定位，避免弹窗越出屏幕。
 - **每模型推理档位只走宿主声明的行内入口**：配套 Missher Desktop 的 Models 模块声明 `settings.models.model-fields` 时，思考模式和最高档位显示在模型卡片右侧，共用该卡片的保存操作。宿主不声明该 slot 时（官方 DSH `0.2.1-rc.4` 即如此），保持原生模型选择、滑块与指引，**不再提供插件私有设置页**（0.7.8 移除 0.7.7 的设置页回退）。行内控件沿用模型已声明的端点映射，插件不会按档位名猜取值。插件本身不增加文本/图片能力，也不另存模型目录。
@@ -49,18 +49,18 @@ DSH peer 保持 `*`；Cordis 支持 `^4.0.4 || ^4.0.5-alpha.1`，Schemastery 支
 
 ## 固定版本安装
 
-以下桌面端和 CLI 安装地址均固定为 `1.0.9`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.9)。
+以下桌面端和 CLI 安装地址均固定为 `1.0.10`。同次发布的 `SHA256SUMS` 可用于校验安装包。[GitHub 发布页](https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/tag/v1.0.10)。
 
 **桌面端：**在“插件 → 添加插件”填写以下固定地址，核对版本、启用状态和加载错误，然后按宿主提示重新加载或重启。Desktop 的配置由桌面插件管理器维护，不用独立 CLI 的 `web` profile 代替。
 
 ```text
-https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.9/missher-dsh-reasoning-effort-1.0.9.tgz
+https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.10/missher-dsh-reasoning-effort-1.0.10.tgz
 ```
 
 **独立 Web/CLI profile：**已安装 DSH CLI 的用户可运行：
 
 ```sh
-dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.9/missher-dsh-reasoning-effort-1.0.9.tgz
+dsh plugin --profile web add https://github.com/Missher12/Missher-DSH-Reasoning-Effort/releases/download/v1.0.10/missher-dsh-reasoning-effort-1.0.10.tgz
 dsh --profile web --dump-config
 ```
 

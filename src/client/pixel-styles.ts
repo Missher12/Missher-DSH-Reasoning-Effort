@@ -5,24 +5,21 @@ export const PIXEL_CSS = `
   box-sizing: border-box;
   width: 216px;
   max-width: 100%;
+  min-height: 92px;
   height: auto;
   margin: 0 auto;
-  padding: 6px 8px 5px;
+  padding: 10px 8px 7px 6px;
   border: 0;
   border-radius: 0;
   background: transparent;
   color: var(--dsw-alias-label-secondary);
 }
-.re-depth-header { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); column-gap: 6px; align-items: end; }
-.re-depth-choice, .re-depth-actual { display: grid; grid-template-rows: 12px 17px; min-width: 0; }
-.re-depth-choice:only-child { grid-column: 1 / -1; }
-.re-depth-actual { text-align: end; }
-.re-depth-label, .re-depth-value, .re-depth-mapping { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.re-depth-label { color: var(--dsw-alias-label-secondary); font-size: 10px; line-height: 12px; }
-.re-depth-value { color: color-mix(in srgb, var(--re-accent) 75%, var(--dsw-alias-label-primary)); font-size: 14px; font-weight: 600; line-height: 17px; }
-.re-depth-mapping, .re-depth-arrow { color: var(--dsw-alias-label-secondary); font-size: 10px; font-weight: 400; line-height: 17px; }
-.re-depth-speed { display: flex; justify-content: space-between; margin-top: 3px; color: var(--dsw-alias-label-tertiary); font-size: 10.5px; line-height: 13px; }
-.re-depth-slider { position: relative; height: 20px; margin-top: 5px; border-radius: 7px; isolation: isolate; }
+.re-depth-header { display: flex; align-items: center; gap: 6px; height: 20px; font-size: 13px; line-height: 20px; }
+.re-depth-label { flex: none; color: var(--dsw-alias-label-tertiary); }
+.re-depth-value { min-width: 0; height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; color: var(--re-accent); }
+.re-depth-mapping { min-width: 0; margin-inline-start: -2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--dsw-alias-label-secondary); }
+.re-depth-speed { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; line-height: 15px; color: var(--dsw-alias-label-tertiary); }
+.re-depth-slider { position: relative; height: 20px; margin-top: 8px; border-radius: 7px; isolation: isolate; }
 .re-depth-track { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--re-accent) 30%, white), color-mix(in srgb, var(--re-accent) 85%, black)); }
 .re-depth-canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; }
 .re-depth-canvas[hidden] { display: none; }
