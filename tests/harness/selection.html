@@ -237,12 +237,40 @@
     await openSeat(sessionId + '-other')
     await openSeat(sessionId)
     check('Recreating the control restores the fractional position and its mapping', shows('XHigh', releasedAt) && actual() === '→ max')
+    publish({ ...state, groups: state.groups.map(group => ({
+      ...group, models: [...group.models, { id: 'plain', name: 'Plain model' }],
+    })) })
+    await wait()
+    const pickModel = async name => {
+      document.querySelector('.re-model-row').click()
+      await wait()
+      const option = [...document.querySelectorAll('.re-model-option')]
+        .find(button => button.querySelector('.re-model-option-name').textContent === name)
+      option.click()
+      await wait()
+    }
+    await pickModel('Plain model')
+    check('Selecting a model without reasoning does not carry the old effort', state.current.model === 'plain'
+      && selections.at(-1).reasoningEffort === undefined && !document.querySelector('.re-depth-input'))
+    await pickModel('Model')
+    check('Selecting a previous model restores its saved tier and release position', selections.at(-1).reasoningEffort === 'max'
+      && shows('XHigh', releasedAt) && actual() === '→ max')
     await key('End')
     check('The Ultra endpoint also shows the raw model tier max', shows('Ultra', 6) && actual() === '→ max')
     const legacySession = sessionId + '-legacy'
     localStorage.setItem('dsh-reasoning-effort.rung.' + JSON.stringify([legacySession, 'p', 'm']), 'xhigh')
     await openSeat(legacySession)
     check('An existing rung-only preference keeps its original display tier', shows('XHigh', 5) && actual() === '→ max')
+    await openSeat(sessionId)
+    await pickModel('Plain model')
+    const updatedReasoning = withEfforts(['low', 'high']).groups[0].models[0].reasoning
+    publish({ ...state, groups: state.groups.map(group => ({
+      ...group, models: group.models.map(model => model.id === 'm' ? { ...model, reasoning: updatedReasoning } : model),
+    })) })
+    await wait()
+    await pickModel('Model')
+    check('Selecting a previous model uses its default when the saved tier is no longer valid', selections.at(-1).reasoningEffort === 'low'
+      && shows('Low', 2) && actual() === '→ low')
   } catch (error) { results.push({ name: error.stack ?? String(error), ok: false }) }
   const failed = results.filter(result => !result.ok).length
   window.__RESULT__ = { pass: results.length - failed, fail: failed, results }

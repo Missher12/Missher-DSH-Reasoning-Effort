@@ -404,10 +404,12 @@ export function apply(ctx: Context, config?: StoreShape): void {
     const path = await settingsPath()
 
     let reason: Guidance['reason'] = 'none'
-    if (current.length === 0) {
-      reason = 'missing'
-    } else if (entry !== undefined && !sameSet(current, expected)) {
-      reason = 'mismatch'
+    if (userEntry?.reasoningEfforts !== false) {
+      if (current.length === 0) {
+        reason = 'missing'
+      } else if (entry !== undefined && !sameSet(current, expected)) {
+        reason = 'mismatch'
+      }
     }
 
     // Guidance targets custom-provider declarations only; the built-in

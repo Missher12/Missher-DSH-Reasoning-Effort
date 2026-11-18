@@ -600,6 +600,11 @@ function EffortSlider({ levels, selectedPosition, selectedName, mappedEffort, in
 interface VisualChoice {
   readonly rung: string
   readonly position?: number
+  readonly effort?: string
+}
+
+function visualChoiceKey(sessionId: SessionId, provider?: string, model?: string): string {
+  return 'dsh-reasoning-effort.rung.' + JSON.stringify([sessionId, provider, model])
 }
 
 function readVisualChoice(key: string): VisualChoice | null {
@@ -609,7 +614,11 @@ function readVisualChoice(key: string): VisualChoice | null {
     if (raw?.startsWith('{')) {
       const value = JSON.parse(raw)
       if (typeof value?.rung === 'string') {
-        return { rung: value.rung, position: Number.isFinite(value.position) ? value.position : undefined }
+        return {
+          rung: value.rung,
+          position: Number.isFinite(value.position) ? value.position : undefined,
+          effort: typeof value.effort === 'string' ? value.effort : undefined,
+        }
       }
     }
   } catch { /* Storage is optional. Earlier versions saved a plain rung ID. */ }
@@ -684,7 +693,7 @@ function AdvancedModelSelect({
   const choice = currentModel(state)
   const offered = choice?.reasoning?.efforts.map(level => level.id) ?? []
   const levels = effortStops(offered)
-  const preferenceKey = 'dsh-reasoning-effort.rung.' + JSON.stringify([sessionId, state.current?.provider, state.current?.model])
+  const preferenceKey = visualChoiceKey(sessionId, state.current?.provider, state.current?.model)
   const visualPreference = useRef<{ key: string; choice: VisualChoice | null } | null>(null)
   if (visualPreference.current?.key !== preferenceKey) {
     visualPreference.current = { key: preferenceKey, choice: readVisualChoice(preferenceKey) }
@@ -703,7 +712,8 @@ function AdvancedModelSelect({
   const invalidEffort = choice === undefined ? undefined : unsupportedEffort(selectedEffort, choice.reasoning?.efforts)
   const effective = selectedEffort ?? choice?.reasoning?.defaultEffort
   const preferredChoice = activeRequest && activeRequest.error === undefined ? activeRequest.choice : visualPreference.current.choice
-  const preferred = levels.findIndex(stop => stop.rung === preferredChoice?.rung && stop.send === effective)
+  const preferred = levels.findIndex(stop => stop.rung === preferredChoice?.rung && stop.send === effective
+    && (preferredChoice.effort === undefined || preferredChoice.effort === stop.send))
   const selectedIndex = preferred >= 0 ? preferred : Math.max(0, levels.findIndex(stop => stop.rung === effective))
   const position = preferredChoice?.position
   const selectedPosition = position !== undefined && position >= 0 && position <= levels.length - 1
@@ -795,7 +805,8 @@ function AdvancedModelSelect({
     const current = state.current
     if (!current || busy || awaitingProjection) return
     const request: EffortRequest = {
-      directory: controller, provider: current.provider, model: current.model, choice: { rung: stop.rung, position }, send: stop.send,
+      directory: controller, provider: current.provider, model: current.model,
+      choice: { rung: stop.rung, position, effort: stop.send }, send: stop.send,
       previous: projected, saving: true,
     }
     setEffortRequest(request)
@@ -818,15 +829,19 @@ function AdvancedModelSelect({
     }
   }
 
-  const chooseModel = async (provider: string, model: string, defaultEffort?: string) => {
-    if (state.current?.provider === provider && state.current.model === model) {
+  const chooseModel = async (provider: string, model: ModelDirectoryState['groups'][number]['models'][number]) => {
+    if (state.current?.provider === provider && state.current.model === model.id) {
       setModelsOpen(false)
       return
     }
+    const saved = readVisualChoice(visualChoiceKey(sessionId, provider, model.id))
+    const restored = saved === null ? undefined : effortStops(model.reasoning?.efforts.map(level => level.id) ?? [])
+      .find(stop => stop.rung === saved.rung && (saved.effort === undefined || saved.effort === stop.send))
+    const reasoningEffort = restored?.send ?? model.reasoning?.defaultEffort
     const accepted = await select({
       provider,
-      model,
-      ...(defaultEffort === undefined ? {} : { reasoningEffort: defaultEffort }),
+      model: model.id,
+      ...(reasoningEffort === undefined ? {} : { reasoningEffort }),
     })
     if (accepted) setModelsOpen(false)
   }
@@ -897,7 +912,7 @@ function AdvancedModelSelect({
                           className="re-model-option"
                           title={model.description ? `${model.name}\n${model.description}` : model.name}
                           disabled={busy}
-                          onClick={() => void chooseModel(group.id, model.id, model.reasoning?.defaultEffort)}
+                          onClick={() => void chooseModel(group.id, model)}
                         >
                           <span className="re-model-option-copy">
                             <span className="re-model-option-name">{model.name}</span>

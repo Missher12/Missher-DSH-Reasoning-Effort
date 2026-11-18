@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.11 — 2026-11-18
+
+- Restore the last accepted slider position and effort when reselecting a model in the same session. Use the model default if its current catalog no longer supports the saved mapping.
+- Honor an explicit `reasoningEfforts: false` declaration and keep configuration guidance for models with missing or mismatched levels.
+
 ## 1.0.10 — 2026-11-13
 
 - Restore the original slider layout with the selected level and its mapped effort together on one line (Medium → high), and Faster / Smarter above the track. The selected level and thumb stay where the user left them.
