@@ -237,6 +237,17 @@ export const CSS = `
 .re-model-menu { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 1200; box-sizing: border-box; width: min(216px, var(--re-menu-width, calc(100vw - 24px))); max-height: var(--re-menu-height, calc(100dvh - 24px)); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; translate: var(--re-menu-x, 0px) var(--re-menu-y, 0px); border: .5px solid var(--dsw-alias-border-l2); border-radius: 9px; color: var(--dsw-alias-label-primary, #15171b); background: var(--dsw-alias-bg-layer-2); box-shadow: 0 4px 16px color-mix(in srgb, var(--dsw-alias-label-primary) 12%, transparent); animation: re-menu-in 150ms cubic-bezier(.22,1,.36,1); }
 .re-model-content,
 .re-model-body { display: contents; }
+.re-team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.re-team-row > button { flex-shrink: 0; }
 .re-model-menu[data-guidance-card] {
   height: min(128px, var(--re-menu-height, calc(100dvh - 24px)));
   white-space: normal;

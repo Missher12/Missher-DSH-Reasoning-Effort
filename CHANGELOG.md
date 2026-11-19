@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.12 — 2026-11-19
+
+- Restore the conversation's Agent Teams switch below the thinking-depth slider on supported DSH hosts. The switch follows the saved session state and confirms before turning teamwork off in a conversation that has already started.
+
 ## 1.0.11 — 2026-11-18
 
 - Restore the last accepted slider position and effort when reselecting a model in the same session. Use the model default if its current catalog no longer supports the saved mapping.

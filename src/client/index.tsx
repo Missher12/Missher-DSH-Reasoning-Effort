@@ -11,7 +11,7 @@
  * @module dsh-reasoning-effort/client
  */
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
-import type { ButtonHTMLAttributes, ComponentType, CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
+import type { ButtonHTMLAttributes, ComponentType, CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
@@ -55,13 +55,17 @@ import agentTutorialZh from './agent-tutorial.zh.md'
 
 // rc.4 provides these controls. Older hosts can still use the plugin without them.
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant: 'primary' | 'outline' | 'ghost' }
-type SwitchProps = { checked: boolean; label: string; onChange: (value: boolean) => void }
-type HostControls = { Button?: ComponentType<ButtonProps>; Switch?: ComponentType<SwitchProps> }
+type SwitchProps = { checked: boolean; label: string; onChange: (value: boolean) => void; disabled?: boolean; title?: string }
+type ModalProps = {
+  open: boolean; tone: 'warning'; title: string; closeLabel: string; onClose: () => void
+  footer: ReactNode; children: ReactNode
+}
+type HostControls = { Button?: ComponentType<ButtonProps>; Switch?: ComponentType<SwitchProps>; Modal?: ComponentType<ModalProps> }
 declare const require: (id: '@deepseek-ai/dsh-client-ui-primitives') => HostControls
 function loadHostControls(): HostControls {
   try { return require('@deepseek-ai/dsh-client-ui-primitives') ?? {} } catch { return {} }
 }
-const { Button: HostButton, Switch: HostSwitch } = loadHostControls()
+const { Button: HostButton, Switch: HostSwitch, Modal: HostModal } = loadHostControls()
 
 function GuidanceButton({ variant, ...props }: ButtonProps) {
   return HostButton ? <HostButton type="button" variant={variant} {...props} />
@@ -243,9 +247,20 @@ interface ModelSeatInjectedProps {
   readonly adapt: AdaptationService | null
   /** Rules document for the active locale, read at copy time. */
   readonly agentTutorial: () => string
+  readonly setTeamEnabled?: (enabled: boolean) => Promise<void>
 }
 
 type ModelSeatProps = ModelSeatInjectedProps & PropsLocale<typeof NS>
+
+type TeamOption = (locked: boolean, dismiss: () => void) => ReactNode
+
+/** Optional session hooks supplied by hosts with Agent Teams. */
+interface TeamSessionHooks {
+  useProjection(name: 'agentTeam'): { enabled: boolean } | undefined
+  useProjection(name: 'modelSelection'): { lastUsed: ModelSelection | null } | undefined
+  useSession(select: (snapshot: { subagent?: unknown }) => boolean): boolean
+  useSessions(select: (state: { byId: Record<string, { origin?: string } | undefined> }) => boolean): boolean
+}
 
 const SLOT = 'conversation.input.model'
 const SETTINGS_SLOT = 'settings.general.item'
@@ -636,6 +651,78 @@ interface EffortRequest {
   readonly error?: string
 }
 
+function ModelSeat(props: ModelSeatProps) {
+  const runtime = props as ModelSeatProps & Partial<TeamSessionHooks>
+  if (!props.setTeamEnabled || !HostSwitch || !HostModal || typeof runtime.useProjection !== 'function'
+    || typeof runtime.useSession !== 'function' || typeof runtime.useSessions !== 'function') {
+    return <AdvancedModelSelect {...props} />
+  }
+  return <ModelSeatWithTeam key={props.sessionId} {...runtime as ModelSeatProps & TeamSessionHooks}
+    Switch={HostSwitch} Modal={HostModal} setTeamEnabled={props.setTeamEnabled} />
+}
+
+/** Read and update the same session mode as DSH's own model menu. */
+function ModelSeatWithTeam({
+  useProjection, useSession, useSessions, setTeamEnabled, Switch, Modal, ...props
+}: ModelSeatProps & TeamSessionHooks & {
+  setTeamEnabled: (enabled: boolean) => Promise<void>
+  Switch: ComponentType<SwitchProps>
+  Modal: ComponentType<ModalProps>
+}) {
+  const team = useProjection('agentTeam')
+  const selection = useProjection('modelSelection')
+  const addressedChild = useSession(snapshot => Boolean(snapshot.subagent))
+  const listedChild = useSessions(state => state.byId[props.sessionId]?.origin === 'subagent')
+  const [pending, setPending] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const [failure, setFailure] = useState<string | null>(null)
+  const { t } = props
+  if (typeof team?.enabled !== 'boolean' || addressedChild || listedChild) return <AdvancedModelSelect {...props} />
+
+  const save = async (enabled: boolean) => {
+    if (pending) return
+    setPending(true)
+    setFailure(null)
+    try {
+      await setTeamEnabled(enabled)
+      setConfirming(false)
+    } catch (error) {
+      setFailure(t('team.failed', { message: error instanceof Error ? error.message : String(error) }))
+    } finally {
+      setPending(false)
+    }
+  }
+  const cancel = () => {
+    if (pending) return
+    setConfirming(false)
+    setFailure(null)
+  }
+  return <>
+    <AdvancedModelSelect {...props} teamOption={(locked, dismiss) => <>
+      <div className="re-team-row">
+        <span>{t('team.toggle')}</span>
+        <Switch checked={team.enabled} label={t('team.toggle')} title={t('team.help')}
+          disabled={locked || pending || selection === undefined} onChange={enabled => {
+            if (!enabled && selection?.lastUsed != null) {
+              dismiss()
+              setFailure(null)
+              setConfirming(true)
+            } else void save(enabled)
+          }} />
+      </div>
+      {failure ? <div className="re-model-error" role="status">{failure}</div> : null}
+    </>} />
+    {confirming ? <Modal open tone="warning" title={t('team.disableTitle')} closeLabel={t('team.close')} onClose={cancel}
+      footer={<>
+        <GuidanceButton variant="outline" disabled={pending} data-modal-autofocus onClick={cancel}>{t('team.cancel')}</GuidanceButton>
+        <GuidanceButton variant="primary" disabled={pending} onClick={() => void save(false)}>{t('team.disable')}</GuidanceButton>
+      </>}>
+      <p>{t('team.disableNotice')}</p>
+      {failure ? <p role="alert" className="re-model-error">{failure}</p> : null}
+    </Modal> : null}
+  </>
+}
+
 function AdvancedModelSelect({
   sessionId,
   locked,
@@ -646,8 +733,9 @@ function AdvancedModelSelect({
   select,
   adapt,
   agentTutorial,
+  teamOption,
   t,
-}: ModelSeatProps) {
+}: ModelSeatProps & { teamOption?: TeamOption }) {
   const state = useSyncExternalStore(
     (notify) => directory.subscribe(notify),
     () => directory.getSnapshot(),
@@ -950,6 +1038,10 @@ function AdvancedModelSelect({
                   ) : !guidance?.needsGuide ? (
                     <div className="re-model-status">{t('effort.unavailable')}</div>
                   ) : null}
+                  {teamOption?.(locked || busy || awaitingProjection, () => {
+                    close()
+                    triggerRef.current?.focus()
+                  })}
                   {guidance !== null && guidance.needsGuide ? (
                     <div className="re-adapt">
                       <div className="re-adapt-copy">
@@ -1181,7 +1273,8 @@ export function apply(ctx: ClientContext) {
   }
   for (const note of capabilities.degraded) reportOnce(note, 'info')
 
-  const adapt = makeAdaptationService(connection?.rpc)
+  const rpc = connection?.rpc
+  const adapt = makeAdaptationService(rpc)
 
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'reasoning-effort: dictionaries')
 
@@ -1239,13 +1332,17 @@ export function apply(ctx: ClientContext) {
               load: () => controller.load().then(() => undefined, () => undefined),
               select: (selection: ModelSelection) => controller.select(selection).then(result => { requireAcceptedSelection(result); return true }).catch(() => false),
               adapt,
+              setTeamEnabled: typeof rpc?.call === 'function' ? async (enabled: boolean) => {
+                const result = await rpc.call('/api', 'agentTeams/setEnabled', { args: { agentId: sessionId, enabled } }) as ReRpcResult<unknown>
+                if (result?.ok !== true) throw new Error(result?.error?.message ?? 'Invalid Host response')
+              } : undefined,
               // Read at copy time: a language switch must change the next copy,
               // not require the seat to remount.
               agentTutorial: () => (locale?.getLocale().active === 'zh' ? agentTutorialZh : agentTutorialEn),
             }
           },
         },
-        AdvancedModelSelect,
+        ModelSeat,
       )
     }
 
